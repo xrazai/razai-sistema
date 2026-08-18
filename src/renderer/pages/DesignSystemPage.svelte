@@ -232,11 +232,12 @@
 
             <!-- Inputs -->
             <Cell>
-              <Label text="Input (Padrão, Prefix, Suffix, Disabled)" />
+              <Label text="Input (Padrão, Prefix, Suffix, Swatch, Disabled)" />
               <Stack gap="2">
                 <Input bind:value={inputValue} placeholder="Texto simples..." />
                 <Input bind:value={inputPrefixValue} prefix="R$" placeholder="0,00" />
                 <Input bind:value={inputSuffixValue} suffix="m" placeholder="1,50" />
+                <Input value="#FFCC00" swatch="#FFCC00" placeholder="#RRGGBB" />
                 <Input value="Campo Desabilitado" disabled suffix="g/m²" />
               </Stack>
             </Cell>
