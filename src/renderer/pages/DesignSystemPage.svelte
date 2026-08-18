@@ -210,6 +210,7 @@
                   <Button variant="primary">Primary</Button>
                   <Button variant="secondary">Secondary</Button>
                   <Button variant="ghost">Ghost</Button>
+                  <Button variant="danger">Danger</Button>
                   <Button disabled>Disabled</Button>
                 </Stack>
                 <span class="caption">Tamanho SM (Compacto / Toolbars):</span>
@@ -223,6 +224,7 @@
                     <Icon name="arrow-left" size="sm" />
                     <span>Voltar</span>
                   </Button>
+                  <Button variant="danger" size="sm">Excluir</Button>
                   <Button size="sm" disabled>Off</Button>
                 </Stack>
               </Stack>

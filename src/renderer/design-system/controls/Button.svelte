@@ -2,7 +2,7 @@
   import type { Snippet } from 'svelte'
 
   type Props = {
-    variant?: 'primary' | 'secondary' | 'ghost'
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
     size?: 'sm' | 'md'
     disabled?: boolean
     type?: 'button' | 'submit' | 'reset'
@@ -93,5 +93,23 @@
     background: var(--color-bg-sunken);
     color: var(--color-fg);
     border-color: var(--color-border-strong);
+  }
+
+  .btn[data-variant='danger'] {
+    background: transparent;
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  .btn[data-variant='danger']:hover:not(:disabled) {
+    background: var(--color-danger);
+    color: var(--color-bg);
+    border-color: var(--color-danger);
+  }
+
+  .btn[data-variant='danger']:active:not(:disabled) {
+    background: var(--color-bg);
+    color: var(--color-danger);
+    border-color: var(--color-danger);
   }
 </style>
