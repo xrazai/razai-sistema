@@ -35,120 +35,170 @@ Toda tarefa é cadastrada, movida e iterada **no board** (GitHub Projects). Não
 
 ---
 
-## Tasks e changelog (obrigatório)
+## Tasks e Changelog (obrigatório)
 
 ### Papéis
 
-- **Board (GitHub Projects)** — o que falta fazer: issues do repo com `Priority` (P0/P1/P2) e `Status` (Backlog → Ready → In progress → In review → Done).
-- **`CHANGELOG.md`** — o que já foi feito, **mais recente no topo**.
+- **Board (GitHub Projects)**: o que falta fazer — issues com `Priority` (P0/P1/P2) e `Status` (Backlog → Ready → In progress → In review → Done).
+- **`CHANGELOG.md`**: o que já foi feito, **mais recente no topo**.
 
-Uma task só está “fechada” quando:
+Uma task só está **fechada** quando:
+1. O PR foi **mergeado** e a issue movida para **Done** no board.
+2. Há entrada correspondente no topo do `CHANGELOG.md` (`## YYYY-MM-DD — resumo curto`).
 
-1. O PR foi **mergeado** e a issue foi movida para **Done** no board, **e**
-2. Tem entrada correspondente em `CHANGELOG.md` (resumo de poucas palavras).
+### Prioridade e Ordem
 
-### Prioridade e ordem de implementação
+- Score de prioridade: `score = 3× desbloqueio + 2× risco + valor` → P0 (≥12), P1 (7–11), P2 (≤6).
+- Ordem de execução: P0 → P1 → P2. Em empate, a menor issue aberta (salvo indicação contrária).
+- Dependências reais entre tasks abertas → **Stacked PRs**.
 
-- Prioridade calculada como **score = 3× desbloqueio + 2× risco + valor** → P0 (≥12), P1 (7–11), P2 (≤6).
-- Ao trabalhar, preferir **P0 → P1 → P2**; dentro da mesma prioridade, a menor issue aberta, salvo o usuário pedir outra.
-- Dependências reais entre tasks abertas → **stacked PRs** (ver abaixo).
+### Ciclo da Task
 
-### Cadastrar nova task
+1. **Cadastrar**: criar issue com título `Task <N> — <resumo>` e body com prioridade/score, justificativa e fluxo de branch. Adicionar ao board com Priority e Status.
+2. **Iniciar**: atualizar `main`, criar branch `task/<N>-<slug>` a partir de `main` e mover issue para `In progress`.
+3. **Desenvolver e validar**: implementar o escopo focado da task e validar localmente.
+4. **Submeter**: abrir PR via GitHub CLI (`gh pr create` ou `gh stack submit`), mover para `In review`.
+5. **Concluir**: após o merge, adicionar linha no topo do `CHANGELOG.md`, fechar issue (ou mover para `Done`), apagar branch local/remota e atualizar `main`.
+6. Se gerou UI genérica nova: atualizar `DesignSystemPage.svelte` antes de considerar completa.
 
-1. Entender dependências (o que precisa existir antes).
-2. Criar **issue** no repo com título `Task <N> — <resumo>` e body com prioridade/score, justificativa de ordem e fluxo de branch.
-3. Adicionar ao board e preencher `Priority` e `Status`.
-4. Não cadastrar task genérica demais (“melhorar app”); quebrar em entregas verificáveis.
-
-### Concluir uma task
-
-1. Entregar o código/docs pedidos pela task **na branch da task** (ver **Branches e PRs** abaixo).
-2. Mover a issue para **In progress** / **In review** conforme o andamento.
-3. Em `CHANGELOG.md`, **no topo**, uma linha — data + poucas palavras:
-
-```md
-## YYYY-MM-DD — resumo curto
-```
-
-4. Abrir PR para `main` (ou empilhar), push da branch e aguardar merge (não entregar task só em `main` local).
-5. Após o merge: **fechar a issue** e mover para **Done** no board.
-6. Se a task gerou UI genérica nova: atualizar `DesignSystemPage.svelte` (ver Design System abaixo) **antes** de considerar completa.
-
-### O que agentes NÃO devem fazer
-
-- Fechar task só no chat, sem mover a issue no board e sem `CHANGELOG.md`.
-- Criar segundo backlog (markdown paralelo, Notion, etc.).
-- Escrever changelog longo (arquivos, commits, notas) — só o resumo curto.
-- Implementar task direto em `main` ou reutilizar branch de outra task.
+**O que agentes NÃO devem fazer**:
+- Fechar task no chat sem atualizar board e `CHANGELOG.md`.
+- Criar backlog paralelo (markdown local, Notion, etc.).
+- Escrever changelog verboso (apenas o resumo curto de uma linha).
+- Implementar direto em `main` ou reutilizar branch de outra task.
 
 ---
 
-## Branches e PRs (obrigatório)
+## Workflow de Desenvolvimento e Pull Requests
 
-Toda task pendente no board é entregue em **uma branch nova** + **PR para `main`**. Uma task = uma branch = um PR (stacked quando houver dependência).
+Otimizado para desenvolvimento local rápido, mudanças pequenas e fáceis de revisar, e uma `main` limpa.
 
-### Nomenclatura
+### Fluxo Central
+
+```text
+Issue → Branch → Desenvolvimento → Validação Local → PR → CI do GitHub → Squash Merge → main
+```
+
+### 1. Iniciar de uma Issue
+
+Todo trabalho deve estar associado a uma issue. Use a issue para entender objetivo, comportamento esperado e critérios de aceitação. Mantenha o escopo focado.
+
+### 2. Nomenclatura de Branches
 
 ```
 task/<N>-<slug-kebab>
 ```
 
-| Parte | Regra | Exemplo |
-| --- | --- | --- |
-| Prefixo | Sempre `task/` | `task/` |
-| `N` | Número da issue no board (sem zero à esquerda) | `1`, `15` |
-| `slug` | 2–5 palavras da task, kebab-case, sem acento | `definir-dominio-produto` |
+- Prefixos permitidos: `task/`, `fix/` (hotfix), `chore/` (manutenção).
+- Exemplo: `task/1-definir-dominio-produto`, `task/3-runner-migrations`.
 
-Exemplos:
+### 3. Decisão: PR Normal vs. Stacked PR
 
-- Task 1 → `task/1-definir-dominio-produto`
-- Task 3 → `task/3-runner-migrations`
-- Task 9 → `task/9-empacotar-app-windows`
+- **PR Normal (padrão)**: para mudanças pequenas, autocontidas e fáceis de revisar como unidade.
+- **Stacked PR**: apenas quando uma entrega grande pode ser dividida em camadas dependentes e significativas (ex.: Schema → Service → IPC → UI).
+- Não criar stacked PRs apenas por ter múltiplos commits.
+- Tasks independentes devem usar branches/worktrees independentes.
 
-### Fluxo
+### 4. Desenvolvimento Local
 
-1. Atualizar `main` local (`git pull` em `main`).
-2. Criar a branch a partir de `main` com o nome no padrão acima.
-3. Implementar só o escopo daquela task (+ `CHANGELOG.md` e movimentação da issue no board).
-4. Commit(s) na branch; **não** commitar a entrega em `main`.
-5. Push da branch e abrir PR para `main` com **GitHub CLI** (`gh pr create` — ver **GitHub** abaixo).
-6. Após o merge, apagar a branch remota/local se ainda existir e voltar para `main` atualizada.
+Priorize feedback rápido durante o loop de edição:
+1. Lint do código afetado.
+2. Typecheck quando relevante.
+3. Menor conjunto relevante de testes.
+4. Corrigir falhas imediatamente.
 
-Hotfix / chore fora de task numerada: usar `fix/<slug>` ou `chore/<slug>`, ainda assim com PR para `main` — não empilhar em `main` direto.
+Múltiplos commits intermediários são permitidos e esperados. Não perca tempo fazendo squash/rewrite durante o desenvolvimento ativo.
 
-### Stacked PRs — `gh stack` (preview)
+### 5. Stacked PRs (`gh stack`)
 
-Quando uma task **depende** de outra ainda não mergeada, empilhar em vez de esperar o merge (feature em preview do GitHub; habilitar no repo antes de usar):
+Quando houver dependência real entre branches antes do merge:
 
 ```powershell
 gh extension install github/gh-stack   # gh >= 2.90
 
-gh stack init task/<N>-<slug>          # camada de baixo (trunk: main)
-gh stack add task/<M>-<slug>           # próxima camada, depende da de baixo
-gh stack submit                        # push + PRs linked (--auto em terminal não interativo)
-gh stack sync --prune                  # após merges; seguro em automação
-gh stack merge --yes --squash          # merge bottom-up, não interativo
+gh stack init task/<N>-<slug>          # camada base (target: main)
+gh stack add task/<M>-<slug>           # próxima camada (depende da anterior)
+gh stack submit                        # push + criação de PRs vinculados
+gh stack sync --prune                  # sincronizar após merges
+gh stack merge --yes --squash          # merge bottom-up não interativo
 ```
 
-Regras:
-
-- Uma task = uma camada = um PR. Empilhar **só com dependência real**; tasks independentes → PRs separados para `main`.
-- Merge sempre **bottom-up**; o GitHub faz rebase cascata do restante automaticamente.
-- Branch protection e checks de CI (GitHub Actions) valem para **todas** as camadas — nenhuma camada mergeia sem passar nos checks.
+- Cada camada = 1 branch = 1 PR com mudanças incrementais.
+- Merge sempre **bottom-up**; rebase em cascata automático.
+- Branch protection e CI valem para todas as camadas.
 - Não suportado: cross-fork stacks e GitHub Desktop.
+
+### 6. Validação Local Pré-PR
+
+Antes de submeter PR normal ou stack completa:
+1. `npm run typecheck`
+2. Testes automatizados relevantes
+3. `npm run build` (build completo da aplicação)
+
+O build completo é etapa **pré-PR**, não do loop de edição. Nunca abra PR com build falhando.
+
+**Regra em stack**: não execute o build completo para cada camada individual. Valide a branch mais alta a ser submetida/mergeada (representa o estado combinado final).
+
+### 7. Submissão e Vinculação de Issues
+
+- **PR Normal**:
+  ```powershell
+  git push -u origin HEAD
+  gh pr create --title "..." --body "Closes #<issue> ..." --base main
+  ```
+- **Stacked PR**:
+  - Submeter com `gh stack submit`.
+  - Camadas intermediárias usam `Part of #<issue>`.
+  - Apenas a última camada (ou PR final) usa `Closes #<issue>`. A issue só fecha quando a mudança completa chega em `main`.
+
+### 8. GitHub CI e Correções
+
+- **CI rápida**: checks limitados a lint, typecheck e testes. Não rodar build completo nem gerar empacotamento Electron na CI de PR comum.
+- **Correção de falhas**: inspecionar → corrigir localmente → validar → push no mesmo PR (ou `gh stack submit`/`gh stack sync` para stacks). Não abandone o PR para abrir outro.
+
+### 9. Merge
+
+- Merge apenas com todos os checks de CI verdes.
+- **Squash and Merge** é o padrão para PRs normais.
+- Para stacks, usar merge bottom-up via `gh stack merge`.
+- Após merge: fechar issue se aplicável, deletar branch remota/local e atualizar `main`.
+
+### 10. Merge Queue
+
+Não usar GitHub Merge Queue por padrão. O projeto tem fluxo solo e prioriza baixa latência.
+
+### 11. Releases e Empacotamento
+
+Fluxo separado de desenvolvimento:
+```text
+Dev PR:  lint → typecheck → testes → build local → PR → CI → merge
+Release: main → validação → Electron packaging → instaladores/artefatos → release
+```
+Nunca empacotar o Electron em tarefas normais de desenvolvimento.
+
+### Matriz de Decisão Rápida
+
+| Cenário | Ação |
+| --- | --- |
+| Mudança autocontida | PR normal |
+| Mudança grande em camadas dependentes | Stacked PR (`gh stack`) |
+| Tasks independentes | Branches / worktrees separados |
+| Durante o desenvolvimento | Feedback rápido (lint / typecheck / testes focados) |
+| Antes de submeter PR ou Stack | Build completo local |
+| GitHub CI | Checks rápidos apenas |
+| Estratégia de Merge | Squash Merge (bottom-up se stack) |
+| Release | Build de distribuíveis isolado a partir da `main` |
 
 ---
 
 ## Design System — Industrial Brutalist Grid UI
 
 Regra visual central:
-
 - Todo elemento pertence a uma **cell**.
 - Toda cell pertence a um **grid**.
 - O grid deve permanecer **visualmente perceptível**.
 
 Preferir:
-
 - grids modulares rígidos
 - bordas e divisores de 1px visíveis
 - compartimentos retangulares
@@ -156,33 +206,19 @@ Preferir:
 - densidade estruturada de informação
 - labels, estados, métricas e timestamps explícitos
 - tokens compartilhados (`foundations/tokens.css`)
-- CSS simples
-- componentes reutilizáveis
+- CSS simples e componentes reutilizáveis
 
 Evitar:
-
-- cards flutuantes
-- border-radius excessivo
-- shadows
-- glassmorphism
-- gradientes decorativos
-- whitespace excessivo
-- estilos duplicados fora do Design System
-- padrões visuais específicos de feature quando já existir componente no Design System
+- cards flutuantes, border-radius excessivo, shadows, glassmorphism, gradientes decorativos, whitespace excessivo, estilos duplicados fora do DS.
 
 ## Componentização
 
-Fluxo obrigatório para nova necessidade de UI:
+Fluxo obrigatório para nova UI:
+1. Já existe no DS? → **Reutilizar**.
+2. Não existe e **não é genérico**? → Criar em `features/`.
+3. Não existe e **é genérico**? → Criar em `design-system/` → Adicionar em `DesignSystemPage.svelte` → Usar na Feature.
 
-1. Já existe no Design System? → **Reutilizar**.
-2. Não existe e **não é genérico**? → **Criar na Feature** (`features/`).
-3. Não existe e **é genérico**? →
-   1. Criar no Design System
-   2. Adicionar ao `DesignSystemPage.svelte`
-   3. Usar na Feature
-
-Hierarquia de dependência (não inverter):
-
+Hierarquia:
 ```
 Foundations → Primitives → Controls / Data Display / Layout / Navigation
                               ↓
@@ -191,78 +227,32 @@ Foundations → Primitives → Controls / Data Display / Layout / Navigation
               Feature Components → Pages
 ```
 
-`DesignSystemPage` consome qualquer camada como fonte de verdade visual.
-
-Regras:
-
-- UI genérica → `design-system/`
-- UI de produto → `features/`
-- Features **compõem** o Design System; não reimplementam estilos
-- Promover para o Design System **somente** quando for genuinamente genérico e reutilizável
-- Não introduzir nova linguagem visual sem precedente no Design System; se for necessário, implemente primeiro no Design System
-
 ## Living Design System
 
-- `src/renderer/pages/DesignSystemPage.svelte` é a **fonte de verdade visual** do Design System atual.
-- Deve usar os **componentes e tokens reais de produção**.
-- Nunca criar versões fake só para documentação.
-- Qualquer mudança em componente, token, tipografia, spacing, layout ou padrão visual **só está completa** quando refletida nessa página.
-- Não introduzir Storybook ou outro framework de DS sem necessidade demonstrada.
-- Preferir a menor abstração que resolve a necessidade atual.
+- `src/renderer/pages/DesignSystemPage.svelte` é a **fonte de verdade visual**.
+- Usa componentes e tokens reais de produção (nunca mockados).
+- Qualquer alteração visual só é considerada completa quando refletida nessa página.
 
-## Backend / dados
+---
 
-- SQLite só no **main**. Renderer acessa dados via IPC (`preload` → `window.razai`).
-- Schema inicial em `src/main/database/schema.ts`.
-- Migrations versionadas em `src/main/database/migrations/` quando o schema evoluir — sem framework prematuro.
-- Tipagens IPC em `src/shared/types.ts`.
+## Backend / Dados
 
-## GitHub (git / PR)
+- SQLite **apenas no main**. Renderer acessa via IPC (`preload` → `window.razai`).
+- Schema inicial: `src/main/database/schema.ts`.
+- Migrations versionadas: `src/main/database/migrations/`.
+- Tipagens IPC: `src/shared/types.ts`.
 
-- Remote: configurar `origin` apontando para o repositório GitHub (`https://github.com/<org>/<repo>.git`).
-- Fonte da verdade do backlog: **board** (issues) + **`CHANGELOG.md`**.
-- Fluxo de branch por task: ver **Branches e PRs** acima.
-- CI e apps são opcionais; só quando houver task correspondente.
+---
 
-### PRs — GitHub CLI
+## Ambiente e Comandos
+
+- Caminho canônico no Windows: `C:\\Users\\razai\\Devs\\raz-sistema`
+- Executar comandos (`git`, `npm`, `gh`) no PowerShell nativo do Windows.
 
 ```powershell
-# Em C:\Users\razai\Devs\raz-sistema, na branch da entrega:
-git push -u origin HEAD
+cd C:\\Users\\razai\\Devs\\raz-sistema
 
-gh pr create --title "…" --body "…" --base main
-```
-
-- **Usar** `gh pr create`, `gh pr view`, `gh pr merge`.
-- Tasks dependentes ainda não mergeadas: usar `gh stack` (ver **Stacked PRs** acima) em vez de esperar o merge.
-
-## Como trabalhar
-
-- Antes de implementar: ler a task de maior prioridade no board (ou a que o usuário indicar) e este `AGENTS.md`.
-- Abrir branch `task/<N>-<slug>` a partir de `main` **antes** de codar a task.
-- Não inventar bibliotecas de UI, roteadores ou state managers sem pedido explícito.
-- Não expandir o escopo além do pedido / da task.
-- Manter o visual Industrial Brutalist; não “modernizar” com cards, shadows ou glass.
-- Em dúvida de onde colocar um componente: seguir o fluxo de componentização.
-- Ao terminar entrega alinhada a uma task: mover a issue para **Done** no board, adicionar resumo curto em `CHANGELOG.md` e abrir PR no GitHub (`gh pr create` ou `gh stack submit`).
-- Documentação viva do DS: `docs/design-system.md` + `DesignSystemPage.svelte`.
-
-### Shell: PowerShell no Windows
-
-Caminho canônico do repo: **`C:\Users\razai\Devs\raz-sistema`**.
-
-Rodar `git`, `npm` e `gh` **somente** nesse caminho nativo do Windows (PowerShell).
-
-Evitar:
-
-- Misturar `node_modules` compilados em outro SO com Node no Windows
-
-## Comandos
-
-```powershell
-cd C:\Users\razai\Devs\raz-sistema
-
-# Node.js 22 LTS instalado nativamente no Windows
+# Node.js 22 LTS
 node -v
 
 npm install
