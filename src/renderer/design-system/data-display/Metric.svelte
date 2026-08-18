@@ -19,14 +19,29 @@
   .metric {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: var(--space-1);
-    min-width: 0;
+    min-height: 48px;
+    box-sizing: border-box;
+    line-height: 100%;
+  }
+
+  .label {
+    height: 16px;
+    font-size: var(--text-xs);
+    line-height: 100%;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-fg-muted);
   }
 
   .value {
+    height: 24px;
+    display: flex;
+    align-items: baseline;
     font-size: var(--text-xl);
     color: var(--color-fg);
-    line-height: var(--leading-tight);
+    line-height: 100%;
   }
 
   .unit {

@@ -48,14 +48,16 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    min-height: 44px;
+    height: 40px;
     padding: var(--space-2) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
+    line-height: 100%;
     letter-spacing: var(--tracking-header);
     text-transform: uppercase;
     color: var(--color-fg-muted);
     background: var(--color-bg-elevated);
+    box-sizing: border-box;
   }
 
   .head-content {

@@ -21,4 +21,8 @@
     border-right: var(--border-width) solid var(--color-border);
     background: var(--color-bg-elevated);
   }
+
+  .sidebar :global(span) {
+    line-height: 100%;
+  }
 </style>

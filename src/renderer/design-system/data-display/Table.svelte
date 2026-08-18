@@ -166,11 +166,13 @@
 
   th,
   td {
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     border-right: var(--border-width) solid var(--color-border);
     text-align: left;
     white-space: nowrap;
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   th:last-child,
@@ -179,6 +181,7 @@
   }
 
   th {
+    height: 40px;
     font-size: var(--text-xs);
     font-weight: 500;
     letter-spacing: var(--tracking-label);
@@ -190,6 +193,10 @@
     top: 0;
     z-index: 1;
     transition: background var(--motion-fast), color var(--motion-fast);
+  }
+
+  td {
+    height: 40px;
   }
 
   th.is-sortable {
@@ -240,10 +247,6 @@
 
   tbody tr.clickable {
     cursor: pointer;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
   }
 
   .empty-cell {

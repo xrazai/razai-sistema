@@ -30,22 +30,27 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
+    height: 32px;
     padding: var(--space-2) var(--space-3);
     border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-bg-elevated);
     color: var(--color-fg);
     font-size: var(--text-sm);
+    line-height: 100%;
     letter-spacing: var(--tracking-tight);
     text-transform: uppercase;
+    box-sizing: border-box;
     transition: background var(--motion-fast), border-color var(--motion-fast),
       color var(--motion-fast);
   }
 
   .btn[data-size='sm'] {
+    height: 24px;
     padding: var(--space-1) var(--space-2);
     font-size: var(--text-xs);
     gap: var(--space-1);
+    line-height: 100%;
   }
 
   .btn:hover:not(:disabled) {

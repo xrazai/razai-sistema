@@ -27,6 +27,7 @@
 <style>
   .select {
     width: 100%;
+    height: 32px;
     padding: var(--space-2) var(--space-3);
     border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
@@ -34,8 +35,10 @@
     color: var(--color-fg);
     font-family: var(--font-mono);
     font-size: var(--text-sm);
+    line-height: 100%;
     outline: none;
     cursor: pointer;
+    box-sizing: border-box;
     transition: border-color var(--motion-fast);
   }
 

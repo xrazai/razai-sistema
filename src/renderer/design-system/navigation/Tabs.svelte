@@ -28,18 +28,25 @@
 <style>
   .tabs {
     display: flex;
+    height: 32px;
     border-bottom: var(--border-width) solid var(--color-border);
+    box-sizing: border-box;
   }
 
   .tab {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
     padding: var(--space-2) var(--space-3);
     border: none;
     border-right: var(--border-width) solid var(--color-border);
     background: transparent;
     color: var(--color-fg-muted);
     font-size: var(--text-xs);
+    line-height: 100%;
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
+    box-sizing: border-box;
   }
 
   .tab:hover {

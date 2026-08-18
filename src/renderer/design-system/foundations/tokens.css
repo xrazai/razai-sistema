@@ -36,8 +36,9 @@
   --text-md: 13px;
   --text-lg: 15px;
   --text-xl: 18px;
-  --leading-tight: 1.25;
-  --leading-normal: 1.45;
+  --leading-tight: 100%;
+  --leading-normal: 100%;
+  --leading-none: 100%;
   --tracking-tight: 0.04em;
   --tracking-label: 0.08em;
   --tracking-header: 0.1em;

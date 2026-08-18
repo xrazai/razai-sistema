@@ -19,10 +19,14 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
+    height: 20px;
+    padding: var(--space-1) 0;
     font-size: var(--text-xs);
+    line-height: 100%;
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--color-fg-muted);
+    box-sizing: border-box;
   }
 
   .dot {

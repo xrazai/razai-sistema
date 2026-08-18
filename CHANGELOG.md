@@ -12,6 +12,10 @@ Formato:
 
 ---
 
+## 2026-08-18 — Amarração proporcional e ritmo unificado de 40px no Design System (Sidebar, Topbar, Toolbar, Tabela)
+
+## 2026-08-18 — Padronização de line-height 100% universal e regras de compensação hierárquica em múltiplos de 4/8
+
 ## 2026-08-18 — Topbar unificada com botões de ação e atualização completa da documentação técnica
 
 ## 2026-08-18 — Configuração de empacotamento Windows via electron-builder e guia de smoke test (Task 9)
