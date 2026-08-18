@@ -35,6 +35,10 @@
     text-transform: uppercase;
   }
 
+  .nav-item span {
+    line-height: 100%;
+  }
+
   .nav-item:hover {
     color: var(--color-fg);
     background: var(--color-bg);
