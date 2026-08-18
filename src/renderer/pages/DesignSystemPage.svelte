@@ -144,8 +144,6 @@
           </Grid>
         </section>
 
-        <Divider />
-
         <!-- 02. Primitives -->
         <section>
           <h2 class="section">02. Primitives</h2>
@@ -194,8 +192,6 @@
             </Cell>
           </Grid>
         </section>
-
-        <Divider />
 
         <!-- 03. Controls -->
         <section>
@@ -277,8 +273,6 @@
           </Grid>
         </section>
 
-        <Divider />
-
         <!-- 04. Data Display -->
         <section>
           <h2 class="section">04. Data Display</h2>
@@ -350,8 +344,6 @@
           </Grid>
         </section>
 
-        <Divider />
-
         <!-- 05. Layout & Containers -->
         <section>
           <h2 class="section">05. Layout & Containers</h2>
@@ -400,8 +392,6 @@
           </Stack>
         </section>
 
-        <Divider />
-
         <!-- 06. Navigation Components -->
         <section>
           <h2 class="section">06. Navigation</h2>
@@ -447,8 +437,6 @@
           </div>
         </section>
 
-        <Divider />
-
         <!-- 07. Compositions -->
         <section>
           <h2 class="section">07. Compositions</h2>
@@ -492,8 +480,6 @@
             </Panel>
           </Grid>
         </section>
-
-        <Divider />
 
         <!-- 08. Form & Field Playground (Grid Modular de Cadastro) -->
         <section>
@@ -704,11 +690,25 @@
     text-transform: uppercase;
   }
 
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border);
+    padding-bottom: var(--space-5);
+    margin-bottom: var(--space-5);
+  }
+
+  section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
   .type-scale {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    margin-top: var(--space-2);
   }
 
   .type-item {
