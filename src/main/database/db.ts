@@ -14,15 +14,19 @@ export function getDb(): Database.Database {
   return db
 }
 
+export function getDatabasePath(customPath?: string): string {
+  if (customPath) return customPath
+  if (process.env.RAZAI_DB_PATH) return process.env.RAZAI_DB_PATH
+
+  const dir = join(app.getPath('userData'), 'data')
+  mkdirSync(dir, { recursive: true })
+  return join(dir, 'razai.sqlite')
+}
+
 export function openDatabase(customPath?: string): Database.Database {
   if (db) return db
 
-  let path = customPath || process.env.RAZAI_DB_PATH
-  if (!path) {
-    const dir = join(app.getPath('userData'), 'data')
-    mkdirSync(dir, { recursive: true })
-    path = join(dir, 'razai.sqlite')
-  }
+  const path = getDatabasePath(customPath)
 
   db = new Database(path)
   db.pragma('journal_mode = WAL')
