@@ -65,12 +65,13 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 > - **Controles Compactos (`24px`)**: `Button` (`size="sm"`), `Checkbox`, `Toggle` $\rightarrow$ dentro de uma linha de 40px, recebem 8px de respiro vertical (múltiplo de 8).
 > - **Badges e Indicadores de Estado (`20px`)**: `Badge`, `Status` $\rightarrow$ `height: 20px;` (múltiplo de 4), centralizados no eixo vertical com `display: inline-flex; align-items: center;`.
 > - **Cabeçalhos de Seção / Modais (`48px`)**: `.form-header`, `.modal-header` $\rightarrow$ `height: 48px;` ($6 \times 8\text{px}$).
-> - **Rodapés de Ação (`56px`)**: `.form-footer`, `.modal-footer` $\rightarrow$ `height: 56px;` ($7 \times 8\text{px}$).
+> - **Rodapés de Ação de Formulário (`.form-footer`)**: `80px` ($10 \times 8\text{px}$, com `padding: var(--space-3) var(--space-4)` e `min-height: 56px`).
+> - **Rodapés de Modais (`.modal-footer`)**: `56px` ($7 \times 8\text{px}$).
 >
 > ### 4. Relação Hierárquica Pai-Filho
 > Se um componente estiver aninhado dentro de outro componente, **tanto os elementos filhos quanto os elementos pais** devem possuir altura somada estritamente múltipla de 4 ou 8.
-> Exemplo: Campo de formulário composto:
-> $$\text{Label }(16\text{px}) + \text{Margin }(8\text{px}) + \text{Input }(32\text{px}) = 56\text{px}\quad(7 \times 8\text{px})$$
+> Exemplo: Célula de formulário composta (`.field-cell`):
+> $$\text{Padding Top }(12\text{px}) + \text{Label }(16\text{px}) + \text{Margin }(4\text{px}) + \text{Input }(32\text{px}) + \text{Padding Bottom }(16\text{px}) = 80\text{px}\quad(10 \times 8\text{px})$$
 >
 > ### 5. Fechamento e Delimitação Geométrica
 > Todo compartimento da grade é fechado: a última linha de qualquer tabela preserva sua borda inferior de 1px (`border-bottom: 1px solid var(--color-border)`), demarcando o limite da célula contra o espaço vazio.

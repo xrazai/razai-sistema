@@ -622,6 +622,15 @@
                   </Cell>
                 </Grid>
               </div>
+
+              <!-- Rodapé de Ação Padrão -->
+              <footer class="demo-form-footer">
+                <Button variant="ghost">Cancelar</Button>
+                <Button variant="primary">
+                  <Icon name="plus" size="sm" />
+                  <span>Salvar Tecido</span>
+                </Button>
+              </footer>
             </Stack>
           </Panel>
         </section>
@@ -860,8 +869,23 @@
   }
 
   .field-box {
-    padding: var(--space-3);
+    padding: var(--space-3) var(--space-4) var(--space-4) var(--space-4);
     background: var(--color-bg);
     box-sizing: border-box;
+  }
+
+  .demo-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    height: 80px;
+    min-height: 56px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg-elevated);
+    border: var(--border-width) solid var(--color-border);
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 100%;
   }
 </style>

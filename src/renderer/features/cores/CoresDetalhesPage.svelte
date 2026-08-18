@@ -381,7 +381,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 56px;
+    height: 80px;
     min-height: 56px;
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);

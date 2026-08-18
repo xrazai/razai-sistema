@@ -599,7 +599,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    height: 56px;
+    height: 80px;
     min-height: 56px;
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);

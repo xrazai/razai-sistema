@@ -294,7 +294,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: var(--space-3);
-    height: 56px;
+    height: 80px;
     min-height: 56px;
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);
