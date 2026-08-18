@@ -37,7 +37,8 @@ Regras estruturais:
 - **Panel `flush` & `actions`**: corpo sem padding quando contém Table/Grid encostados na moldura (`Table bordered={false}`, `Grid bare`); cabeçalho com suporte a snippet `actions` para botões e controles contextuais alinhados à direita.
 - **Table padrão**: suporte a colunas com alinhamento (`align`), largura (`width`), linhas clicáveis (`clickable`), fallback de estado vazio (`emptyMessage`) e snippet customizado por célula (`cell`).
 - **Button com variantes de tamanho**: `size="md"` (padrão) e `size="sm"` (compacto para toolbars e cabeçalhos de painéis).
-- **Ícones**: SVG autoral, stroke 1px, `shape-rendering: crispEdges`, monocromáticos (`currentColor`). Inclui `grid`, `dash`, `settings`, `system`, `chevron`, `check`, `empty`, `fabric`, `palette`, `link`, `plus`, `search`.
+- **Input com suporte a prefix/suffix**: suporte a afixos de unidade e símbolos técnicos (`suffix="m"`, `suffix="g/m²"`, `suffix="m/kg"`, `prefix="R$"`) integrados ao input group.
+- **Ícones**: SVG autoral, stroke 1px, `shape-rendering: crispEdges`, monocromáticos (`currentColor`). Inclui `grid`, `dash`, `settings`, `system`, `chevron`, `chevron-left`, `arrow-left`, `check`, `empty`, `fabric`, `palette`, `link`, `plus`, `search`.
 
 ## Camadas de componentes
 

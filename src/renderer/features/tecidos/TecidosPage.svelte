@@ -4,9 +4,9 @@
   import Cell from '../../design-system/primitives/Cell.svelte'
   import Icon from '../../design-system/primitives/Icon.svelte'
   import Button from '../../design-system/controls/Button.svelte'
-  import Input from '../../design-system/controls/Input.svelte'
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
+  import TecidosCadastroPage, { type NovoTecidoData } from './TecidosCadastroPage.svelte'
 
   type Tecido = {
     id: string
@@ -17,18 +17,25 @@
     largura: string
     fornecedor: string
     status: 'ativo' | 'inativo' | 'esgotado'
+    rendimento?: string
+    gramaturaLinear?: string
+    tipo?: string
+    transparencia?: string
+    elasticidade?: string
+    acabamento?: string
   }
 
   const columns: Column[] = [
-    { key: 'codigo', label: 'Código', width: '120px' },
+    { key: 'codigo', label: 'Código', width: '110px' },
     { key: 'nome', label: 'Nome / Descrição' },
     { key: 'composicao', label: 'Composição' },
-    { key: 'gramatura', label: 'Gramatura', width: '130px' },
+    { key: 'gramatura', label: 'Gramatura (g/m²)', width: '150px' },
     { key: 'largura', label: 'Largura', width: '110px' },
     { key: 'fornecedor', label: 'Fornecedor' },
     { key: 'status', label: 'Status', width: '110px', align: 'center' }
   ]
 
+  let viewMode = $state<'list' | 'create'>('list')
   let searchTerm = $state('')
   let selectedTecido = $state<Tecido | null>(null)
 
@@ -42,7 +49,13 @@
       gramatura: '120 g/m²',
       largura: '1.50 m',
       fornecedor: 'Têxtil Santa Catarina',
-      status: 'ativo'
+      status: 'ativo',
+      rendimento: '2.80 m/kg',
+      gramaturaLinear: '180 g/m',
+      tipo: 'liso',
+      transparencia: 'nenhuma',
+      elasticidade: 'nenhuma',
+      acabamento: 'fosco'
     },
     {
       id: '2',
@@ -52,7 +65,13 @@
       gramatura: '240 g/m²',
       largura: '1.45 m',
       fornecedor: 'Fiação & Tecelagem Imperial',
-      status: 'ativo'
+      status: 'ativo',
+      rendimento: '2.40 m/kg',
+      gramaturaLinear: '348 g/m',
+      tipo: 'liso',
+      transparencia: 'baixa',
+      elasticidade: 'nenhuma',
+      acabamento: 'fosco'
     },
     {
       id: '3',
@@ -62,7 +81,13 @@
       gramatura: '260 g/m²',
       largura: '1.60 m',
       fornecedor: 'Vicunha Têxtil',
-      status: 'ativo'
+      status: 'ativo',
+      rendimento: '2.10 m/kg',
+      gramaturaLinear: '416 g/m',
+      tipo: 'liso',
+      transparencia: 'nenhuma',
+      elasticidade: 'baixa',
+      acabamento: 'semi_brilho'
     },
     {
       id: '4',
@@ -72,7 +97,13 @@
       gramatura: '85 g/m²',
       largura: '1.40 m',
       fornecedor: 'Tecidos Finos Aurora',
-      status: 'esgotado'
+      status: 'esgotado',
+      rendimento: '8.40 m/kg',
+      gramaturaLinear: '119 g/m',
+      tipo: 'estampado',
+      transparencia: 'alta',
+      elasticidade: 'nenhuma',
+      acabamento: 'semi_brilho'
     },
     {
       id: '5',
@@ -82,7 +113,13 @@
       gramatura: '165 g/m²',
       largura: '1.48 m',
       fornecedor: 'Malharia Sul',
-      status: 'ativo'
+      status: 'ativo',
+      rendimento: '4.10 m/kg',
+      gramaturaLinear: '244 g/m',
+      tipo: 'liso',
+      transparencia: 'baixa',
+      elasticidade: 'nenhuma',
+      acabamento: 'fosco'
     },
     {
       id: '6',
@@ -92,7 +129,13 @@
       gramatura: '380 g/m²',
       largura: '1.65 m',
       fornecedor: 'Santana Textiles',
-      status: 'inativo'
+      status: 'inativo',
+      rendimento: '1.60 m/kg',
+      gramaturaLinear: '627 g/m',
+      tipo: 'liso',
+      transparencia: 'nenhuma',
+      elasticidade: 'baixa',
+      acabamento: 'fosco'
     }
   ])
 
@@ -109,9 +152,29 @@
     })
   )
 
-  function handleCadastrarTecido() {
-    // Ação inicial disparada ao clicar no botão
-    console.log('Iniciar fluxo de cadastro de tecido')
+  function handleNovoTecido(novo: NovoTecidoData) {
+    const nextNum = tecidos.length + 1
+    const padNum = String(nextNum).padStart(3, '0')
+    const novoItem: Tecido = {
+      id: String(Date.now()),
+      codigo: `TC-${padNum}`,
+      nome: novo.nome,
+      composicao: novo.composicao || '—',
+      gramatura: novo.gramaturaM2 ? `${novo.gramaturaM2} g/m²` : '—',
+      largura: novo.largura ? `${novo.largura} m` : '—',
+      fornecedor: 'Padrão Local',
+      status: 'ativo',
+      rendimento: novo.rendimento ? `${novo.rendimento} m/kg` : undefined,
+      gramaturaLinear: novo.gramaturaLinear ? `${novo.gramaturaLinear} g/m` : undefined,
+      tipo: novo.tipo || undefined,
+      transparencia: novo.transparencia || undefined,
+      elasticidade: novo.elasticidade || undefined,
+      acabamento: novo.acabamento || undefined
+    }
+
+    tecidos = [novoItem, ...tecidos]
+    selectedTecido = novoItem
+    viewMode = 'list'
   }
 
   function getStatusTone(status: Tecido['status']): 'ok' | 'warn' | 'danger' {
@@ -127,72 +190,79 @@
   }
 </script>
 
-<div class="page">
-  <Panel title="Tecidos" flush>
-    {#snippet actions()}
-      <Button variant="primary" size="sm" onclick={handleCadastrarTecido}>
-        <Icon name="plus" size="sm" />
-        <span>Cadastrar Tecido</span>
-      </Button>
-    {/snippet}
+{#if viewMode === 'create'}
+  <TecidosCadastroPage
+    oncancel={() => (viewMode = 'list')}
+    onsave={handleNovoTecido}
+  />
+{:else}
+  <div class="page">
+    <Panel title="Tecidos" flush>
+      {#snippet actions()}
+        <Button variant="primary" size="sm" onclick={() => (viewMode = 'create')}>
+          <Icon name="plus" size="sm" />
+          <span>Cadastrar Tecido</span>
+        </Button>
+      {/snippet}
 
-    <div class="layout">
-      <!-- Barra superior de ferramentas / busca / contadores -->
-      <div class="toolbar">
-        <div class="search-box">
-          <Icon name="search" size="sm" />
-          <input
-            type="text"
-            class="search-input"
-            bind:value={searchTerm}
-            placeholder="Buscar por código, nome, composição ou fornecedor..."
-          />
-          {#if searchTerm}
-            <button class="clear-btn" onclick={() => (searchTerm = '')} aria-label="Limpar busca">
-              ✕
-            </button>
-          {/if}
-        </div>
-        <div class="toolbar-meta">
-          <Badge text={`${filteredTecidos.length} de ${tecidos.length} itens`} tone="neutral" />
-        </div>
-      </div>
-
-      <!-- Tabela padrão de itens -->
-      <div class="table-container">
-        <Table
-          {columns}
-          rows={filteredTecidos}
-          bordered={false}
-          emptyMessage="Nenhum tecido encontrado para os critérios de busca."
-          onrowclick={(row) => (selectedTecido = row as Tecido)}
-        >
-          {#snippet cell({ row, column, value })}
-            {#if column.key === 'codigo'}
-              <span class="code">{value}</span>
-            {:else if column.key === 'status'}
-              <Badge text={getStatusLabel(value)} tone={getStatusTone(value)} />
-            {:else if column.key === 'nome'}
-              <span class="fabric-name">{value}</span>
-            {:else}
-              <span>{value ?? '—'}</span>
+      <div class="layout">
+        <!-- Barra superior de ferramentas / busca / contadores -->
+        <div class="toolbar">
+          <div class="search-box">
+            <Icon name="search" size="sm" />
+            <input
+              type="text"
+              class="search-input"
+              bind:value={searchTerm}
+              placeholder="Buscar por código, nome, composição ou fornecedor..."
+            />
+            {#if searchTerm}
+              <button class="clear-btn" onclick={() => (searchTerm = '')} aria-label="Limpar busca">
+                ✕
+              </button>
             {/if}
-          {/snippet}
-        </Table>
-      </div>
+          </div>
+          <div class="toolbar-meta">
+            <Badge text={`${filteredTecidos.length} de ${tecidos.length} itens`} tone="neutral" />
+          </div>
+        </div>
 
-      <!-- Barra de rodapé informativa -->
-      <footer class="footer">
-        <span class="footer-note">Pressione um item da tabela para visualizar detalhes</span>
-        {#if selectedTecido}
-          <span class="footer-selected">
-            Selecionado: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong>
-          </span>
-        {/if}
-      </footer>
-    </div>
-  </Panel>
-</div>
+        <!-- Tabela padrão de itens -->
+        <div class="table-container">
+          <Table
+            {columns}
+            rows={filteredTecidos}
+            bordered={false}
+            emptyMessage="Nenhum tecido encontrado para os critérios de busca."
+            onrowclick={(row) => (selectedTecido = row as Tecido)}
+          >
+            {#snippet cell({ row, column, value })}
+              {#if column.key === 'codigo'}
+                <span class="code">{value}</span>
+              {:else if column.key === 'status'}
+                <Badge text={getStatusLabel(value)} tone={getStatusTone(value)} />
+              {:else if column.key === 'nome'}
+                <span class="fabric-name">{value}</span>
+              {:else}
+                <span>{value ?? '—'}</span>
+              {/if}
+            {/snippet}
+          </Table>
+        </div>
+
+        <!-- Barra de rodapé informativa -->
+        <footer class="footer">
+          <span class="footer-note">Pressione um item da tabela para visualizar detalhes</span>
+          {#if selectedTecido}
+            <span class="footer-selected">
+              Selecionado: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong>
+            </span>
+          {/if}
+        </footer>
+      </div>
+    </Panel>
+  </div>
+{/if}
 
 <style>
   .page {

@@ -34,6 +34,14 @@
     <svg viewBox="0 0 14 14">
       <path d="M5 2.5 L10 7 L5 11.5" />
     </svg>
+  {:else if name === 'chevron-left'}
+    <svg viewBox="0 0 14 14">
+      <path d="M9 2.5 L4 7 L9 11.5" />
+    </svg>
+  {:else if name === 'arrow-left'}
+    <svg viewBox="0 0 14 14">
+      <path d="M11.5 7 H2.5 M6 3.5 L2.5 7 L6 10.5" />
+    </svg>
   {:else if name === 'check'}
     <svg viewBox="0 0 14 14">
       <path d="M2.5 7.5 L5.5 10.5 L11.5 3.5" />
