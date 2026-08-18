@@ -1,14 +1,10 @@
 <script lang="ts">
-  import Panel from '../../design-system/layout/Panel.svelte'
-  import Stack from '../../design-system/layout/Stack.svelte'
   import Grid from '../../design-system/layout/Grid.svelte'
   import Label from '../../design-system/primitives/Label.svelte'
-  import Icon from '../../design-system/primitives/Icon.svelte'
   import Button from '../../design-system/controls/Button.svelte'
   import Input from '../../design-system/controls/Input.svelte'
   import Select from '../../design-system/controls/Select.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
-  import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
   import type { CreateTecidoInput } from '../../../shared/types'
 
   type Props = {
@@ -206,26 +202,10 @@
 </script>
 
 <div class="cadastro-page">
-  <Panel flush>
-    {#snippet header()}
-      <Breadcrumb
-        items={[
-          { label: 'Tecidos', onclick: oncancel },
-          { label: 'Cadastro de Tecido', active: true }
-        ]}
-      />
-    {/snippet}
-    {#snippet actions()}
-      <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSaving}>
-        <Icon name="arrow-left" size="sm" />
-        <span>Voltar para Lista</span>
-      </Button>
-    {/snippet}
-
-    <div class="content-scroll">
-      <div class="form-wrapper">
-        <!-- Subheader informativo em largura total -->
-        <div class="form-header">
+  <div class="content-scroll">
+    <div class="form-wrapper">
+      <!-- Subheader informativo em largura total -->
+      <div class="form-header">
           <div class="header-info">
             <span class="step-badge">NOVO REGISTRO</span>
             <span class="header-desc">
@@ -370,7 +350,6 @@
         </footer>
       </div>
     </div>
-  </Panel>
 </div>
 
 <style>

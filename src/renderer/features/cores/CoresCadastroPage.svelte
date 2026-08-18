@@ -1,12 +1,9 @@
 <script lang="ts">
-  import Panel from '../../design-system/layout/Panel.svelte'
   import Grid from '../../design-system/layout/Grid.svelte'
   import Label from '../../design-system/primitives/Label.svelte'
-  import Icon from '../../design-system/primitives/Icon.svelte'
   import Button from '../../design-system/controls/Button.svelte'
   import Input from '../../design-system/controls/Input.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
-  import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
   import { formatHexInput, isValidHex, labToHex, hexToLab } from './utils'
   import type { CreateCorInput } from '../../../shared/types'
 
@@ -88,26 +85,10 @@
 </script>
 
 <div class="cadastro-page">
-  <Panel flush>
-    {#snippet header()}
-      <Breadcrumb
-        items={[
-          { label: 'Cores', onclick: oncancel },
-          { label: 'Cadastro de Cor', active: true }
-        ]}
-      />
-    {/snippet}
-    {#snippet actions()}
-      <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSaving}>
-        <Icon name="arrow-left" size="sm" />
-        <span>Voltar para Lista</span>
-      </Button>
-    {/snippet}
-
-    <div class="content-scroll">
-      <div class="form-wrapper">
-        <!-- Subheader informativo em largura total -->
-        <div class="form-header">
+  <div class="content-scroll">
+    <div class="form-wrapper">
+      <!-- Subheader informativo em largura total -->
+      <div class="form-header">
           <div class="header-info">
             <span class="step-badge">NOVO REGISTRO</span>
             <span class="header-desc">
@@ -171,7 +152,6 @@
         </footer>
       </div>
     </div>
-  </Panel>
 </div>
 
 <style>

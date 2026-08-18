@@ -1,12 +1,9 @@
 <script lang="ts">
-  import Panel from '../../design-system/layout/Panel.svelte'
   import Grid from '../../design-system/layout/Grid.svelte'
   import Label from '../../design-system/primitives/Label.svelte'
-  import Icon from '../../design-system/primitives/Icon.svelte'
   import Button from '../../design-system/controls/Button.svelte'
   import Input from '../../design-system/controls/Input.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
-  import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
   import { formatHexInput, isValidHex, labToHex, hexToLab } from './utils'
   import type { CorRecord, UpdateCorInput } from '../../../shared/types'
 
@@ -111,25 +108,9 @@
 </script>
 
 <div class="detalhes-page">
-  <Panel flush>
-    {#snippet header()}
-      <Breadcrumb
-        items={[
-          { label: 'Cores', onclick: onback },
-          { label: cor.nome || 'Detalhes da Cor', active: true }
-        ]}
-      />
-    {/snippet}
-    {#snippet actions()}
-      <Button variant="ghost" size="sm" onclick={onback} disabled={isSaving}>
-        <Icon name="arrow-left" size="sm" />
-        <span>Voltar para Lista</span>
-      </Button>
-    {/snippet}
-
-    <div class="content-scroll">
-      <div class="form-wrapper">
-        <div class="form-header">
+  <div class="content-scroll">
+    <div class="form-wrapper">
+      <div class="form-header">
           <div class="header-info">
             <div
               class="color-indicator-swatch"
@@ -204,6 +185,7 @@
           </div>
         </form>
 
+        <!-- Barra de rodapé com ações -->
         <footer class="form-footer">
           <div class="footer-left">
             <Button
@@ -225,7 +207,6 @@
         </footer>
       </div>
     </div>
-  </Panel>
 </div>
 
 <style>
