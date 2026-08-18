@@ -131,7 +131,11 @@
   }
 
   function handleLarguraInput() {
-    if (lastEditedMetric) {
+    const activeMetric =
+      lastEditedMetric ||
+      (rendimento ? 'rendimento' : gramaturaM2 ? 'gramaturaM2' : gramaturaLinear ? 'gramaturaLinear' : null)
+    if (activeMetric) {
+      lastEditedMetric = activeMetric
       recalculateMetrics('largura')
     }
   }
