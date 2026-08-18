@@ -255,8 +255,8 @@
   }
 
   .color-indicator-swatch {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border: var(--border-width) solid var(--color-border-strong);
     box-sizing: border-box;
   }

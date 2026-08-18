@@ -161,11 +161,19 @@
   .table {
     width: 100%;
     border-collapse: collapse;
+    border-spacing: 0;
     font-size: var(--text-sm);
+    box-sizing: border-box;
+  }
+
+  tr {
+    height: 40px;
+    box-sizing: border-box;
   }
 
   th,
   td {
+    height: 40px;
     padding: var(--space-2) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     border-right: var(--border-width) solid var(--color-border);
@@ -173,6 +181,7 @@
     white-space: nowrap;
     box-sizing: border-box;
     line-height: 100%;
+    vertical-align: middle;
   }
 
   th:last-child,

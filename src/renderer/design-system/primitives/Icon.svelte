@@ -92,6 +92,9 @@
     width: 14px;
     height: 14px;
     color: var(--color-fg-muted);
+    vertical-align: middle;
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .sm {
@@ -100,12 +103,14 @@
   }
 
   svg {
+    display: block;
     width: 100%;
     height: 100%;
     fill: none;
     stroke: currentColor;
     stroke-width: 1;
     shape-rendering: crispEdges;
+    box-sizing: border-box;
   }
 
   svg .fill {
