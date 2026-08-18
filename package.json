@@ -1,18 +1,23 @@
 {
   "name": "razai-sistema",
+  "productName": "Razai Sistema",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Sistema desktop Razai — Electron + Svelte + TypeScript + SQLite",
+  "description": "Sistema desktop Razai — Gestão e Engenharia Têxtil",
+  "author": "Razai",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "build:win": "electron-vite build && electron-builder --win",
+    "package:win": "electron-vite build && electron-builder --win --dir",
     "preview": "electron-vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run tests/unit",
     "test:unit": "vitest run tests/unit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0"
@@ -23,6 +28,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.21",
     "electron": "^36.3.1",
+    "electron-builder": "^26.15.3",
     "electron-vite": "^3.1.0",
     "svelte": "^5.33.3",
     "svelte-check": "^4.2.1",

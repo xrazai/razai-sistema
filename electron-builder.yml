@@ -1,0 +1,39 @@
+appId: com.razai.sistema
+productName: Razai Sistema
+copyright: Copyright © 2026 Razai
+
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - out/**/*
+  - package.json
+
+asar: true
+asarUnpack:
+  - "**/*.node"
+
+win:
+  executableName: Razai Sistema
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  artifactName: "${productName}-Setup-${version}-${arch}.${ext}"
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Razai Sistema
+  uninstallDisplayName: "${productName} ${version}"
+
+portable:
+  artifactName: "${productName}-Portable-${version}.${ext}"
