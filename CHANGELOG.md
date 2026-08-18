@@ -12,6 +12,10 @@ Formato:
 
 ---
 
+## 2026-08-18 — Refinamento de UX em Tecidos: debounce na busca, estados vazios contextualizados e diálogo semântico de exclusão
+
+## 2026-08-18 — Regras de isolamento de banco de dados em testes e limpeza obrigatória de mocks
+
 ## 2026-08-18 — Suíte de testes unitários de domínio e testes E2E com Playwright para fluxos de QA em Tecidos
 
 ## 2026-08-18 — Roteador reativo sem dependências externas via hash URL e navegação modular (Task 4)

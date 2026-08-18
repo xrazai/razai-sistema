@@ -33,10 +33,35 @@
   })
 
   let searchTerm = $state('')
+  let debouncedSearch = $state('')
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
   let selectedTecido = $state<TecidoRecord | null>(null)
   let tecidos = $state<TecidoRecord[]>([])
   let isLoading = $state(true)
   let errorMsg = $state<string | null>(null)
+
+  $effect(() => {
+    const term = searchTerm
+    if (!term) {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debouncedSearch = ''
+      return
+    }
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+      debouncedSearch = term
+    }, 200)
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+    }
+  })
+
+  let isFiltered = $derived(debouncedSearch.trim().length > 0)
+  let emptyMessage = $derived.by(() => {
+    if (isLoading) return 'Carregando dados...'
+    if (isFiltered) return `Nenhum tecido encontrado para "${debouncedSearch}".`
+    return 'Nenhum tecido cadastrado no banco de dados.'
+  })
 
   $effect(() => {
     if (router.route === 'tecidos' && router.subRoute && router.subRoute !== 'cadastro') {
@@ -69,7 +94,7 @@
   }
 
   $effect(() => {
-    loadTecidos(searchTerm)
+    loadTecidos(debouncedSearch)
   })
 
   async function handleNovoTecido(novo: CreateTecidoInput) {
@@ -77,7 +102,7 @@
       if (typeof window !== 'undefined' && window.razai?.tecidos) {
         const created = await window.razai.tecidos.create(novo)
         selectedTecido = created
-        await loadTecidos(searchTerm)
+        await loadTecidos(debouncedSearch)
       } else {
         const sku = generateTecidoSku(novo.nome)
         const localItem: TecidoRecord = {
@@ -112,7 +137,7 @@
       if (typeof window !== 'undefined' && window.razai?.tecidos) {
         const updated = await window.razai.tecidos.update(id, input)
         selectedTecido = updated
-        await loadTecidos(searchTerm)
+        await loadTecidos(debouncedSearch)
       } else {
         tecidos = tecidos.map((item) => {
           if (item.id === id) {
@@ -142,7 +167,7 @@
         tecidos = tecidos.filter((item) => item.id !== id)
       }
       selectedTecido = null
-      await loadTecidos(searchTerm)
+      await loadTecidos(debouncedSearch)
       router.navigate('tecidos')
     } catch (err: any) {
       console.error('Erro ao excluir tecido:', err)
@@ -217,6 +242,11 @@
               <Badge text={errorMsg} tone="danger" />
             {:else if isLoading}
               <Badge text="Carregando..." tone="neutral" />
+            {:else if isFiltered}
+              <Badge
+                text={`${tecidos.length} ${tecidos.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}`}
+                tone={tecidos.length === 0 ? 'warn' : 'neutral'}
+              />
             {:else}
               <Badge text={`${tecidos.length} ${tecidos.length === 1 ? 'tecido cadastrado' : 'tecidos cadastrados'}`} tone="neutral" />
             {/if}
@@ -241,7 +271,7 @@
               {columns}
               rows={tecidos}
               bordered={false}
-              emptyMessage={isLoading ? 'Carregando dados...' : 'Nenhum tecido encontrado no banco de dados.'}
+              emptyMessage={emptyMessage}
               onrowclick={handleRowClick}
             >
               {#snippet cell({ row, column, value })}

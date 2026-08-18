@@ -15,6 +15,17 @@ Orientações obrigatórias para qualquer agente (humano ou IA) que trabalhar ne
 
 ---
 
+## 🧹 REGRA DE OURO — Limpeza de Mocks e Isolamento de Testes
+
+> **PROIBIÇÃO DE POLUIÇÃO DO BANCO REAL E OBRIGATORIEDADE DE LIMPEZA DE MOCKS**:
+>
+> 1. **Isolamento Total de Testes**: Nenhum teste automatizado (unitário, integração ou E2E/Playwright) pode ler, gravar ou alterar o banco SQLite de desenvolvimento/produção local (`%APPDATA%/razai-sistema/data/razai.sqlite`).
+> 2. **Bancos Temporários em Testes**: Testes E2E devem configurar banco temporário via `RAZAI_DB_PATH` ou diretório temporário isolado (`os.tmpdir()`), destruído automaticamente após o teardown do teste.
+> 3. **Remoção Obrigatória de Mocks Antes do PR**: Se mocks temporários, registros fictícios de depuração ou scripts auxiliares forem criados durante o desenvolvimento, o agente é **estritamente obrigado a removê-los e limpá-los** antes de submeter qualquer Pull Request.
+> 4. **Verificação Pré-PR**: Garantir que nenhum resíduo de teste permaneça na base de dados de desenvolvimento ou no código de produção.
+
+---
+
 ## 🔀 Transição Automática de Branch (Nunca trabalhar direto na `main`)
 
 Se o usuário solicitar uma tarefa, feature ou correção enquanto o workspace estiver na branch `main`:

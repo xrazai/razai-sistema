@@ -250,27 +250,10 @@
       />
     {/snippet}
     {#snippet actions()}
-      <Stack direction="horizontal" gap="2">
-        <Button variant="ghost" size="sm" onclick={onback} disabled={isSaving}>
-          <Icon name="arrow-left" size="sm" />
-          <span>Voltar para Lista</span>
-        </Button>
-        {#if showDeleteConfirm}
-          <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = false)} disabled={isSaving}>
-            <span>Cancelar Exclusão</span>
-          </Button>
-          <Button variant="primary" size="sm" onclick={handleDelete} disabled={isSaving}>
-            <span>Confirmar Exclusão</span>
-          </Button>
-        {:else}
-          <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = true)} disabled={isSaving}>
-            <span>Excluir Tecido</span>
-          </Button>
-        {/if}
-        <Button variant="primary" size="sm" onclick={handleSubmit} disabled={isSaving}>
-          <span>{isSaving ? 'Salvando...' : 'Salvar Alterações'}</span>
-        </Button>
-      </Stack>
+      <Button variant="ghost" size="sm" onclick={onback} disabled={isSaving}>
+        <Icon name="arrow-left" size="sm" />
+        <span>Voltar para Lista</span>
+      </Button>
     {/snippet}
 
     <div class="content-scroll">
@@ -412,17 +395,89 @@
 
         <!-- Barra de rodapé com ações -->
         <footer class="form-footer">
-          <Button variant="ghost" onclick={onback} disabled={isSaving}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onclick={handleSubmit} disabled={isSaving}>
-            <span>{isSaving ? 'Salvando...' : 'Salvar Alterações'}</span>
-          </Button>
+          <div class="footer-left">
+            <Button variant="danger" onclick={() => (showDeleteConfirm = true)} disabled={isSaving}>
+              <span>Excluir Tecido</span>
+            </Button>
+          </div>
+          <div class="footer-right">
+            <Button variant="ghost" onclick={onback} disabled={isSaving}>
+              Cancelar
+            </Button>
+            <Button variant="primary" onclick={handleSubmit} disabled={isSaving}>
+              <span>{isSaving ? 'Salvando...' : 'Salvar Alterações'}</span>
+            </Button>
+          </div>
         </footer>
       </div>
     </div>
   </Panel>
 </div>
+
+{#if showDeleteConfirm}
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    onclick={() => (showDeleteConfirm = false)}
+    onkeydown={(e) => { if (e.key === 'Escape') showDeleteConfirm = false }}
+  >
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+    <div
+      class="modal-dialog"
+      role="alertdialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      aria-describedby="modal-desc"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => { if (e.key === 'Escape') showDeleteConfirm = false }}
+    >
+      <header class="modal-header">
+        <span id="modal-title" class="modal-title">Confirmar Exclusão Definitiva</span>
+        <button
+          type="button"
+          class="modal-close"
+          onclick={() => (showDeleteConfirm = false)}
+          aria-label="Fechar"
+        >
+          ✕
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <div class="danger-banner">
+          <p id="modal-desc" class="warning-text">
+            Esta operação é irreversível. O tecido e todos os seus dados técnicos serão removidos permanentemente.
+          </p>
+        </div>
+
+        <div class="item-summary">
+          <div class="summary-row">
+            <span class="summary-label">Código SKU:</span>
+            <span class="summary-value code-accent">{codigoExibicao}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Nome:</span>
+            <span class="summary-value">{nome || tecido.nome}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Composição:</span>
+            <span class="summary-value">{composicao || tecido.composicao}</span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <Button variant="ghost" onclick={() => (showDeleteConfirm = false)} disabled={isSaving}>
+          <span>Cancelar Exclusão</span>
+        </Button>
+        <Button variant="danger" onclick={handleDelete} disabled={isSaving}>
+          <span>Confirmar Exclusão</span>
+        </Button>
+      </footer>
+    </div>
+  </div>
+{/if}
 
 <style>
   .detalhes-page {
@@ -535,12 +590,135 @@
   .form-footer {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);
     border-top: var(--border-width) solid var(--color-border);
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .modal-dialog {
+    background: var(--color-bg);
+    border: var(--border-width) solid var(--color-danger);
+    width: 100%;
+    max-width: 480px;
+    box-sizing: border-box;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg-elevated);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .modal-title {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-header);
+    text-transform: uppercase;
+    color: var(--color-danger);
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+
+  .modal-close {
+    border: none;
+    background: transparent;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    font-size: var(--text-xs);
+    padding: var(--space-1);
+  }
+
+  .modal-close:hover {
+    color: var(--color-fg);
+  }
+
+  .modal-body {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .danger-banner {
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-bg-sunken);
+    border-left: 2px solid var(--color-danger);
+  }
+
+  .warning-text {
+    font-size: var(--text-xs);
+    color: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    margin: 0;
+    line-height: var(--leading-normal);
+  }
+
+  .item-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    border: var(--border-width) solid var(--color-border);
+    padding: var(--space-3);
+    background: var(--color-bg-sunken);
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+  }
+
+  .summary-label {
+    color: var(--color-fg-dim);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+  }
+
+  .summary-value {
+    color: var(--color-fg);
+    font-weight: 500;
+  }
+
+  .summary-value.code-accent {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg-elevated);
+    border-top: var(--border-width) solid var(--color-border);
   }
 </style>

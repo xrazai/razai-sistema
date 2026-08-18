@@ -216,15 +216,10 @@
       />
     {/snippet}
     {#snippet actions()}
-      <Stack direction="horizontal" gap="2">
-        <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSaving}>
-          <Icon name="arrow-left" size="sm" />
-          <span>Voltar para Lista</span>
-        </Button>
-        <Button variant="primary" size="sm" onclick={handleSubmit} disabled={isSaving}>
-          <span>{isSaving ? 'Salvando...' : 'Salvar Tecido'}</span>
-        </Button>
-      </Stack>
+      <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSaving}>
+        <Icon name="arrow-left" size="sm" />
+        <span>Voltar para Lista</span>
+      </Button>
     {/snippet}
 
     <div class="content-scroll">
