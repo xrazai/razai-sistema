@@ -17,7 +17,7 @@ export function getDb(): Database.Database {
 export function openDatabase(customPath?: string): Database.Database {
   if (db) return db
 
-  let path = customPath
+  let path = customPath || process.env.RAZAI_DB_PATH
   if (!path) {
     const dir = join(app.getPath('userData'), 'data')
     mkdirSync(dir, { recursive: true })

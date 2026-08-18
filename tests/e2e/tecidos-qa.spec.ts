@@ -1,19 +1,29 @@
 import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { mkdtempSync, rmSync } from 'node:fs'
 
 test.describe('QA E2E — Módulo de Tecidos', () => {
   let app: ElectronApplication
   let page: Page
+  let tempDir: string
+  let tempDbPath: string
 
   const uniqueId = Math.floor(1000 + Math.random() * 9000)
   const fabricName = `Tecido QA Alfa ${uniqueId}`
   const fabricNameEdited = `Tecido QA Beta ${uniqueId}`
 
   test.beforeAll(async () => {
+    // Cria diretório temporário totalmente isolado para o banco de dados do teste
+    tempDir = mkdtempSync(join(tmpdir(), 'razai-e2e-'))
+    tempDbPath = join(tempDir, 'razai-test.sqlite')
+
     app = await electron.launch({
       args: ['.'],
       env: {
         ...process.env,
-        NODE_ENV: 'test'
+        NODE_ENV: 'test',
+        RAZAI_DB_PATH: tempDbPath
       }
     })
 
@@ -24,6 +34,14 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
   test.afterAll(async () => {
     if (app) {
       await app.close()
+    }
+    // Remove o banco temporário de testes para não deixar resíduos
+    if (tempDir) {
+      try {
+        rmSync(tempDir, { recursive: true, force: true })
+      } catch (err) {
+        console.error('Falha ao limpar diretório temporário de testes:', err)
+      }
     }
   })
 
