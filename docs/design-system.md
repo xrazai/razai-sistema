@@ -35,24 +35,45 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 > ### 1. Line-Height 100% Universal
 > Todo e qualquer elemento textual (`span`, `p`, `label`, `button`, `input`, `select`, `th`, `td`, `div`, títulos `h1-h6`) possui obrigatoriamente `line-height: 100%` (ou `1`), eliminando qualquer entrelinha residual fracionária.
 >
-> ### 2. Componentes Prontos e Compensação Estrutural
-> A altura somada total de qualquer componente pronto (somando conteúdo, padding e bordas de 1px com `box-sizing: border-box`) deve resultar estritamente em um múltiplo de 4 ou 8px:
-> - **Micro / Tags / Status**: `20px` (múltiplo de 4)
-> - **Botão Pequeno (`size="sm"`)**: `24px` (múltiplo de 8)
-> - **Botão Padrão (`size="md"`) / Input / Select**: `32px` (múltiplo de 8)
-> - **Item de Menu Lateral (`NavItem`)**: `40px` (múltiplo de 8)
-> - **Abas (`Tabs`)**: `32px` (múltiplo de 8)
-> - **Cabeçalho de Tabela (`th`) / Linhas de Tabela (`td`) / Topbar / Painéis**: `40px` (múltiplo de 8)
-> - **Toolbars de Busca / Cabeçalhos de Formulário / Modais**: `48px` (múltiplo de 8)
-> - **Rodapés de Ação (`.form-footer`)**: `56px` (múltiplo de 8)
+> ### 2. O Ritmo Modular Rígido de 40px (Amarração Proporcional de Layout)
+> Para que as linhas horizontais da interface se cruzem e alinhem perfeitamente de ponta a ponta na tela (entre Sidebar e Área Principal), os blocos estruturais primários compartilham a **altura computada unificada de 40px**:
 >
-> ### 3. Relação Hierárquica Pai-Filho
+> ```text
+> ┌────────────────────────┬─────────────────────────────────────────────────────────────────────────┐
+> │ SIDEBAR (220px)        │ ÁREA PRINCIPAL / CONTEÚDO                                               │
+> ├────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+> │ Brand (40px)           │ Topbar Unificada (40px)                  [• SQLite Online] [+ Cadastrar]│
+> ├────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+> │ NavItem: Início (40px) │ Toolbar de Busca / Filtros (40px)  [Search Input 100% (40px)] [Contador]│
+> ├────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+> │ NavItem: Tecidos (40px)│ Cabeçalho da Tabela th (40px)      [SKU ▲] [NOME] [COMPOSIÇÃO] [LARGURA]│
+> ├────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+> │ NavItem: Cores (40px)  │ Linha de Dados td - 01 (40px)      [ANAR]  [Anarruga]  [96% Poliéster]  │
+> ├────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+> │ NavItem: Vínculos(40px)│ Linha de Dados td - 02 (40px)      [CETI]  [Cetim]     [100% Poliéster] │
+> ├────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+> │ NavItem: Config (40px) │ Linha de Dados td - 03 (40px)      [TRAL]  [Tricoline] [100% Algodão]   │
+> ├────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+> │ NavItem: DS (40px)     │ Rodapé da Tabela footer (40px)     [Instruções de navegação]            │
+> └────────────────────────┴─────────────────────────────────────────────────────────────────────────┘
+> ```
+>
+> ### 3. Tabela de Amarração de Alturas e Proporções
+> A altura somada total de qualquer componente pronto (somando conteúdo, padding e bordas de 1px com `box-sizing: border-box`) deve resultar estritamente em um múltiplo de 4 ou 8px:
+> - **Ritmo Primário de Linhas e Navegação (`40px`)**: `Topbar`, `NavItem`, `Brand`, `Toolbar`, `Table th`, `Table td`, `Table footer`, `Panel .head`.
+> - **Controles Padrão (`32px`)**: `Button` (`size="md"`), `Input`, `Select`, `Tabs` $\rightarrow$ dentro de uma linha de 40px, recebem 4px de respiro vertical ou ocupam 100% (40px) quando flush.
+> - **Controles Compactos (`24px`)**: `Button` (`size="sm"`), `Checkbox`, `Toggle` $\rightarrow$ dentro de uma linha de 40px, recebem 8px de respiro vertical (múltiplo de 8).
+> - **Badges e Indicadores de Estado (`20px`)**: `Badge`, `Status` $\rightarrow$ `height: 20px;` (múltiplo de 4), centralizados no eixo vertical com `display: inline-flex; align-items: center;`.
+> - **Cabeçalhos de Seção / Modais (`48px`)**: `.form-header`, `.modal-header` $\rightarrow$ `height: 48px;` ($6 \times 8\text{px}$).
+> - **Rodapés de Ação (`56px`)**: `.form-footer`, `.modal-footer` $\rightarrow$ `height: 56px;` ($7 \times 8\text{px}$).
+>
+> ### 4. Relação Hierárquica Pai-Filho
 > Se um componente estiver aninhado dentro de outro componente, **tanto os elementos filhos quanto os elementos pais** devem possuir altura somada estritamente múltipla de 4 ou 8.
 > Exemplo: Campo de formulário composto:
 > $$\text{Label }(16\text{px}) + \text{Margin }(8\text{px}) + \text{Input }(32\text{px}) = 56\text{px}\quad(7 \times 8\text{px})$$
 >
-> ### 4. Blocos de Layout
-> Todo e qualquer bloco que compõe o layout (barras laterais, topbars, toolbars, seções de formulário, rodapés, modais e containers) deve ter sua altura somada cravada em múltiplos de 4 ou 8.
+> ### 5. Fechamento e Delimitação Geométrica
+> Todo compartimento da grade é fechado: a última linha de qualquer tabela preserva sua borda inferior de 1px (`border-bottom: 1px solid var(--color-border)`), demarcando o limite da célula contra o espaço vazio.
 
 ---
 

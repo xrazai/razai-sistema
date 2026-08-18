@@ -263,11 +263,16 @@ Regras visuais mandatórias:
 > **1. Line-Height 100% Universal**:
 > - Todo e qualquer texto, span, label, input, button, título, célula e parágrafo no projeto deve possuir `line-height: 100%` (ou `1`).
 >
-> **2. Hierarquia e Compensação de Altura (Múltiplos de 4 ou 8px)**:
-> - **Componentes Prontos**: A altura somada final do componente (conteúdo + padding + bordas de 1px) deve ser **sempre múltiplo de 4 ou 8px** (ex.: 20px, 24px, 32px, 36px, 40px, 48px, 56px).
+> **2. Ritmo Modular Unificado de 40px (Amarração Proporcional)**:
+> - As linhas horizontais da interface devem se alinhar e cruzar continuamente de ponta a ponta na tela (Sidebar ↔ Área Principal).
+> - Elementos que compartilham estritamente a **altura computada de 40px**: `Brand` lateral, itens de menu `NavItem`, barra de topo `Topbar`, barra de busca `Toolbar`, cabeçalhos de tabela `th`, linhas de dados `td`, rodapés de tabela `footer` e cabeçalhos de painel `Panel .head`.
+>
+> **3. Hierarquia e Compensação de Altura (Múltiplos de 4 ou 8px)**:
+> - **Componentes Prontos**: A altura somada final do componente (conteúdo + padding + bordas de 1px) deve ser **sempre múltiplo de 4 ou 8px** (ex.: 20px, 24px, 32px, 40px, 48px, 56px).
 > - **Relação Pai-Filho**: Se um componente estiver dentro de outro componente, **tanto os elementos filhos quanto os elementos pais** devem ter sua altura somada estritamente múltipla de 4 ou 8.
 > - **Elementos de Layout**: Todo e qualquer bloco que compõe o layout da aplicação (barras laterais, topbars, toolbars, seções, cabeçalhos, rodapés de formulários, linhas de tabelas e modais) deve ter altura somada múltipla de 4 ou 8.
 > - **Compensação Exigida**: Todo componente criado exige compensação explícita de padding e/ou height com `box-sizing: border-box` para cravar no grid modular.
+> - **Fechamento Geométrico**: Todo compartimento é fechado (linhas finais de tabelas mantêm borda inferior de 1px).
 
 Preferir:
 - grids modulares rígidos
