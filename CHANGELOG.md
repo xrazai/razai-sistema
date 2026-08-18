@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Módulos Tecidos, Cores e Vínculos adicionados ao sidebar e layout em 100% de largura
+
 ## 2026-08-18 — Proteções de branch, ruleset e auto-merge configurados no GitHub (Task 14)
 
 ## 2026-08-18 — Stacked PRs com gh-stack integrados e documentados no AGENTS.md (Task 15)
