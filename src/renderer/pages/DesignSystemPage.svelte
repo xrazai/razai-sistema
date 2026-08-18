@@ -144,8 +144,6 @@
           </Grid>
         </section>
 
-        <Divider />
-
         <!-- 02. Primitives -->
         <section>
           <h2 class="section">02. Primitives</h2>
@@ -194,8 +192,6 @@
             </Cell>
           </Grid>
         </section>
-
-        <Divider />
 
         <!-- 03. Controls -->
         <section>
@@ -277,8 +273,6 @@
           </Grid>
         </section>
 
-        <Divider />
-
         <!-- 04. Data Display -->
         <section>
           <h2 class="section">04. Data Display</h2>
@@ -350,8 +344,6 @@
           </Grid>
         </section>
 
-        <Divider />
-
         <!-- 05. Layout & Containers -->
         <section>
           <h2 class="section">05. Layout & Containers</h2>
@@ -400,19 +392,15 @@
           </Stack>
         </section>
 
-        <Divider />
-
         <!-- 06. Navigation Components -->
         <section>
           <h2 class="section">06. Navigation</h2>
           <div class="nav-demo">
             <Sidebar>
               <div class="demo-brand">RAZAI / DEMO</div>
-              <Divider />
               <NavItem label="Tecidos" icon="fabric" active={breadcrumbStep === 'tecidos'} onclick={() => (breadcrumbStep = 'tecidos')} />
               <NavItem label="Cores" icon="palette" active={breadcrumbStep === 'cores'} onclick={() => (breadcrumbStep = 'cores')} />
               <NavItem label="Vínculos" icon="link" active={breadcrumbStep === 'vinculos'} onclick={() => (breadcrumbStep = 'vinculos')} />
-              <Divider />
               <NavItem label="Configurações" icon="settings" active={breadcrumbStep === 'config'} onclick={() => (breadcrumbStep = 'config')} />
             </Sidebar>
 
@@ -448,8 +436,6 @@
             </div>
           </div>
         </section>
-
-        <Divider />
 
         <!-- 07. Compositions -->
         <section>
@@ -494,8 +480,6 @@
             </Panel>
           </Grid>
         </section>
-
-        <Divider />
 
         <!-- 08. Form & Field Playground (Grid Modular de Cadastro) -->
         <section>
@@ -706,11 +690,25 @@
     text-transform: uppercase;
   }
 
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border);
+    padding-bottom: var(--space-5);
+    margin-bottom: var(--space-5);
+  }
+
+  section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
   .type-scale {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    margin-top: var(--space-2);
   }
 
   .type-item {
@@ -823,12 +821,17 @@
   }
 
   .demo-brand {
-    padding: var(--space-3);
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: var(--space-2) var(--space-3);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-header);
     text-transform: uppercase;
     color: var(--color-fg);
-    font-family: var(--font-mono);
+    border-bottom: var(--border-width) solid var(--color-border);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .nav-main {
@@ -858,7 +861,11 @@
   }
 
   .section-title {
-    padding: var(--space-2) var(--space-3);
+    display: flex;
+    align-items: center;
+    height: 40px;
+    min-height: 40px;
+    padding: var(--space-2) var(--space-4);
     background: var(--color-bg-elevated);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
@@ -866,6 +873,8 @@
     text-transform: uppercase;
     color: var(--color-fg-dim);
     font-family: var(--font-mono);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .field-box {

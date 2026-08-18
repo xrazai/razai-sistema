@@ -1,7 +1,6 @@
 <script lang="ts">
   import Sidebar from '../design-system/navigation/Sidebar.svelte'
   import NavItem from '../design-system/navigation/NavItem.svelte'
-  import Divider from '../design-system/primitives/Divider.svelte'
 
   type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
 
@@ -15,7 +14,6 @@
 
 <Sidebar>
   <div class="brand">RAZAI / SISTEMA</div>
-  <Divider />
   <NavItem
     label="Início"
     icon="dash"
@@ -40,7 +38,6 @@
     active={route === 'vinculos'}
     onclick={() => onnavigate('vinculos')}
   />
-  <Divider />
   <NavItem
     label="Settings"
     icon="settings"
@@ -66,6 +63,7 @@
     text-transform: uppercase;
     color: var(--color-fg);
     line-height: 100%;
+    border-bottom: var(--border-width) solid var(--color-border);
     box-sizing: border-box;
   }
 </style>
