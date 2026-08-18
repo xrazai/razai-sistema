@@ -2,6 +2,28 @@
 
 Orientações obrigatórias para qualquer agente (humano ou IA) que trabalhar neste repositório.
 
+---
+
+## ⛔ REGRA DE OURO — Push e Pull Requests
+
+> **PROIBIÇÃO ABSOLUTA DE PUSH E PR NÃO SOLICITADOS**:
+>
+> 1. Agentes estão **estritamente proibidos** de executar `git push`, `gh pr create` ou `gh stack submit` por iniciativa própria.
+> 2. **NUNCA** abra Pull Request ou faça push para o repositório remoto sem que o usuário peça **explicitamente** na mensagem atual (ex: *"abra o PR"*, *"faça push"*, *"submeta a stack"*).
+> 3. Todo trabalho (código, novas features, correções, testes e documentação) deve ser desenvolvido, testado e mantido **apenas no ambiente local**.
+> 4. Não presuma que documentação, arquivos novos ou tarefas concluídas devem ser submetidos automaticamente. Finalize a implementação localmente, valide com `npm run typecheck` e `npm run build`, e **aguarde a instrução do usuário**.
+
+---
+
+## 🔀 Transição Automática de Branch (Nunca trabalhar direto na `main`)
+
+Se o usuário solicitar uma tarefa, feature ou correção enquanto o workspace estiver na branch `main`:
+1. **Nunca desenvolver diretamente na `main`**: O agente deve criar e trocar para uma branch de trabalho automaticamente (`task/<N>-<slug>` ou `task/<slug>`).
+2. **Preservar alterações em andamento**: Se houver arquivos modificados ou commits locais à frente da `origin/main`, o agente deve transferi-los para a nova branch sem perda de código.
+3. **Sincronização**: Manter a base alinhada com a `origin/main`. O usuário não precisa se preocupar em trocar de branch manualmente antes de pedir uma alteração.
+
+---
+
 ## Stack
 
 - **Electron** (processo main + preload + renderer)
@@ -68,9 +90,9 @@ Quando o usuário solicitar a execução de tasks em fila ou em ordem:
 - Criar as branches encadeadas (`task/<N>-<slug>`), fazer um commit atômico por task com mensagem padronizada e avançar imediatamente para a próxima sem pausar entre cada uma.
 - Ao finalizar todo o lote, realizar a validação completa e aguardar a confirmação do usuário antes de submeter PRs.
 
-**O que agentes NÃO devem fazer**:
-- Abrir PR ou fazer push para o repositório remoto sem pedido explícito do usuário.
-- Abrir PR isolado exclusivo para documentação ou atualização do `CHANGELOG.md` (o changelog deve ser incluído no próprio PR/stack da task).
+**O que agentes NUNCA devem fazer**:
+- **Abrir PR ou fazer push para o repositório remoto sem pedido explícito do usuário.**
+- Abrir PR isolado exclusivo para documentação ou atualização do `CHANGELOG.md` (o changelog deve ser incluído no próprio PR/stack da task quando o PR for solicitado).
 - Fechar task no chat sem atualizar board e `CHANGELOG.md`.
 - Criar backlog paralelo (markdown local, Notion, etc.).
 - Escrever changelog verboso (apenas o resumo curto de uma linha).
