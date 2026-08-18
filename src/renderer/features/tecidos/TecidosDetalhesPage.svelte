@@ -588,7 +588,7 @@
   }
 
   .field-cell {
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-3) var(--space-4) var(--space-4) var(--space-4);
     background: var(--color-bg);
     width: 100%;
     box-sizing: border-box;
