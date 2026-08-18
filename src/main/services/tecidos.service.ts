@@ -51,10 +51,12 @@ function getUniqueSku(nome: string, currentId?: string): string {
     return baseSku
   }
 
-  // Se houver colisão de SKU com outro registro, adiciona sufixo numérico
-  let counter = 2
-  while (true) {
-    const candidate = `${baseSku.slice(0, 3)}${counter}`
+  // Se houver colisão de SKU com outro registro, gera sufixo alfanumérico garantindo estritamente 4 caracteres
+  // 1) Tentativa com 3 caracteres de base + 1 caractere alfanumérico (2..9, A..Z)
+  const chars3 = baseSku.slice(0, 3)
+  const singleCharSuffixes = '23456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  for (const suffix of singleCharSuffixes) {
+    const candidate = `${chars3}${suffix}`
     const check = db
       .prepare('SELECT id FROM tecidos WHERE codigo = ?')
       .get(candidate) as { id: string } | undefined
@@ -62,8 +64,23 @@ function getUniqueSku(nome: string, currentId?: string): string {
     if (!check || check.id === currentId) {
       return candidate
     }
-    counter++
   }
+
+  // 2) Se esgotar (34 colisões), usa 2 caracteres de base + 2 caracteres base36 (01..ZZ = 1296 combinações)
+  const chars2 = baseSku.slice(0, 2)
+  for (let i = 1; i < 36 * 36; i++) {
+    const suffix = i.toString(36).toUpperCase().padStart(2, '0')
+    const candidate = `${chars2}${suffix}`
+    const check = db
+      .prepare('SELECT id FROM tecidos WHERE codigo = ?')
+      .get(candidate) as { id: string } | undefined
+
+    if (!check || check.id === currentId) {
+      return candidate
+    }
+  }
+
+  throw new Error(`Não foi possível gerar um SKU único de 4 caracteres para o tecido "${nome}"`)
 }
 
 export class TecidosService {
