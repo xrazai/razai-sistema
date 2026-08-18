@@ -8,6 +8,7 @@
   import Badge from '../../design-system/data-display/Badge.svelte'
   import TecidosCadastroPage from './TecidosCadastroPage.svelte'
   import TecidosDetalhesPage from './TecidosDetalhesPage.svelte'
+  import { generateTecidoSku } from './utils'
   import type { TecidoRecord, CreateTecidoInput, UpdateTecidoInput } from '../../../shared/types'
 
   const columns: Column[] = [
@@ -33,10 +34,12 @@
     isLoading = true
     errorMsg = null
     try {
-      if (window.razai?.tecidos) {
-        tecidos = await window.razai.tecidos.list(query)
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        const data = await window.razai.tecidos.list(query)
+        tecidos = data
       }
     } catch (err: any) {
+      console.error('Erro ao carregar tecidos:', err)
       errorMsg = err?.message || 'Erro ao carregar tecidos do banco de dados.'
     } finally {
       isLoading = false
@@ -48,30 +51,82 @@
   })
 
   async function handleNovoTecido(novo: CreateTecidoInput) {
-    if (window.razai?.tecidos) {
-      const created = await window.razai.tecidos.create(novo)
-      selectedTecido = created
+    try {
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        const created = await window.razai.tecidos.create(novo)
+        selectedTecido = created
+        await loadTecidos(searchTerm)
+      } else {
+        const sku = generateTecidoSku(novo.nome)
+        const localItem: TecidoRecord = {
+          id: String(Date.now()),
+          codigo: sku,
+          nome: novo.nome,
+          composicao: novo.composicao,
+          largura: novo.largura,
+          rendimento: novo.rendimento ?? null,
+          gramaturaLinear: novo.gramaturaLinear ?? null,
+          gramaturaM2: novo.gramaturaM2 ?? null,
+          tipo: novo.tipo ?? null,
+          transparencia: novo.transparencia ?? null,
+          elasticidade: novo.elasticidade ?? null,
+          acabamento: novo.acabamento ?? null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        tecidos = [localItem, ...tecidos]
+        selectedTecido = localItem
+      }
+      viewMode = 'list'
+    } catch (err: any) {
+      console.error('Erro ao cadastrar tecido:', err)
+      errorMsg = err?.message || 'Erro ao cadastrar tecido no banco de dados.'
+      throw err
     }
-    await loadTecidos(searchTerm)
-    viewMode = 'list'
   }
 
   async function handleSalvarEdicao(id: string, input: UpdateTecidoInput) {
-    if (window.razai?.tecidos) {
-      const updated = await window.razai.tecidos.update(id, input)
-      selectedTecido = updated
+    try {
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        const updated = await window.razai.tecidos.update(id, input)
+        selectedTecido = updated
+        await loadTecidos(searchTerm)
+      } else {
+        tecidos = tecidos.map((item) => {
+          if (item.id === id) {
+            return {
+              ...item,
+              ...input,
+              codigo: input.nome ? generateTecidoSku(input.nome) : item.codigo,
+              updatedAt: new Date().toISOString()
+            }
+          }
+          return item
+        })
+      }
+      viewMode = 'list'
+    } catch (err: any) {
+      console.error('Erro ao atualizar tecido:', err)
+      errorMsg = err?.message || 'Erro ao atualizar tecido.'
+      throw err
     }
-    await loadTecidos(searchTerm)
-    viewMode = 'list'
   }
 
   async function handleExcluirTecido(id: string) {
-    if (window.razai?.tecidos) {
-      await window.razai.tecidos.delete(id)
+    try {
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        await window.razai.tecidos.delete(id)
+      } else {
+        tecidos = tecidos.filter((item) => item.id !== id)
+      }
+      selectedTecido = null
+      await loadTecidos(searchTerm)
+      viewMode = 'list'
+    } catch (err: any) {
+      console.error('Erro ao excluir tecido:', err)
+      errorMsg = err?.message || 'Erro ao excluir tecido.'
+      throw err
     }
-    selectedTecido = null
-    await loadTecidos(searchTerm)
-    viewMode = 'list'
   }
 
   function handleRowClick(row: any) {
