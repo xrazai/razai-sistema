@@ -310,24 +310,6 @@
     border-bottom: var(--border-width) solid var(--color-border);
   }
 
-  .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 32px;
-    min-height: 32px;
-    padding: var(--space-1) var(--space-4);
-    background: var(--color-bg-elevated);
-    border-bottom: var(--border-width) solid var(--color-border);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-header);
-    text-transform: uppercase;
-    color: var(--color-fg-dim);
-    font-family: var(--font-mono);
-    box-sizing: border-box;
-    line-height: 100%;
-  }
-
   .head-rule {
     font-size: var(--text-xs);
     color: var(--color-fg-dim);

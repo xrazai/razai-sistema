@@ -858,7 +858,11 @@
   }
 
   .section-title {
-    padding: var(--space-2) var(--space-3);
+    display: flex;
+    align-items: center;
+    height: 40px;
+    min-height: 40px;
+    padding: var(--space-2) var(--space-4);
     background: var(--color-bg-elevated);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
@@ -866,6 +870,8 @@
     text-transform: uppercase;
     color: var(--color-fg-dim);
     font-family: var(--font-mono);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .field-box {
