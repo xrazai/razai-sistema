@@ -249,10 +249,6 @@
     cursor: pointer;
   }
 
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
-
   .empty-cell {
     text-align: center;
     color: var(--color-fg-dim);
