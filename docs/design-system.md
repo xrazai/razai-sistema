@@ -24,7 +24,8 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 ### Regras Visuais Mandatórias:
 - **Tema Escuro Industrial**: Fundo primário `#0e0e0e`, superfícies elevadas `#161616`, fundos rebaixados `#080808`.
 - **Bordas Rígidas**: `1px solid var(--color-border)` (#262626). `border-radius: 0` em todos os elementos.
-- **Tipografia Técnica**: Todas as tabelas, SKUs, métricas e identificadores usam `--font-mono` com caixa alta e tracking estruturado.
+- **Tipografia Técnica & Line-Height 100%**: Todas as tipografias e textos utilizam `line-height: 100%` (ou `1`), garantindo alinhamento óptico e vertical controlado.
+- **Grid de Alturas em Múltiplos de 4/8**: Todo componente final possui altura total calculada estritamente múltipla de 4 ou 8px (ex.: Badges/Status `20px`, Botões `24px`/`32px`, Inputs/Selects `32px`, NavItems `36px`, Topbar/Footers `40px`, Toolbars `48px`).
 - **Sem Decorações Supérfluas**: Proibido uso de box-shadows flutuantes, glassmorphism, blur ou gradientes decorativos.
 
 ---

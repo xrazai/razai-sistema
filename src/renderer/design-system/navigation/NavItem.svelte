@@ -24,15 +24,18 @@
     align-items: center;
     gap: var(--space-2);
     width: 100%;
-    padding: var(--space-2) var(--space-3);
+    height: 36px;
+    padding: 0 var(--space-3);
     border: none;
     border-bottom: var(--border-width) solid var(--color-border);
     background: transparent;
     color: var(--color-fg-muted);
     font-size: var(--text-sm);
+    line-height: 100%;
     letter-spacing: var(--tracking-tight);
     text-align: left;
     text-transform: uppercase;
+    box-sizing: border-box;
   }
 
   .nav-item span {

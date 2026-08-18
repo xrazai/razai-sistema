@@ -52,14 +52,17 @@
 <style>
   .input {
     width: 100%;
-    padding: var(--space-2) var(--space-3);
+    height: 32px;
+    padding: 0 var(--space-3);
     border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-bg-sunken);
     color: var(--color-fg);
     font-family: var(--font-mono);
     font-size: var(--text-sm);
+    line-height: 100%;
     outline: none;
+    box-sizing: border-box;
     transition: border-color var(--motion-fast);
   }
 
@@ -85,8 +88,10 @@
     display: flex;
     align-items: stretch;
     width: 100%;
+    height: 32px;
     border: var(--border-width) solid var(--color-border-strong);
     background: var(--color-bg-sunken);
+    box-sizing: border-box;
     transition: border-color var(--motion-fast);
   }
 
@@ -107,9 +112,11 @@
   .input.grouped {
     border: none;
     background: transparent;
-    padding: var(--space-2) var(--space-3);
+    height: 100%;
+    padding: 0 var(--space-3);
     flex: 1;
     min-width: 0;
+    line-height: 100%;
   }
 
   .affix {

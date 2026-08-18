@@ -325,12 +325,14 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    min-height: 52px;
-    padding: var(--space-3) var(--space-4);
+    height: 48px;
+    min-height: 48px;
+    padding: 0 var(--space-4);
     background: var(--color-bg-sunken);
     border-bottom: var(--border-width) solid var(--color-border);
     width: 100%;
     box-sizing: border-box;
+    line-height: 100%;
   }
 
   .search-box {
@@ -339,10 +341,13 @@
     gap: var(--space-2);
     flex: 1;
     max-width: 460px;
-    padding: var(--space-1) var(--space-2);
+    height: 32px;
+    padding: 0 var(--space-2);
     border: var(--border-width) solid var(--color-border);
     background: var(--color-bg);
     color: var(--color-fg-muted);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .search-box:focus-within {
@@ -421,11 +426,13 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
+    height: 40px;
     min-height: 40px;
-    padding: var(--space-3) var(--space-4);
+    padding: 0 var(--space-4);
     border-top: var(--border-width) solid var(--color-border);
     background: var(--color-bg-elevated);
     font-size: var(--text-xs);
+    line-height: 100%;
     color: var(--color-fg-dim);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
