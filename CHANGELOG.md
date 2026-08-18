@@ -2,7 +2,7 @@
 
 Registro do que já foi entregue. Mais recente no topo.
 
-Ao concluir uma task: **remover** de `TASKS.md` e adicionar **uma linha** aqui (data + poucas palavras).
+Ao concluir uma task: mover a issue para **Done** no board e adicionar **uma linha** aqui (data + poucas palavras).
 
 Formato:
 
@@ -11,6 +11,8 @@ Formato:
 ```
 
 ---
+
+## 2026-08-18 — Board GitHub Projects vira fonte de tarefas; issues 1–17 com prioridade
 
 ## 2026-08-18 — Stacked PRs (gh stack) adotados no fluxo de PRs/CI
 

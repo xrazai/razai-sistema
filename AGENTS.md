@@ -24,14 +24,14 @@ src/renderer/
 
 Arquivos de processo na raiz:
 
-| Arquivo | Papel |
+| Arquivo / recurso | Papel |
 | --- | --- |
-| `TASKS.md` | Backlog vivo — única fonte de tarefas pendentes |
+| [Board Razai Sistema — Kanban](https://github.com/users/xrazai/projects/6/views/1) | Backlog vivo — única fonte de tarefas pendentes (issues do repo) |
 | `CHANGELOG.md` | Histórico do que já foi entregue |
 | `docs/design-system.md` | Regras escritas do Design System |
 | `AGENTS.md` | Este arquivo — regras para agentes |
 
-Não inventar board externo: usar `TASKS.md` + `CHANGELOG.md`. PRs e histórico remoto via **GitHub**.
+Toda tarefa é cadastrada, movida e iterada **no board** (GitHub Projects). Não criar backlog paralelo (markdown local, Notion, etc.).
 
 ---
 
@@ -39,55 +39,45 @@ Não inventar board externo: usar `TASKS.md` + `CHANGELOG.md`. PRs e histórico 
 
 ### Papéis
 
-- **`TASKS.md`** — o que falta fazer, em **ordem sugerida de implementação**.
+- **Board (GitHub Projects)** — o que falta fazer: issues do repo com `Priority` (P0/P1/P2) e `Status` (Backlog → Ready → In progress → In review → Done).
 - **`CHANGELOG.md`** — o que já foi feito, **mais recente no topo**.
 
 Uma task só está “fechada” quando:
 
-1. Foi **removida** da ordem sugerida em `TASKS.md` (tabela e checklist), **e**
+1. O PR foi **mergeado** e a issue foi movida para **Done** no board, **e**
 2. Tem entrada correspondente em `CHANGELOG.md` (resumo de poucas palavras).
 
-### Ordem de implementação
+### Prioridade e ordem de implementação
 
-- Cada task tem um **número**. Menor número = fazer antes.
-- A ordem é uma **sugestão de dependência/risco** (fundação → domínio → schema → UX → packaging → CI).
-- Ao trabalhar, preferir a **menor task pendente** (`[ ]`), salvo o usuário pedir outra.
-- Não pular números sem motivo explícito do usuário.
+- Prioridade calculada como **score = 3× desbloqueio + 2× risco + valor** → P0 (≥12), P1 (7–11), P2 (≤6).
+- Ao trabalhar, preferir **P0 → P1 → P2**; dentro da mesma prioridade, a menor issue aberta, salvo o usuário pedir outra.
+- Dependências reais entre tasks abertas → **stacked PRs** (ver abaixo).
 
 ### Cadastrar nova task
 
 1. Entender dependências (o que precisa existir antes).
-2. Inserir na **posição correta** da tabela e da checklist em `TASKS.md`.
-3. **Renumerar** tudo para ficar contínuo (1…N), sem buracos.
-4. Na coluna “Por quê nesta ordem”, justificar em uma frase.
-5. Não cadastrar task genérica demais (“melhorar app”); quebrar em entregas verificáveis.
+2. Criar **issue** no repo com título `Task <N> — <resumo>` e body com prioridade/score, justificativa de ordem e fluxo de branch.
+3. Adicionar ao board e preencher `Priority` e `Status`.
+4. Não cadastrar task genérica demais (“melhorar app”); quebrar em entregas verificáveis.
 
 ### Concluir uma task
 
 1. Entregar o código/docs pedidos pela task **na branch da task** (ver **Branches e PRs** abaixo).
-2. Em `TASKS.md`: **remover** a task da tabela e da checklist. Não deixar `[x]` na ordem sugerida — o check significa “sai da lista”.
-3. **Renumerar** as pendentes para ficar contínuo (1…N), sem buracos.
-4. Em `CHANGELOG.md`, **no topo** (abaixo do cabeçalho/formato), uma linha — data + poucas palavras:
+2. Mover a issue para **In progress** / **In review** conforme o andamento.
+3. Em `CHANGELOG.md`, **no topo**, uma linha — data + poucas palavras:
 
 ```md
 ## YYYY-MM-DD — resumo curto
 ```
 
-5. Abrir PR para `main`, push da branch e aguardar merge (não entregar task só em `main` local).
-6. Se a conclusão desbloquear ou invalidar outras tasks, **reordenar/renumerar** as pendentes em `TASKS.md`.
-7. Se a task gerou UI genérica nova: atualizar `DesignSystemPage.svelte` (ver Design System abaixo) **antes** de considerar completa.
-
-### Reordenar
-
-- Mudou a prioridade? Reescreva a tabela + checklist com números novos e contínuos.
-- A ordem sugerida contém **só pendentes**. O registro permanente fica no `CHANGELOG.md`.
+4. Abrir PR para `main` (ou empilhar), push da branch e aguardar merge (não entregar task só em `main` local).
+5. Após o merge: **fechar a issue** e mover para **Done** no board.
+6. Se a task gerou UI genérica nova: atualizar `DesignSystemPage.svelte` (ver Design System abaixo) **antes** de considerar completa.
 
 ### O que agentes NÃO devem fazer
 
-- Fechar task só no chat, sem atualizar `TASKS.md` / `CHANGELOG.md`.
-- Adicionar task no fim da lista sem avaliar ordem.
-- Criar segundo backlog (Notion, outro markdown paralelo, Issues inventadas).
-- Deixar task concluída na ordem sugerida (mesmo com `[x]`).
+- Fechar task só no chat, sem mover a issue no board e sem `CHANGELOG.md`.
+- Criar segundo backlog (markdown paralelo, Notion, etc.).
 - Escrever changelog longo (arquivos, commits, notas) — só o resumo curto.
 - Implementar task direto em `main` ou reutilizar branch de outra task.
 
@@ -95,7 +85,7 @@ Uma task só está “fechada” quando:
 
 ## Branches e PRs (obrigatório)
 
-Toda task pendente em `TASKS.md` é entregue em **uma branch nova** + **PR para `main`**. Uma task = uma branch = um PR.
+Toda task pendente no board é entregue em **uma branch nova** + **PR para `main`**. Uma task = uma branch = um PR (stacked quando houver dependência).
 
 ### Nomenclatura
 
@@ -106,7 +96,7 @@ task/<N>-<slug-kebab>
 | Parte | Regra | Exemplo |
 | --- | --- | --- |
 | Prefixo | Sempre `task/` | `task/` |
-| `N` | Número da task em `TASKS.md` (sem zero à esquerda) | `1`, `15` |
+| `N` | Número da issue no board (sem zero à esquerda) | `1`, `15` |
 | `slug` | 2–5 palavras da task, kebab-case, sem acento | `definir-dominio-produto` |
 
 Exemplos:
@@ -119,7 +109,7 @@ Exemplos:
 
 1. Atualizar `main` local (`git pull` em `main`).
 2. Criar a branch a partir de `main` com o nome no padrão acima.
-3. Implementar só o escopo daquela task (+ updates de `TASKS.md` / `CHANGELOG.md`).
+3. Implementar só o escopo daquela task (+ `CHANGELOG.md` e movimentação da issue no board).
 4. Commit(s) na branch; **não** commitar a entrega em `main`.
 5. Push da branch e abrir PR para `main` com **GitHub CLI** (`gh pr create` — ver **GitHub** abaixo).
 6. Após o merge, apagar a branch remota/local se ainda existir e voltar para `main` atualizada.
@@ -230,7 +220,7 @@ Regras:
 ## GitHub (git / PR)
 
 - Remote: configurar `origin` apontando para o repositório GitHub (`https://github.com/<org>/<repo>.git`).
-- Fonte da verdade do backlog: **`TASKS.md`** + **`CHANGELOG.md`** (não substituir por Issues sem pedido).
+- Fonte da verdade do backlog: **board** (issues) + **`CHANGELOG.md`**.
 - Fluxo de branch por task: ver **Branches e PRs** acima.
 - CI e apps são opcionais; só quando houver task correspondente.
 
@@ -248,13 +238,13 @@ gh pr create --title "…" --body "…" --base main
 
 ## Como trabalhar
 
-- Antes de implementar: ler a menor task pendente em `TASKS.md` (ou a que o usuário indicar) e este `AGENTS.md`.
+- Antes de implementar: ler a task de maior prioridade no board (ou a que o usuário indicar) e este `AGENTS.md`.
 - Abrir branch `task/<N>-<slug>` a partir de `main` **antes** de codar a task.
 - Não inventar bibliotecas de UI, roteadores ou state managers sem pedido explícito.
 - Não expandir o escopo além do pedido / da task.
 - Manter o visual Industrial Brutalist; não “modernizar” com cards, shadows ou glass.
 - Em dúvida de onde colocar um componente: seguir o fluxo de componentização.
-- Ao terminar entrega alinhada a uma task: remover a task de `TASKS.md`, adicionar resumo curto em `CHANGELOG.md` e abrir PR no GitHub (`gh pr create`).
+- Ao terminar entrega alinhada a uma task: mover a issue para **Done** no board, adicionar resumo curto em `CHANGELOG.md` e abrir PR no GitHub (`gh pr create` ou `gh stack submit`).
 - Documentação viva do DS: `docs/design-system.md` + `DesignSystemPage.svelte`.
 
 ### Shell: PowerShell no Windows
