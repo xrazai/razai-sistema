@@ -8,6 +8,7 @@
   import Input from '../../design-system/controls/Input.svelte'
   import Select from '../../design-system/controls/Select.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
+  import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
 
   export type NovoTecidoData = {
     nome: string
@@ -205,7 +206,15 @@
 </script>
 
 <div class="cadastro-page">
-  <Panel title="Tecidos / Cadastro de Tecido" flush>
+  <Panel flush>
+    {#snippet header()}
+      <Breadcrumb
+        items={[
+          { label: 'Tecidos', onclick: oncancel },
+          { label: 'Cadastro de Tecido', active: true }
+        ]}
+      />
+    {/snippet}
     {#snippet actions()}
       <Stack direction="horizontal" gap="2">
         <Button variant="ghost" size="sm" onclick={oncancel}>

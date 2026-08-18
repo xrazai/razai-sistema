@@ -34,7 +34,8 @@ Regras estruturais:
 - **Estado ativo por inversão**: NavItem/Tab ativo = fundo `--color-accent` + texto `--color-accent-fg` (nunca borda > 1px).
 - **Ícones**: SVG autoral, stroke 1px, `shape-rendering: crispEdges`, monocromáticos (`currentColor`).
 - **Checkbox/Toggle**: customizados (quadrado 1px), sem styling nativo do OS; focus visível via `:focus-visible` no irmão visual.
-- **Panel `flush` & `actions`**: corpo sem padding quando contém Table/Grid encostados na moldura (`Table bordered={false}`, `Grid bare`); cabeçalho com suporte a snippet `actions` para botões e controles contextuais alinhados à direita.
+- **Panel `flush`, `header` & `actions`**: corpo sem padding quando contém Table/Grid encostados na moldura (`Table bordered={false}`, `Grid bare`); cabeçalho com suporte a snippets `header` (ex.: Breadcrumb funcional) e `actions` para botões e controles contextuais alinhados à direita.
+- **Breadcrumb navegável**: trilha de navegação hierárquica em monoespaçado maiúsculo com separadores `/`, itens linkáveis e item atual ativo.
 - **Table padrão**: suporte a colunas com alinhamento (`align`), largura (`width`), linhas clicáveis (`clickable`), fallback de estado vazio (`emptyMessage`) e snippet customizado por célula (`cell`).
 - **Button com variantes de tamanho**: `size="md"` (padrão) e `size="sm"` (compacto para toolbars e cabeçalhos de painéis).
 - **Input com suporte a prefix/suffix**: suporte a afixos de unidade e símbolos técnicos (`suffix="m"`, `suffix="g/m²"`, `suffix="m/kg"`, `prefix="R$"`) integrados ao input group.
@@ -50,7 +51,7 @@ Primitives          Cell, Divider, Label, Icon, Surface
 Controls            Button, Input, Select, Checkbox, Toggle
 Data Display        Status, Metric, Badge, Table, Progress
 Layout              Panel, Stack, Grid, SplitPane, ScrollArea
-Navigation          Sidebar, Topbar, Tabs, NavItem
+Navigation          Sidebar, Topbar, Tabs, NavItem, Breadcrumb
     ↓
 Compositions        Inspector, DataPanel, MetricPanel, EmptyState
     ↓

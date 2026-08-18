@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { join } from 'node:path'
 import { mkdirSync } from 'node:fs'
-import { applySchema } from './schema'
+import { runMigrations } from './migrator'
 
 let db: Database.Database | null = null
 
@@ -13,17 +13,20 @@ export function getDb(): Database.Database {
   return db
 }
 
-export function openDatabase(): Database.Database {
+export function openDatabase(customPath?: string): Database.Database {
   if (db) return db
 
-  const dir = join(app.getPath('userData'), 'data')
-  mkdirSync(dir, { recursive: true })
+  let path = customPath
+  if (!path) {
+    const dir = join(app.getPath('userData'), 'data')
+    mkdirSync(dir, { recursive: true })
+    path = join(dir, 'razai.sqlite')
+  }
 
-  const path = join(dir, 'razai.sqlite')
   db = new Database(path)
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
-  applySchema(db)
+  runMigrations(db)
 
   return db
 }

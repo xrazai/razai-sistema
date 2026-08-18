@@ -6,15 +6,22 @@
     flush?: boolean
     children?: Snippet
     actions?: Snippet
+    header?: Snippet
   }
 
-  let { title = '', flush = false, children, actions }: Props = $props()
+  let { title = '', flush = false, children, actions, header }: Props = $props()
 </script>
 
 <section class="panel">
-  {#if title || actions}
+  {#if title || actions || header}
     <header class="head">
-      <span class="title">{title}</span>
+      <div class="head-content">
+        {#if header}
+          {@render header()}
+        {:else if title}
+          <span class="title">{title}</span>
+        {/if}
+      </div>
       {#if actions}
         <div class="actions">
           {@render actions()}
@@ -49,6 +56,13 @@
     text-transform: uppercase;
     color: var(--color-fg-muted);
     background: var(--color-bg-elevated);
+  }
+
+  .head-content {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
   }
 
   .title {

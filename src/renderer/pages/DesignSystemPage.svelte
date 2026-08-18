@@ -23,6 +23,7 @@
   import Topbar from '../design-system/navigation/Topbar.svelte'
   import Tabs from '../design-system/navigation/Tabs.svelte'
   import NavItem from '../design-system/navigation/NavItem.svelte'
+  import Breadcrumb from '../design-system/navigation/Breadcrumb.svelte'
   import Inspector from '../design-system/compositions/Inspector.svelte'
   import DataPanel from '../design-system/compositions/DataPanel.svelte'
   import MetricPanel from '../design-system/compositions/MetricPanel.svelte'
@@ -380,6 +381,15 @@
                 active={tab}
                 onselect={(id) => (tab = id)}
               />
+              <div style="padding: var(--space-2) var(--space-3); background: var(--color-bg); border-top: var(--border-width) solid var(--color-border);">
+                <Breadcrumb
+                  items={[
+                    { label: 'Módulo', onclick: () => {} },
+                    { label: 'Subitem', onclick: () => {} },
+                    { label: 'Item Ativo', active: true }
+                  ]}
+                />
+              </div>
             </div>
           </div>
         </section>
