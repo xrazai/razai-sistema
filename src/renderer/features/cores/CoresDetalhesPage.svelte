@@ -1,12 +1,9 @@
 <script lang="ts">
-  import Panel from '../../design-system/layout/Panel.svelte'
   import Grid from '../../design-system/layout/Grid.svelte'
   import Label from '../../design-system/primitives/Label.svelte'
-  import Icon from '../../design-system/primitives/Icon.svelte'
   import Button from '../../design-system/controls/Button.svelte'
   import Input from '../../design-system/controls/Input.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
-  import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
   import { formatHexInput, isValidHex, labToHex, hexToLab } from './utils'
   import type { CorRecord, UpdateCorInput } from '../../../shared/types'
 
@@ -111,66 +108,42 @@
 </script>
 
 <div class="detalhes-page">
-  <Panel flush>
-    {#snippet header()}
-      <Breadcrumb
-        items={[
-          { label: 'Cores', onclick: onback },
-          { label: cor.nome || 'Detalhes da Cor', active: true }
-        ]}
-      />
-    {/snippet}
-    {#snippet actions()}
-      <Button variant="ghost" size="sm" onclick={onback} disabled={isSaving}>
-        <Icon name="arrow-left" size="sm" />
-        <span>Voltar para Lista</span>
-      </Button>
-    {/snippet}
-
-    <div class="content-scroll">
-      <div class="form-wrapper">
-        <div class="form-header">
-          <div class="header-info">
-            <div
-              class="color-indicator-swatch"
-              style:background-color={isValidHex(hex) ? hex : cor.hex}
-            ></div>
-            <div class="title-meta">
-              <span class="cor-title">{cor.nome}</span>
-              <span class="cor-hex-tag">{cor.hex}</span>
-            </div>
+  <div class="content-scroll">
+    <div class="form-wrapper">
+      {#if showDeleteConfirm}
+        <div class="delete-banner">
+          <div class="delete-banner-text">
+            <span>Deseja realmente excluir permanentemente a cor <strong>{cor.nome}</strong> ({cor.hex})?</span>
           </div>
-          <div class="header-status">
-            {#if erroMsg}
-              <Badge text={erroMsg} tone="danger" />
-            {/if}
+          <div class="delete-banner-actions">
+            <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = false)} disabled={isSaving}>
+              Cancelar
+            </Button>
+            <Button variant="danger" size="sm" onclick={handleDelete} disabled={isSaving}>
+              <span>{isSaving ? 'Excluindo...' : 'Confirmar Exclusão'}</span>
+            </Button>
           </div>
         </div>
+      {/if}
 
-        {#if showDeleteConfirm}
-          <div class="delete-banner">
-            <div class="delete-banner-text">
-              <Icon name="warning" size="sm" />
-              <span>Deseja realmente excluir permanentemente a cor <strong>{cor.nome}</strong> ({cor.hex})?</span>
-            </div>
-            <div class="delete-banner-actions">
-              <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = false)} disabled={isSaving}>
-                Cancelar
-              </Button>
-              <Button variant="danger" size="sm" onclick={handleDelete} disabled={isSaving}>
-                <span>{isSaving ? 'Excluindo...' : 'Confirmar Exclusão'}</span>
-              </Button>
-            </div>
-          </div>
-        {/if}
-
-        <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSave(); }}>
-          <div class="grid-form">
-            <div class="section-row">
-              <header class="section-head">
+      <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSave(); }}>
+        <div class="grid-form">
+          <div class="section-row">
+            <header class="section-head">
+              <div class="head-title-wrap">
+                <div
+                  class="color-indicator-swatch"
+                  style:background-color={isValidHex(hex) ? hex : cor.hex}
+                ></div>
                 <span>01. Identificação e Especificação da Cor</span>
+                <span class="cor-hex-tag">{isValidHex(hex) ? hex : cor.hex}</span>
+              </div>
+              {#if erroMsg}
+                <Badge text={erroMsg} tone="danger" />
+              {:else}
                 <span class="head-rule">Edição cadastral</span>
-              </header>
+              {/if}
+            </header>
               <Grid cols={3} bare>
                 <div class="field-cell">
                   <Label text="Nome da cor *" for="nome" />
@@ -205,15 +178,14 @@
           </div>
         </form>
 
+        <!-- Barra de rodapé com ações -->
         <footer class="form-footer">
           <div class="footer-left">
             <Button
               variant="danger"
-              size="sm"
               onclick={() => (showDeleteConfirm = true)}
               disabled={isSaving || showDeleteConfirm}
             >
-              <Icon name="trash" size="sm" />
               <span>Excluir Cor</span>
             </Button>
           </div>
@@ -228,7 +200,6 @@
         </footer>
       </div>
     </div>
-  </Panel>
 </div>
 
 <style>
@@ -259,44 +230,35 @@
     box-sizing: border-box;
   }
 
-  .form-header {
+  .section-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
-    height: 48px;
-    min-height: 48px;
+    height: 40px;
+    min-height: 40px;
     padding: var(--space-2) var(--space-4);
-    background: var(--color-bg-sunken);
+    background: var(--color-bg-elevated);
     border-bottom: var(--border-width) solid var(--color-border);
-    width: 100%;
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-header);
+    text-transform: uppercase;
+    color: var(--color-fg-dim);
+    font-family: var(--font-mono);
     box-sizing: border-box;
     line-height: 100%;
   }
 
-  .header-info {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .color-indicator-swatch {
-    width: 24px;
-    height: 24px;
-    border: var(--border-width) solid var(--color-border-strong);
-    box-sizing: border-box;
-  }
-
-  .title-meta {
+  .head-title-wrap {
     display: flex;
     align-items: center;
     gap: var(--space-2);
   }
 
-  .cor-title {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--color-fg);
+  .color-indicator-swatch {
+    width: 18px;
+    height: 18px;
+    border: var(--border-width) solid var(--color-border-strong);
+    box-sizing: border-box;
   }
 
   .cor-hex-tag {
@@ -374,7 +336,7 @@
   }
 
   .field-cell {
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-3) var(--space-4) var(--space-4) var(--space-4);
     background: var(--color-bg);
     width: 100%;
     box-sizing: border-box;
@@ -384,7 +346,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 56px;
+    height: 80px;
     min-height: 56px;
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);

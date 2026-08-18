@@ -1,14 +1,10 @@
 <script lang="ts">
-  import Panel from '../../design-system/layout/Panel.svelte'
-  import Stack from '../../design-system/layout/Stack.svelte'
   import Grid from '../../design-system/layout/Grid.svelte'
   import Label from '../../design-system/primitives/Label.svelte'
-  import Icon from '../../design-system/primitives/Icon.svelte'
   import Button from '../../design-system/controls/Button.svelte'
   import Input from '../../design-system/controls/Input.svelte'
   import Select from '../../design-system/controls/Select.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
-  import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
   import type { CreateTecidoInput } from '../../../shared/types'
 
   type Props = {
@@ -206,45 +202,20 @@
 </script>
 
 <div class="cadastro-page">
-  <Panel flush>
-    {#snippet header()}
-      <Breadcrumb
-        items={[
-          { label: 'Tecidos', onclick: oncancel },
-          { label: 'Cadastro de Tecido', active: true }
-        ]}
-      />
-    {/snippet}
-    {#snippet actions()}
-      <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSaving}>
-        <Icon name="arrow-left" size="sm" />
-        <span>Voltar para Lista</span>
-      </Button>
-    {/snippet}
-
-    <div class="content-scroll">
-      <div class="form-wrapper">
-        <!-- Subheader informativo em largura total -->
-        <div class="form-header">
-          <div class="header-info">
-            <span class="step-badge">NOVO REGISTRO</span>
-            <span class="header-desc">
-              Preencha o Nome, Composição, Largura e ao menos mais um valor numérico. Os outros campos serão calculados automaticamente.
-            </span>
-          </div>
-          {#if erroMsg}
-            <Badge text={erroMsg} tone="danger" />
-          {/if}
-        </div>
-
-        <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          <div class="grid-form">
-            <!-- Linha 1: 2 colunas (Nome e Composição) -->
-            <div class="section-row">
-              <header class="section-head">
-                <span>01. Identificação Básica</span>
+  <div class="content-scroll">
+    <div class="form-wrapper">
+      <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <div class="grid-form">
+          <!-- Linha 1: 2 colunas (Nome e Composição) -->
+          <div class="section-row">
+            <header class="section-head">
+              <span>01. Identificação Básica</span>
+              {#if erroMsg}
+                <Badge text={erroMsg} tone="danger" />
+              {:else}
                 <span class="head-rule">Campos obrigatórios</span>
-              </header>
+              {/if}
+            </header>
               <Grid cols={2} bare>
                 <div class="field-cell">
                   <Label text="Nome *" for="nome" />
@@ -370,7 +341,6 @@
         </footer>
       </div>
     </div>
-  </Panel>
 </div>
 
 <style>
@@ -401,68 +371,13 @@
     box-sizing: border-box;
   }
 
-  .form-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    height: 48px;
-    min-height: 48px;
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-bg-sunken);
-    border-bottom: var(--border-width) solid var(--color-border);
-    width: 100%;
-    box-sizing: border-box;
-    line-height: 100%;
-  }
-
-  .header-info {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .step-badge {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-header);
-    padding: 2px var(--space-2);
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    font-weight: 600;
-  }
-
-  .header-desc {
-    font-size: var(--text-xs);
-    color: var(--color-fg-muted);
-    font-family: var(--font-mono);
-  }
-
-  .form-body {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .grid-form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .section-row {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    border-bottom: var(--border-width) solid var(--color-border);
-  }
-
   .section-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 32px;
-    min-height: 32px;
-    padding: var(--space-1) var(--space-4);
+    height: 40px;
+    min-height: 40px;
+    padding: var(--space-2) var(--space-4);
     background: var(--color-bg-elevated);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
@@ -482,7 +397,7 @@
   }
 
   .field-cell {
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-3) var(--space-4) var(--space-4) var(--space-4);
     background: var(--color-bg);
     width: 100%;
     box-sizing: border-box;
@@ -493,7 +408,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: var(--space-3);
-    height: 56px;
+    height: 80px;
     min-height: 56px;
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);

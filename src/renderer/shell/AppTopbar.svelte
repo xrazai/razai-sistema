@@ -85,10 +85,20 @@
         <Icon name="plus" size="sm" />
         <span>Cadastrar Tecido</span>
       </Button>
+    {:else if router.route === 'tecidos' && router.subRoute}
+      <Button variant="ghost" size="sm" onclick={() => router.navigate('tecidos')}>
+        <Icon name="arrow-left" size="sm" />
+        <span>Voltar</span>
+      </Button>
     {:else if router.route === 'cores' && !router.subRoute}
       <Button variant="primary" size="sm" onclick={() => router.navigate('cores/cadastro')}>
         <Icon name="plus" size="sm" />
         <span>Cadastrar Cor</span>
+      </Button>
+    {:else if router.route === 'cores' && router.subRoute}
+      <Button variant="ghost" size="sm" onclick={() => router.navigate('cores')}>
+        <Icon name="arrow-left" size="sm" />
+        <span>Voltar</span>
       </Button>
     {/if}
   </div>
