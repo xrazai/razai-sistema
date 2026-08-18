@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import { getDb } from '../database/db'
-import type { AppInfo, DbHealth } from '../../shared/types'
+import { TecidosService } from '../services/tecidos.service'
+import type { AppInfo, DbHealth, CreateTecidoInput, UpdateTecidoInput } from '../../shared/types'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('app:getInfo', (): AppInfo => ({
@@ -17,5 +18,26 @@ export function registerIpcHandlers(): void {
       ok: true,
       schemaVersion: row?.value ?? 'unknown'
     }
+  })
+
+  // Handlers para o CRUD de Tecidos
+  ipcMain.handle('tecidos:list', (_event, search?: string) => {
+    return TecidosService.list(search)
+  })
+
+  ipcMain.handle('tecidos:getById', (_event, id: string) => {
+    return TecidosService.getById(id)
+  })
+
+  ipcMain.handle('tecidos:create', (_event, input: CreateTecidoInput) => {
+    return TecidosService.create(input)
+  })
+
+  ipcMain.handle('tecidos:update', (_event, id: string, input: UpdateTecidoInput) => {
+    return TecidosService.update(id, input)
+  })
+
+  ipcMain.handle('tecidos:delete', (_event, id: string) => {
+    return TecidosService.delete(id)
   })
 }
