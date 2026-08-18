@@ -28,7 +28,7 @@
   .select {
     width: 100%;
     height: 32px;
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-bg-sunken);

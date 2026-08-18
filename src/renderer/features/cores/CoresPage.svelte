@@ -304,7 +304,7 @@
     gap: var(--space-3);
     height: 48px;
     min-height: 48px;
-    padding: 0 var(--space-4);
+    padding: var(--space-2) var(--space-4);
     background: var(--color-bg-sunken);
     border-bottom: var(--border-width) solid var(--color-border);
     width: 100%;
@@ -319,7 +319,7 @@
     flex: 1;
     max-width: 460px;
     height: 32px;
-    padding: 0 var(--space-2);
+    padding: var(--space-1) var(--space-2);
     border: var(--border-width) solid var(--color-border);
     background: var(--color-bg);
     color: var(--color-fg-muted);
@@ -425,7 +425,7 @@
     gap: var(--space-3);
     height: 40px;
     min-height: 40px;
-    padding: 0 var(--space-4);
+    padding: var(--space-2) var(--space-4);
     border-top: var(--border-width) solid var(--color-border);
     background: var(--color-bg-elevated);
     font-size: var(--text-xs);

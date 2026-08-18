@@ -25,7 +25,7 @@
     gap: var(--space-2);
     width: 100%;
     height: 36px;
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border: none;
     border-bottom: var(--border-width) solid var(--color-border);
     background: transparent;

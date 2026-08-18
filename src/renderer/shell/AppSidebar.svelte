@@ -60,7 +60,7 @@
     display: flex;
     align-items: center;
     height: 40px;
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-header);
     text-transform: uppercase;

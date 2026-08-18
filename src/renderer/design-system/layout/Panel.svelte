@@ -49,7 +49,7 @@
     justify-content: space-between;
     gap: var(--space-3);
     height: 40px;
-    padding: 0 var(--space-4);
+    padding: var(--space-2) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
     line-height: 100%;

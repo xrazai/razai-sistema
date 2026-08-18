@@ -14,7 +14,7 @@
     display: inline-flex;
     align-items: center;
     height: 20px;
-    padding: 0 var(--space-2);
+    padding: var(--space-1) var(--space-2);
     border: var(--border-width) solid var(--color-border-strong);
     font-size: var(--text-xs);
     line-height: 100%;

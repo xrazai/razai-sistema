@@ -53,7 +53,7 @@
   .input {
     width: 100%;
     height: 32px;
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-bg-sunken);
@@ -113,7 +113,7 @@
     border: none;
     background: transparent;
     height: 100%;
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     flex: 1;
     min-width: 0;
     line-height: 100%;
@@ -123,7 +123,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 var(--space-2);
+    padding: var(--space-2) var(--space-2);
     font-size: var(--text-xs);
     font-family: var(--font-mono);
     color: var(--color-fg-muted);
@@ -131,6 +131,7 @@
     user-select: none;
     letter-spacing: var(--tracking-tight);
     white-space: nowrap;
+    line-height: 100%;
   }
 
   .affix.prefix {

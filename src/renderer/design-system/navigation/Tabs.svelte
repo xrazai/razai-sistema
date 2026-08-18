@@ -37,7 +37,7 @@
     display: inline-flex;
     align-items: center;
     height: 100%;
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border: none;
     border-right: var(--border-width) solid var(--color-border);
     background: transparent;

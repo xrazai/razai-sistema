@@ -24,10 +24,12 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    min-height: 40px;
-    padding: 0 var(--space-3);
+    height: 40px;
+    padding: var(--space-2) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     background: var(--color-bg-elevated);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .title {

@@ -166,7 +166,7 @@
 
   th,
   td {
-    padding: 0 var(--space-4);
+    padding: var(--space-2) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     border-right: var(--border-width) solid var(--color-border);
     text-align: left;

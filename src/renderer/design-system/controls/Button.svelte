@@ -31,7 +31,7 @@
     justify-content: center;
     gap: var(--space-2);
     height: 32px;
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-bg-elevated);
@@ -47,7 +47,7 @@
 
   .btn[data-size='sm'] {
     height: 24px;
-    padding: 0 var(--space-2);
+    padding: var(--space-1) var(--space-2);
     font-size: var(--text-xs);
     gap: var(--space-1);
     line-height: 100%;
