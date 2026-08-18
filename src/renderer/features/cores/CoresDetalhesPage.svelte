@@ -150,7 +150,6 @@
         {#if showDeleteConfirm}
           <div class="delete-banner">
             <div class="delete-banner-text">
-              <Icon name="warning" size="sm" />
               <span>Deseja realmente excluir permanentemente a cor <strong>{cor.nome}</strong> ({cor.hex})?</span>
             </div>
             <div class="delete-banner-actions">
@@ -209,11 +208,9 @@
           <div class="footer-left">
             <Button
               variant="danger"
-              size="sm"
               onclick={() => (showDeleteConfirm = true)}
               disabled={isSaving || showDeleteConfirm}
             >
-              <Icon name="trash" size="sm" />
               <span>Excluir Cor</span>
             </Button>
           </div>
