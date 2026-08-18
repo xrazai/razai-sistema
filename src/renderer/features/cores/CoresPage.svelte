@@ -301,10 +301,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
-    height: 48px;
-    min-height: 48px;
-    padding: var(--space-2) var(--space-4);
+    gap: var(--space-4);
+    height: 40px;
+    min-height: 40px;
+    padding: 0 var(--space-4) 0 0;
     background: var(--color-bg-sunken);
     border-bottom: var(--border-width) solid var(--color-border);
     width: 100%;
@@ -318,27 +318,32 @@
     gap: var(--space-2);
     flex: 1;
     max-width: 460px;
-    height: 32px;
-    padding: var(--space-1) var(--space-2);
-    border: var(--border-width) solid var(--color-border);
+    height: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-right: var(--border-width) solid var(--color-border);
     background: var(--color-bg);
     color: var(--color-fg-muted);
     box-sizing: border-box;
     line-height: 100%;
+    transition: background var(--motion-fast), border-color var(--motion-fast);
   }
 
   .search-box:focus-within {
-    border-color: var(--color-border-strong);
+    border-right-color: var(--color-border-strong);
+    background: var(--color-bg-elevated);
     color: var(--color-fg);
   }
 
   .search-input {
     width: 100%;
+    height: 100%;
     border: none;
     background: transparent;
     color: var(--color-fg);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
+    line-height: 100%;
     outline: none;
   }
 
@@ -351,7 +356,8 @@
     background: transparent;
     color: var(--color-fg-dim);
     font-size: var(--text-xs);
-    padding: 0 var(--space-1);
+    line-height: 100%;
+    padding: var(--space-1);
     cursor: pointer;
   }
 
