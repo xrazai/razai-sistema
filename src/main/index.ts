@@ -1,10 +1,17 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'node:path'
+import { existsSync } from 'node:fs'
 import { openDatabase, closeDatabase } from './database/db'
 import { registerIpcHandlers } from './ipc/handlers'
 
 if (process.env.WSL_DISTRO_NAME) {
   app.disableHardwareAcceleration()
+}
+
+function getPreloadPath(): string {
+  const mjs = join(__dirname, '../preload/index.mjs')
+  const js = join(__dirname, '../preload/index.js')
+  return existsSync(mjs) ? mjs : js
 }
 
 function createWindow(): void {
@@ -16,7 +23,7 @@ function createWindow(): void {
     backgroundColor: '#0e0e0e',
     show: false,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: getPreloadPath(),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false

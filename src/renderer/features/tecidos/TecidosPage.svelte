@@ -6,9 +6,10 @@
   import Button from '../../design-system/controls/Button.svelte'
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
-  import TecidosCadastroPage, { type NovoTecidoData } from './TecidosCadastroPage.svelte'
-  import TecidosDetalhesPage, { type Tecido } from './TecidosDetalhesPage.svelte'
+  import TecidosCadastroPage from './TecidosCadastroPage.svelte'
+  import TecidosDetalhesPage from './TecidosDetalhesPage.svelte'
   import { generateTecidoSku } from './utils'
+  import type { TecidoRecord, CreateTecidoInput, UpdateTecidoInput } from '../../../shared/types'
 
   const columns: Column[] = [
     { key: 'codigo', label: 'SKU', width: '90px' },
@@ -24,178 +25,116 @@
 
   let viewMode = $state<'list' | 'create' | 'details'>('list')
   let searchTerm = $state('')
-  let selectedTecido = $state<Tecido | null>(null)
+  let selectedTecido = $state<TecidoRecord | null>(null)
+  let tecidos = $state<TecidoRecord[]>([])
+  let isLoading = $state(true)
+  let errorMsg = $state<string | null>(null)
 
-  // Lista inicial de tecidos com SKUs de 4 caracteres
-  let tecidos = $state<Tecido[]>([
-    {
-      id: '1',
-      codigo: 'TRAL',
-      nome: 'Tricoline Lisa 100% Algodão',
-      composicao: '100% Algodão',
-      largura: '1,50',
-      rendimento: '5,50',
-      gramaturaLinear: '180',
-      gramaturaM2: '120',
-      tipo: 'liso',
-      transparencia: 'nenhuma',
-      elasticidade: 'nenhuma',
-      acabamento: 'fosco'
-    },
-    {
-      id: '2',
-      codigo: 'CETI',
-      nome: 'Cetim',
-      composicao: '100% Poliéster',
-      largura: '1,50',
-      rendimento: '6,50',
-      gramaturaLinear: '150',
-      gramaturaM2: '100',
-      tipo: 'liso',
-      transparencia: 'nenhuma',
-      elasticidade: 'nenhuma',
-      acabamento: 'brilhante'
-    },
-    {
-      id: '3',
-      codigo: 'CEEL',
-      nome: 'Cetim com Elastano',
-      composicao: '97% Poliéster / 3% Elastano',
-      largura: '1,45',
-      rendimento: '5,00',
-      gramaturaLinear: '200',
-      gramaturaM2: '140',
-      tipo: 'liso',
-      transparencia: 'nenhuma',
-      elasticidade: 'baixa',
-      acabamento: 'semi_brilho'
-    },
-    {
-      id: '4',
-      codigo: 'ANAR',
-      nome: 'Anarruga',
-      composicao: '100% Algodão',
-      largura: '1,40',
-      rendimento: '4,50',
-      gramaturaLinear: '220',
-      gramaturaM2: '160',
-      tipo: 'estampado',
-      transparencia: 'baixa',
-      elasticidade: 'nenhuma',
-      acabamento: 'fosco'
-    },
-    {
-      id: '5',
-      codigo: 'LIRU',
-      nome: 'Linho Puro Rústico',
-      composicao: '100% Linho',
-      largura: '1,45',
-      rendimento: '3,00',
-      gramaturaLinear: '350',
-      gramaturaM2: '240',
-      tipo: 'liso',
-      transparencia: 'baixa',
-      elasticidade: 'nenhuma',
-      acabamento: 'fosco'
-    },
-    {
-      id: '6',
-      codigo: 'SAEL',
-      nome: 'Sarja Acetinada com Elastano',
-      composicao: '97% Algodão / 3% Elastano',
-      largura: '1,60',
-      rendimento: '2,50',
-      gramaturaLinear: '420',
-      gramaturaM2: '260',
-      tipo: 'liso',
-      transparencia: 'nenhuma',
-      elasticidade: 'baixa',
-      acabamento: 'semi_brilho'
-    },
-    {
-      id: '7',
-      codigo: 'VISA',
-      nome: 'Viscose Sarjada',
-      composicao: '100% Viscose',
-      largura: '1,48',
-      rendimento: '4,00',
-      gramaturaLinear: '240',
-      gramaturaM2: '170',
-      tipo: 'liso',
-      transparencia: 'baixa',
-      elasticidade: 'nenhuma',
-      acabamento: 'fosco'
-    },
-    {
-      id: '8',
-      codigo: 'JEPE',
-      nome: 'Jeans Denim Pesado',
-      composicao: '98% Algodão / 2% Elastano',
-      largura: '1,65',
-      rendimento: '1,50',
-      gramaturaLinear: '630',
-      gramaturaM2: '380',
-      tipo: 'liso',
-      transparencia: 'nenhuma',
-      elasticidade: 'baixa',
-      acabamento: 'fosco'
+  async function loadTecidos(query = '') {
+    isLoading = true
+    errorMsg = null
+    try {
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        const data = await window.razai.tecidos.list(query)
+        tecidos = data
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar tecidos:', err)
+      errorMsg = err?.message || 'Erro ao carregar tecidos do banco de dados.'
+    } finally {
+      isLoading = false
     }
-  ])
-
-  let filteredTecidos = $derived(
-    tecidos.filter((item) => {
-      if (!searchTerm.trim()) return true
-      const term = searchTerm.toLowerCase()
-      return (
-        item.codigo.toLowerCase().includes(term) ||
-        item.nome.toLowerCase().includes(term) ||
-        item.composicao.toLowerCase().includes(term) ||
-        (item.tipo && item.tipo.toLowerCase().includes(term)) ||
-        (item.acabamento && item.acabamento.toLowerCase().includes(term))
-      )
-    })
-  )
-
-  function handleNovoTecido(novo: NovoTecidoData) {
-    const sku = generateTecidoSku(novo.nome)
-    const novoItem: Tecido = {
-      id: String(Date.now()),
-      codigo: sku,
-      nome: novo.nome,
-      composicao: novo.composicao,
-      largura: novo.largura,
-      rendimento: novo.rendimento,
-      gramaturaLinear: novo.gramaturaLinear,
-      gramaturaM2: novo.gramaturaM2,
-      tipo: novo.tipo,
-      transparencia: novo.transparencia,
-      elasticidade: novo.elasticidade,
-      acabamento: novo.acabamento
-    }
-
-    tecidos = [novoItem, ...tecidos]
-    selectedTecido = novoItem
-    viewMode = 'list'
   }
 
-  function handleSalvarEdicao(atualizado: Tecido) {
-    tecidos = tecidos.map((item) => (item.id === atualizado.id ? atualizado : item))
-    selectedTecido = atualizado
-    viewMode = 'list'
+  $effect(() => {
+    loadTecidos(searchTerm)
+  })
+
+  async function handleNovoTecido(novo: CreateTecidoInput) {
+    try {
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        const created = await window.razai.tecidos.create(novo)
+        selectedTecido = created
+        await loadTecidos(searchTerm)
+      } else {
+        const sku = generateTecidoSku(novo.nome)
+        const localItem: TecidoRecord = {
+          id: String(Date.now()),
+          codigo: sku,
+          nome: novo.nome,
+          composicao: novo.composicao,
+          largura: novo.largura,
+          rendimento: novo.rendimento ?? null,
+          gramaturaLinear: novo.gramaturaLinear ?? null,
+          gramaturaM2: novo.gramaturaM2 ?? null,
+          tipo: novo.tipo ?? null,
+          transparencia: novo.transparencia ?? null,
+          elasticidade: novo.elasticidade ?? null,
+          acabamento: novo.acabamento ?? null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        tecidos = [localItem, ...tecidos]
+        selectedTecido = localItem
+      }
+      viewMode = 'list'
+    } catch (err: any) {
+      console.error('Erro ao cadastrar tecido:', err)
+      errorMsg = err?.message || 'Erro ao cadastrar tecido no banco de dados.'
+      throw err
+    }
   }
 
-  function handleExcluirTecido(id: string) {
-    tecidos = tecidos.filter((item) => item.id !== id)
-    selectedTecido = null
-    viewMode = 'list'
+  async function handleSalvarEdicao(id: string, input: UpdateTecidoInput) {
+    try {
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        const updated = await window.razai.tecidos.update(id, input)
+        selectedTecido = updated
+        await loadTecidos(searchTerm)
+      } else {
+        tecidos = tecidos.map((item) => {
+          if (item.id === id) {
+            return {
+              ...item,
+              ...input,
+              codigo: input.nome ? generateTecidoSku(input.nome) : item.codigo,
+              updatedAt: new Date().toISOString()
+            }
+          }
+          return item
+        })
+      }
+      viewMode = 'list'
+    } catch (err: any) {
+      console.error('Erro ao atualizar tecido:', err)
+      errorMsg = err?.message || 'Erro ao atualizar tecido.'
+      throw err
+    }
+  }
+
+  async function handleExcluirTecido(id: string) {
+    try {
+      if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        await window.razai.tecidos.delete(id)
+      } else {
+        tecidos = tecidos.filter((item) => item.id !== id)
+      }
+      selectedTecido = null
+      await loadTecidos(searchTerm)
+      viewMode = 'list'
+    } catch (err: any) {
+      console.error('Erro ao excluir tecido:', err)
+      errorMsg = err?.message || 'Erro ao excluir tecido.'
+      throw err
+    }
   }
 
   function handleRowClick(row: any) {
-    selectedTecido = row as Tecido
+    selectedTecido = row as TecidoRecord
     viewMode = 'details'
   }
 
-  function formatDisplayLabel(val: string | undefined): string {
+  function formatDisplayLabel(val: string | null | undefined): string {
     if (!val) return '—'
     const map: Record<string, string> = {
       liso: 'Liso',
@@ -252,7 +191,13 @@
             {/if}
           </div>
           <div class="toolbar-meta">
-            <Badge text={`${filteredTecidos.length} de ${tecidos.length} itens`} tone="neutral" />
+            {#if errorMsg}
+              <Badge text={errorMsg} tone="danger" />
+            {:else if isLoading}
+              <Badge text="Carregando..." tone="neutral" />
+            {:else}
+              <Badge text={`${tecidos.length} ${tecidos.length === 1 ? 'tecido cadastrado' : 'tecidos cadastrados'}`} tone="neutral" />
+            {/if}
           </div>
         </div>
 
@@ -260,22 +205,22 @@
         <div class="table-container">
           <Table
             {columns}
-            rows={filteredTecidos}
+            rows={tecidos}
             bordered={false}
-            emptyMessage="Nenhum tecido encontrado para os critérios de busca."
+            emptyMessage={isLoading ? 'Carregando dados...' : 'Nenhum tecido encontrado no banco de dados.'}
             onrowclick={handleRowClick}
           >
             {#snippet cell({ row, column, value })}
               {#if column.key === 'codigo'}
                 <span class="code">{value}</span>
               {:else if column.key === 'largura'}
-                <span>{value ? `${value} m` : '—'}</span>
+                <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m` : '—'}</span>
               {:else if column.key === 'rendimento'}
-                <span>{value ? `${value} m/kg` : '—'}</span>
+                <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m/kg` : '—'}</span>
               {:else if column.key === 'gramaturaLinear'}
-                <span>{value ? `${value} g/m` : '—'}</span>
+                <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m` : '—'}</span>
               {:else if column.key === 'gramaturaM2'}
-                <span>{value ? `${value} g/m²` : '—'}</span>
+                <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m²` : '—'}</span>
               {:else if column.key === 'tipo' || column.key === 'acabamento'}
                 <span class="muted-tag">{formatDisplayLabel(value)}</span>
               {:else if column.key === 'nome'}
@@ -328,7 +273,8 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    min-height: 52px;
+    padding: var(--space-3) var(--space-4);
     background: var(--color-bg-sunken);
     border-bottom: var(--border-width) solid var(--color-border);
     width: 100%;
@@ -414,7 +360,8 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    min-height: 40px;
+    padding: var(--space-3) var(--space-4);
     border-top: var(--border-width) solid var(--color-border);
     background: var(--color-bg-elevated);
     font-size: var(--text-xs);
