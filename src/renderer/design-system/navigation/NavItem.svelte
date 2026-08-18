@@ -24,7 +24,8 @@
     align-items: center;
     gap: var(--space-2);
     width: 100%;
-    height: 36px;
+    height: 40px;
+    min-height: 40px;
     padding: var(--space-2) var(--space-3);
     border: none;
     border-bottom: var(--border-width) solid var(--color-border);
