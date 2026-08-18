@@ -3,6 +3,7 @@ import { app } from 'electron'
 import { join } from 'node:path'
 import { mkdirSync } from 'node:fs'
 import { runMigrations } from './migrator'
+import { normalizeUnaccent } from '../../shared/sku'
 
 let db: Database.Database | null = null
 
@@ -26,6 +27,9 @@ export function openDatabase(customPath?: string): Database.Database {
   db = new Database(path)
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
+  db.function('unaccent', { deterministic: true }, (str: unknown) =>
+    normalizeUnaccent(typeof str === 'string' ? str : (str === null || str === undefined ? '' : String(str)))
+  )
   runMigrations(db)
 
   return db

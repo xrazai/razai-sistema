@@ -1,4 +1,15 @@
 /**
+ * Normaliza o texto removendo diacríticos/acentos e convertendo para minúsculas
+ */
+export function normalizeUnaccent(text: string | null | undefined): string {
+  if (!text) return ''
+  return String(text)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+/**
  * Gera o SKU de 4 caracteres para tecidos conforme a regra de negócio:
  * - 2 primeiros caracteres da primeira palavra
  * - 2 primeiros caracteres da última palavra
@@ -13,15 +24,17 @@
 export function generateTecidoSku(nome: string): string {
   if (!nome || !nome.trim()) return 'XXXX'
 
-  const clean = nome
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+  const clean = normalizeUnaccent(nome)
     .replace(/[^a-zA-Z0-9\s]/g, ' ')
     .trim()
 
-  const words = clean.split(/\s+/).filter((w) => w.length > 0)
+  const allTokens = clean.split(/\s+/).filter((w) => w.length > 0)
 
-  if (words.length === 0) return 'XXXX'
+  if (allTokens.length === 0) return 'XXXX'
+
+  // Filtra tokens puramente numéricos (como '100' proveniente de '100%') para priorizar palavras reais
+  const letterTokens = allTokens.filter((w) => /[a-zA-Z]/.test(w))
+  const words = letterTokens.length > 0 ? letterTokens : allTokens
 
   if (words.length === 1) {
     const single = words[0]
