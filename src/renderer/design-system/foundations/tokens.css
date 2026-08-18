@@ -1,0 +1,50 @@
+:root {
+  /* Color — Industrial Brutalist */
+  --color-bg: #0e0e0e;
+  --color-bg-elevated: #141414;
+  --color-bg-sunken: #0a0a0a;
+  --color-fg: #e8e8e8;
+  --color-fg-muted: #9a9a9a;
+  --color-fg-dim: #6a6a6a;
+  --color-border: #2a2a2a;
+  --color-border-strong: #4a4a4a;
+  --color-accent: #c8c8c8;
+  --color-accent-fg: #0e0e0e;
+  --color-ok: #7a9a7a;
+  --color-warn: #b8a060;
+  --color-danger: #b07070;
+  --color-info: #7088a0;
+
+  /* Spacing — rigid modular scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Borders */
+  --border-width: 1px;
+  --radius: 0;
+
+  /* Typography */
+  --font-mono: "IBM Plex Mono", "Consolas", "Courier New", monospace;
+  --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-lg: 15px;
+  --text-xl: 18px;
+  --leading-tight: 1.25;
+  --leading-normal: 1.45;
+  --tracking-tight: 0.04em;
+  --tracking-label: 0.08em;
+  --tracking-header: 0.1em;
+
+  /* Grid */
+  --cell-pad: var(--space-3);
+
+  /* Motion — minimal */
+  --motion-fast: 120ms linear;
+}

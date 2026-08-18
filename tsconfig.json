@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "checkJs": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@renderer/*": ["src/renderer/*"]
+    },
+    "types": ["svelte", "vite/client", "node"]
+  },
+  "include": [
+    "src/renderer/**/*.ts",
+    "src/renderer/**/*.svelte",
+    "src/shared/**/*.ts",
+    "src/preload/**/*.ts",
+    "electron.vite.config.ts"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

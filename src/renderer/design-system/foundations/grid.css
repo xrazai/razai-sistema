@@ -1,0 +1,45 @@
+.grid-system {
+  display: grid;
+  gap: var(--border-width);
+  background: var(--color-border);
+  border: var(--border-width) solid var(--color-border);
+}
+
+.grid-system > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* the grid owns its separators: children never draw a second line */
+.grid-system > * {
+  border: none !important;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.grid-cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.grid-row-dense {
+  grid-auto-rows: minmax(0, auto);
+}
+
+/* Visible modular compartments */
+.grid-debug > * {
+  outline: var(--border-width) solid var(--color-border);
+}
