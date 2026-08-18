@@ -18,7 +18,7 @@ export function getDatabasePath(customPath?: string): string {
   if (customPath) return customPath
   if (process.env.RAZAI_DB_PATH) return process.env.RAZAI_DB_PATH
 
-  const dir = join(app.getPath('userData'), 'data')
+  const dir = join(app.getPath('appData'), 'razai-sistema', 'data')
   mkdirSync(dir, { recursive: true })
   return join(dir, 'razai.sqlite')
 }
