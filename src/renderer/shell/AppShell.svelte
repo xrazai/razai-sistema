@@ -3,7 +3,7 @@
   import AppSidebar from './AppSidebar.svelte'
   import AppTopbar from './AppTopbar.svelte'
 
-  type Route = 'dashboard' | 'settings' | 'design-system'
+  type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
 
   type Props = {
     route: Route
