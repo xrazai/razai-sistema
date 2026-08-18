@@ -30,7 +30,33 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 
 ---
 
-## 3. Catálogo de Camadas e Componentes
+## 3. Regras de Ouro de Altura e Baseline (Grid 4/8 & Line-Height 100%)
+
+> ### 1. Line-Height 100% Universal
+> Todo e qualquer elemento textual (`span`, `p`, `label`, `button`, `input`, `select`, `th`, `td`, `div`, títulos `h1-h6`) possui obrigatoriamente `line-height: 100%` (ou `1`), eliminando qualquer entrelinha residual fracionária.
+>
+> ### 2. Componentes Prontos e Compensação Estrutural
+> A altura somada total de qualquer componente pronto (somando conteúdo, padding e bordas de 1px com `box-sizing: border-box`) deve resultar estritamente em um múltiplo de 4 ou 8px:
+> - **Micro / Tags / Status**: `20px` (múltiplo de 4)
+> - **Botão Pequeno (`size="sm"`)**: `24px` (múltiplo de 8)
+> - **Botão Padrão (`size="md"`) / Input / Select**: `32px` (múltiplo de 8)
+> - **Item de Menu Lateral (`NavItem`)**: `36px` (múltiplo de 4)
+> - **Abas (`Tabs`) / Cabeçalho de Tabela (`th`)**: `32px` (múltiplo de 8)
+> - **Linhas de Tabela (`td`) / Topbar / Painéis**: `40px` (múltiplo de 8)
+> - **Toolbars de Busca / Cabeçalhos de Formulário / Modais**: `48px` (múltiplo de 8)
+> - **Rodapés de Ação (`.form-footer`)**: `56px` (múltiplo de 8)
+>
+> ### 3. Relação Hierárquica Pai-Filho
+> Se um componente estiver aninhado dentro de outro componente, **tanto os elementos filhos quanto os elementos pais** devem possuir altura somada estritamente múltipla de 4 ou 8.
+> Exemplo: Campo de formulário composto:
+> $$\text{Label }(16\text{px}) + \text{Margin }(8\text{px}) + \text{Input }(32\text{px}) = 56\text{px}\quad(7 \times 8\text{px})$$
+>
+> ### 4. Blocos de Layout
+> Todo e qualquer bloco que compõe o layout (barras laterais, topbars, toolbars, seções de formulário, rodapés, modais e containers) deve ter sua altura somada cravada em múltiplos de 4 ou 8.
+
+---
+
+## 4. Catálogo de Camadas e Componentes
 
 ### 3.1 Primitives (`design-system/primitives/`)
 - `Cell.svelte`: Célula retangular estrutural com bordas ou fundo configurável.

@@ -45,6 +45,11 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 - **Espaços de Cor**: Conversão matemática bidirecional instantânea entre **CIE-$L^*a^*b^*$** (D65) e **sRGB HEX**.
 - **Busca e Filtro**: Busca insensível a maiúsculas e acentos por nome, código HEX ou valores LAB.
 
+### 📐 Design System Industrial Brutalist (Grid 4/8 & Line-Height 100%)
+- **Line-Height 100% Universal**: Todo texto, span, label, input, button e célula tem `line-height: 100%`.
+- **Alturas Múltiplas de 4 ou 8px**: Todo componente pronto, container pai, elemento filho e bloco de layout possui altura somada estritamente múltipla de 4 ou 8px.
+- **Compensação Estrutural**: Padding e heights compensados com `box-sizing: border-box` e bordas rígidas de 1px.
+
 ### 🧭 Navegação & Topbar Unificada
 - **Topbar Única**: Cabeçalho unificado sem duplicações de títulos em páginas.
 - **Ações de Topbar**: Botões de ação primária (`+ Cadastrar Tecido`, `+ Cadastrar Cor`) integrados no canto superior direito ao lado do status de conexão do banco.
