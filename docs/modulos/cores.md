@@ -1,28 +1,26 @@
 # Módulo de Cores — Especificação e Regras de Negócio
 
-Este documento descreve o funcionamento, regras de validação, estrutura de dados e especificações técnicas do **Módulo de Cores** do **razai-sistema**.
+Este documento descreve o funcionamento, regras de validação, conversão de espaços de cor e persistência do **Módulo de Cores** do **razai-sistema**.
 
 ---
 
-## 1. Fluxo do Módulo
+## 1. Fluxo e Visões do Módulo
 
-O módulo segue rigorosamente a arquitetura e os padrões de navegação e componentes do sistema:
+O módulo é estruturado em três visões principais integradas ao roteador reativo:
 
-1. **Listagem / Paleta (`CoresPage.svelte`)**:
-   - Tabela com headers técnicos (`Amostra`, `Nome da Cor`, `HEX`, `LAB (L / A / B)`, `Atualizado em`).
-   - Amostra visual de cor (swatch) renderizada em cada linha.
-   - Busca em tempo real (insensível a acentos, case-insensitive e busca por HEX/LAB).
-   - Contador dinâmico de itens e resultados filtrados.
-   - Botão de ação superior **"Cadastrar Cor"**.
-   - Clique na linha para visualização e edição detalhada.
-2. **Cadastro (`CoresCadastroPage.svelte`)**:
+1. **Listagem / Paleta (`CoresPage.svelte` - rota `#cores`)**:
+   - Cabeçalho integrado na **Topbar Unificada** com o botão **"+ Cadastrar Cor"** e status do banco.
+   - Amostra visual de cor (swatch) renderizada em cada linha da tabela.
+   - Busca em tempo real (insensível a maiúsculas e acentos) por nome, código HEX ou valores LAB.
+   - Tabela de alta densidade (`Amostra`, `Nome da Cor`, `HEX`, `LAB (L / A / B)`, `Atualizado em`).
+   - Clique na linha para abrir a tela de detalhes da cor.
+2. **Cadastro (`CoresCadastroPage.svelte` - rota `#cores/cadastro`)**:
    - Formulário em grade modular (`Grid cols={3}`).
-   - Campos com swatch embutido na extremidade direita do input com feedback visual instantâneo.
-   - Botões de ação: **Cancelar** e **Salvar Cor**.
-3. **Detalhes / Edição (`CoresDetalhesPage.svelte`)**:
-   - Visualização e edição dos campos cadastrais.
-   - Pré-visualização da amostra de cor com swatch indicador e tag HEX no cabeçalho.
-   - Ações de atualização, cancelamento e exclusão com modal semântico de confirmação.
+   - Campos com swatch embutido na extremidade direita do input (`Input swatch={...}`) fornecendo feedback visual instantâneo durante a digitação.
+   - Conversão bidirecional automática: digitar HEX calcula e preenche o LAB; digitar LAB calcula e preenche o HEX.
+3. **Detalhes e Edição (`CoresDetalhesPage.svelte` - rota `#cores/<id>`)**:
+   - Visualização e edição dos parâmetros da cor com swatch e tag HEX de pré-visualização.
+   - Ações de atualização, cancelamento e exclusão com diálogo semântico de confirmação.
 
 ---
 
@@ -36,8 +34,20 @@ O módulo segue rigorosamente a arquitetura e os padrões de navegação e compo
 
 ---
 
-## 3. Feedback Visual e Amostras (Swatches)
+## 3. Conversão Matemática de Espaços de Cor
 
-- Os campos **HEX** e **LAB** utilizam o componente `Input` do Design System com a propriedade `swatch`.
-- O swatch interno exibe um quadrado de 18x18px com a cor calculada ou uma micro-grade indicando estado neutro/vazio.
-- A conversão entre **CIE-L\*a\*b\*** (D65) e **sRGB HEX** é calculada matematicamente em tempo real no frontend, permitindo que a amostra de cor responda imediatamente à digitação em qualquer um dos formatos.
+A conversão entre **CIE-$L^*a^*b^*$** (D65) e **sRGB** é realizada diretamente no frontend em tempo real (`src/renderer/features/cores/utils.ts`):
+
+1. **LAB $\rightarrow$ XYZ**: Conversão das coordenadas $L^*, a^*, b^*$ para o espaço de cor CIE-XYZ com ponto branco de referência D65 ($X_n=95.0489, Y_n=100.0, Z_n=108.8840$).
+2. **XYZ $\rightarrow$ Linear sRGB**: Aplicação da matriz de transformação de cor sRGB padrão.
+3. **Linear sRGB $\rightarrow$ Gamut Clamped sRGB**: Aplicação da curva de correção de gama (gamma correction $\gamma=2.4$) com clamping no intervalo $[0, 255]$.
+4. **sRGB $\rightarrow$ HEX**: Formatação dos canais R, G, B em string hexadecimal `#RRGGBB`.
+
+---
+
+## 4. Persistência SQLite & IPC
+
+- **Tabela**: `cores` (gerenciada pela migration `003_create_cores.ts`).
+- **Serviço Main**: `src/main/services/cores.service.ts` com métodos `list()`, `getById()`, `create()`, `update()`, `delete()`.
+- **IPC Handlers**: canais `cores:list`, `cores:get-by-id`, `cores:create`, `cores:update`, `cores:delete`.
+- **Preload Bridge**: exposto em `window.razai.cores`.

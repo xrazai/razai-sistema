@@ -1,94 +1,105 @@
 # Design System — Industrial Brutalist Grid UI
 
-Este documento descreve a linguagem visual e a organização do Design System do **razai-sistema**. A fonte de verdade **visual** é `src/renderer/pages/DesignSystemPage.svelte` (componentes reais).
+Este documento descreve a linguagem visual, componentes, tokens e padrões arquiteturais do Design System do **razai-sistema**. A fonte de verdade visual viva é `src/renderer/pages/DesignSystemPage.svelte` (utilizando exclusivamente componentes reais de produção).
 
-## Princípio
+---
 
-> Every element belongs to a cell. Every cell belongs to a grid. The grid must remain visually perceptible.
+## 1. Princípio Fundamental
 
-A interface é um sistema de compartimentos rígidos. Informação densa, bordas explícitas, tipografia técnica.
+> **Every element belongs to a cell. Every cell belongs to a grid. The grid must remain visually perceptible.**
 
-## Foundations
+A interface é estruturada como um maquinário de precisão: compartimentos rígidos de 1px, sem curvas decorativas, sombras suaves ou gradientes, priorizando alta densidade de informação técnica, contraste e previsibilidade.
 
-| Token / regra | Onde |
-| --- | --- |
-| Cores, spacing, borders, tipografia base | `foundations/tokens.css` |
-| Hierarquia tipográfica | `foundations/typography.css` |
-| Classes de grid modular | `foundations/grid.css` |
-| Reset + scrollbar + focus | `foundations/global.css` |
+---
 
-Características:
+## 2. Foundations e Tokens
 
-- fundo escuro (`--color-bg`)
-- bordas 1px (`--border-width`)
-- `border-radius: 0`
-- fonte mono (`--font-mono`)
-- spacing modular (`--space-1` … `--space-7`)
-- tracking padronizado (`--tracking-tight` / `--tracking-label` / `--tracking-header`)
-- motion mínimo (`--motion-fast: 120ms linear`)
-- `::selection` e caret temáticos
+| Token / Regra | Arquivo | Descrição |
+| --- | --- | --- |
+| Cores, Espaçamentos, Bordas, Tokens | `src/renderer/design-system/foundations/tokens.css` | Cores semânticas (`--color-bg`, `--color-border`, `--color-accent`, etc.), spacing modular (`--space-1` a `--space-7`), borda de 1px (`--border-width`). |
+| Hierarquia Tipográfica | `src/renderer/design-system/foundations/typography.css` | Família monoespaçada (`--font-mono`), escalas (`--text-2xs` a `--text-2xl`) e letter-spacing técnico (`--tracking-tight`, `--tracking-label`, `--tracking-header`). |
+| Classes de Grid Modular | `src/renderer/design-system/foundations/grid.css` | Utilitários `.grid-system`, `.grid-header`, `.grid-footer`, `.grid-row`. |
+| Reset Global & Scrollbar | `src/renderer/design-system/foundations/global.css` | Scrollbars técnicas quadradas, focus states `:focus-visible` e seleção de texto customizada. |
 
-Regras estruturais:
+### Regras Visuais Mandatórias:
+- **Tema Escuro Industrial**: Fundo primário `#0e0e0e`, superfícies elevadas `#161616`, fundos rebaixados `#080808`.
+- **Bordas Rígidas**: `1px solid var(--color-border)` (#262626). `border-radius: 0` em todos os elementos.
+- **Tipografia Técnica**: Todas as tabelas, SKUs, métricas e identificadores usam `--font-mono` com caixa alta e tracking estruturado.
+- **Sem Decorações Supérfluas**: Proibido uso de box-shadows flutuantes, glassmorphism, blur ou gradientes decorativos.
 
-- **O grid dono dos separadores**: `.grid-system` desenha as linhas internas (gap 1px sobre `--color-border`); filhos diretos nunca desenham borda própria.
-- **Estado ativo por inversão**: NavItem/Tab ativo = fundo `--color-accent` + texto `--color-accent-fg` (nunca borda > 1px).
-- **Ícones**: SVG autoral, stroke 1px, `shape-rendering: crispEdges`, monocromáticos (`currentColor`).
-- **Checkbox/Toggle**: customizados (quadrado 1px), sem styling nativo do OS; focus visível via `:focus-visible` no irmão visual.
-- **Panel `flush`, `header` & `actions`**: corpo sem padding quando contém Table/Grid encostados na moldura (`Table bordered={false}`, `Grid bare`); cabeçalho com suporte a snippets `header` (ex.: Breadcrumb funcional) e `actions` para botões e controles contextuais alinhados à direita.
-- **Breadcrumb navegável**: trilha de navegação hierárquica em monoespaçado maiúsculo com separadores `/`, itens linkáveis e item atual ativo.
-- **Table padrão com ordenação automática**: ordenação alfabética por padrão (`localeCompare('pt-BR')`), suporte a ordenação interativa por cabeçalho de coluna (ASC/DESC com indicadores técnicos `▲`/`▼`), colunas com alinhamento (`align`), largura (`width`), linhas clicáveis (`clickable`), fallback de estado vazio (`emptyMessage`) e snippet customizado por célula (`cell`).
-- **Button com variantes de tamanho e tom**: `variant="primary"`, `variant="secondary"`, `variant="ghost"`, `variant="danger"`, `size="md"` (padrão) e `size="sm"` (compacto para toolbars e cabeçalhos de painéis).
-- **Input com suporte a prefix/suffix**: suporte a afixos de unidade e símbolos técnicos (`suffix="m"`, `suffix="g/m²"`, `suffix="m/kg"`, `prefix="R$"`) integrados ao input group.
-- **Ícones**: SVG autoral, stroke 1px, `shape-rendering: crispEdges`, monocromáticos (`currentColor`). Inclui `grid`, `dash`, `settings`, `system`, `chevron`, `chevron-left`, `arrow-left`, `check`, `empty`, `fabric`, `palette`, `link`, `plus`, `search`.
+---
 
-## Camadas de componentes
+## 3. Catálogo de Camadas e Componentes
 
-```
-Foundations
-    ↓
-Primitives          Cell, Divider, Label, Icon, Surface
-    ↓
-Controls            Button, Input, Select, Checkbox, Toggle
-Data Display        Status, Metric, Badge, Table, Progress
-Layout              Panel, Stack, Grid, SplitPane, ScrollArea
-Navigation          Sidebar, Topbar, Tabs, NavItem, Breadcrumb
-    ↓
-Compositions        Inspector, DataPanel, MetricPanel, EmptyState
-    ↓
-Feature Components / Pages
-```
+### 3.1 Primitives (`design-system/primitives/`)
+- `Cell.svelte`: Célula retangular estrutural com bordas ou fundo configurável.
+- `Divider.svelte`: Divisor horizontal ou vertical de 1px.
+- `Label.svelte`: Rótulo de campo com indicador opcional de obrigatoriedade (`required`).
+- `Icon.svelte`: Ícones vetoriais SVG autorais, traço de 1px com `crispEdges`. Ícones: `grid`, `dash`, `settings`, `system`, `chevron`, `chevron-left`, `arrow-left`, `check`, `empty`, `fabric`, `palette`, `link`, `plus`, `search`.
+- `Surface.svelte`: Compartimento de fundo elevado ou rebaixado.
 
-`DesignSystemPage` pode importar qualquer camada para documentação viva.
+### 3.2 Controls (`design-system/controls/`)
+- `Button.svelte`: Botões industriais com variantes `primary`, `secondary`, `ghost`, `danger` e tamanhos `md` e `sm`.
+- `Input.svelte`: Campo de entrada monoespaçado com suporte a afixos de unidade (`suffix="m"`, `suffix="g/m²"`, `prefix="R$"`) e amostra de cor (`swatch="#FFCC00"`).
+- `Select.svelte`: Caixa de seleção estilizada com indicador de chevron SVG e estados de foco explícitos.
+- `Checkbox.svelte`: Caixa de marcação técnica quadrada de 1px.
+- `Toggle.svelte`: Chave comutadora retangular de alta visibilidade.
 
-## Componentização
+### 3.3 Data Display (`design-system/data-display/`)
+- `Table.svelte`: Tabela técnica com ordenação automática e interativa por colunas (ASC/DESC), colunas com alinhamento e largura customizável, clique na linha e fallback de dados vazios.
+- `Status.svelte`: Indicador de estado do sistema com pontos luminosos (`ok`, `warn`, `danger`, `neutral`).
+- `Badge.svelte`: Tag compacta em monoespaçado para status, mensagens e contadores.
+- `Metric.svelte`: Exibição destacada de valores numéricos com rótulo e unidade.
+- `Progress.svelte`: Barra de progresso retangular de 1px com preenchimento sólido.
 
-```
+### 3.4 Layout (`design-system/layout/`)
+- `Panel.svelte`: Painel encapsulador com suporte a modo `flush`, snippets `header` e `actions`.
+- `Grid.svelte`: Grid CSS modular com suporte a múltiplas colunas (`cols={1..6}`) e modo sem margens (`bare`).
+- `Stack.svelte`: Empilhamento vertical ou horizontal com espaçamentos parametrizados.
+- `SplitPane.svelte`: Divisor de tela ajustável para layouts duplos.
+- `ScrollArea.svelte`: Área com rolagem customizada e barras finas industriais.
+
+### 3.5 Navigation (`design-system/navigation/`)
+- `Sidebar.svelte`: Barra lateral de navegação com logotipo e compartimentos verticais.
+- `NavItem.svelte`: Item de menu lateral com ícone, estado ativo por inversão de cores e contador opcional.
+- `Topbar.svelte`: Barra de cabeçalho unificada no topo do viewport, contendo título dinâmico da rota e slot de ações à direita.
+- `Tabs.svelte`: Abas horizontais de alternância de contexto.
+- `Breadcrumb.svelte`: Trilha navegável com itens clicáveis e separadores técnicos `/`.
+
+### 3.6 Compositions (`design-system/compositions/`)
+- `EmptyState.svelte`: Estado vazio contextualizado com ícone, título técnico, descrição e botão de ação opcional.
+- `DataPanel.svelte`: Composição combinando métricas, tabelas e cabeçalhos.
+- `MetricPanel.svelte`: Painel de monitoramento e indicadores rápidos.
+- `Inspector.svelte`: Painel lateral de inspeção e edição de detalhes.
+
+---
+
+## 4. Padrão de Topbar Unificada e Ações
+
+Para eliminar cabeçalhos duplicados nas telas e maximizar a área útil:
+1. **Topbar Única**: Existe apenas uma barra de topo (`AppTopbar`), que gerencia o título da seção atual (`TECIDOS`, `CORES`, `INÍCIO`, etc.).
+2. **Ações Primárias no Topo**: Botões de cadastro ou ações globais da tela atual (`+ Cadastrar Tecido`, `+ Cadastrar Cor`) ficam posicionados na extremidade direita da Topbar, ao lado do indicador de conexão do banco (`SQLite Online`).
+3. **Páginas Livres de Repetição**: As páginas de listagem começam diretamente na barra de ferramentas e busca (`.toolbar`), fluindo imediatamente para a tabela de dados (`Table`).
+
+---
+
+## 5. Fluxo de Criação de Novos Componentes
+
+```text
 Nova necessidade de UI
         │
         ▼
  Já existe no Design System? ──Sim──► Reutilizar
         │ Não
         ▼
-     É genérico? ──Não──► Criar na Feature
+     É genérico? ──Não──► Criar em src/renderer/features/
         │ Sim
         ▼
- Criar no Design System
+ Criar em src/renderer/design-system/
         │
         ▼
- Adicionar ao DesignSystemPage
+ Adicionar ao DesignSystemPage.svelte
         │
         ▼
  Usar na Feature
 ```
-
-## Preferências / proibições
-
-**Preferir:** grid rígido, divisores 1px, compartimentos, mono, densidade, labels/estados/métricas explícitos, tokens, CSS simples, reuso.
-
-**Evitar:** cards flutuantes, radius, shadows, glass, gradientes decorativos, whitespace excessivo, estilos duplicados, padrões de feature que deveriam ser do DS.
-
-## Living page
-
-Qualquer alteração reutilizável (token, tipografia, spacing, primitive, control, composition, padrão visual) **deve** aparecer em `DesignSystemPage.svelte` antes de considerar a mudança completa.
-
-Não usar Storybook nesta fundação.
