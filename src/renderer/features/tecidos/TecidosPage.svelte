@@ -7,23 +7,7 @@
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
   import TecidosCadastroPage, { type NovoTecidoData } from './TecidosCadastroPage.svelte'
-
-  type Tecido = {
-    id: string
-    codigo: string
-    nome: string
-    composicao: string
-    gramatura: string
-    largura: string
-    fornecedor: string
-    status: 'ativo' | 'inativo' | 'esgotado'
-    rendimento?: string
-    gramaturaLinear?: string
-    tipo?: string
-    transparencia?: string
-    elasticidade?: string
-    acabamento?: string
-  }
+  import TecidosDetalhesPage, { type Tecido } from './TecidosDetalhesPage.svelte'
 
   const columns: Column[] = [
     { key: 'codigo', label: 'Código', width: '110px' },
@@ -35,7 +19,7 @@
     { key: 'status', label: 'Status', width: '110px', align: 'center' }
   ]
 
-  let viewMode = $state<'list' | 'create'>('list')
+  let viewMode = $state<'list' | 'create' | 'details'>('list')
   let searchTerm = $state('')
   let selectedTecido = $state<Tecido | null>(null)
 
@@ -177,6 +161,23 @@
     viewMode = 'list'
   }
 
+  function handleSalvarEdicao(atualizado: Tecido) {
+    tecidos = tecidos.map((item) => (item.id === atualizado.id ? atualizado : item))
+    selectedTecido = atualizado
+    viewMode = 'list'
+  }
+
+  function handleExcluirTecido(id: string) {
+    tecidos = tecidos.filter((item) => item.id !== id)
+    selectedTecido = null
+    viewMode = 'list'
+  }
+
+  function handleRowClick(row: any) {
+    selectedTecido = row as Tecido
+    viewMode = 'details'
+  }
+
   function getStatusTone(status: Tecido['status']): 'ok' | 'warn' | 'danger' {
     if (status === 'ativo') return 'ok'
     if (status === 'esgotado') return 'warn'
@@ -194,6 +195,13 @@
   <TecidosCadastroPage
     oncancel={() => (viewMode = 'list')}
     onsave={handleNovoTecido}
+  />
+{:else if viewMode === 'details' && selectedTecido}
+  <TecidosDetalhesPage
+    tecido={selectedTecido}
+    onback={() => (viewMode = 'list')}
+    onsave={handleSalvarEdicao}
+    ondelete={handleExcluirTecido}
   />
 {:else}
   <div class="page">
@@ -234,7 +242,7 @@
             rows={filteredTecidos}
             bordered={false}
             emptyMessage="Nenhum tecido encontrado para os critérios de busca."
-            onrowclick={(row) => (selectedTecido = row as Tecido)}
+            onrowclick={handleRowClick}
           >
             {#snippet cell({ row, column, value })}
               {#if column.key === 'codigo'}
@@ -252,10 +260,10 @@
 
         <!-- Barra de rodapé informativa -->
         <footer class="footer">
-          <span class="footer-note">Pressione um item da tabela para visualizar detalhes</span>
+          <span class="footer-note">Clique em uma linha para abrir a tela de detalhes e editar o cadastro</span>
           {#if selectedTecido}
             <span class="footer-selected">
-              Selecionado: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong>
+              Último selecionado: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong>
             </span>
           {/if}
         </footer>
@@ -269,11 +277,13 @@
     height: 100%;
     min-height: 0;
     display: grid;
+    width: 100%;
   }
 
   .page :global(.panel) {
     height: 100%;
     min-height: 0;
+    width: 100%;
   }
 
   .layout {
@@ -281,6 +291,7 @@
     flex-direction: column;
     height: 100%;
     min-height: 0;
+    width: 100%;
   }
 
   .toolbar {
@@ -291,6 +302,8 @@
     padding: var(--space-2) var(--space-3);
     background: var(--color-bg-sunken);
     border-bottom: var(--border-width) solid var(--color-border);
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .search-box {
@@ -348,6 +361,7 @@
     min-height: 0;
     overflow: auto;
     background: var(--color-bg);
+    width: 100%;
   }
 
   .code {
@@ -372,6 +386,8 @@
     color: var(--color-fg-dim);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .footer-selected strong {
