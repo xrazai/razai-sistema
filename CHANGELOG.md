@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Modelo de bordas direcionais e consolidação de box-sizing sem colisão no Design System
+
 ## 2026-08-18 — Substituição de separadores avulsos por bordas estruturais e régua de seção padronizada em 40px
 
 ## 2026-08-18 — Amarração proporcional e ritmo unificado de 40px no Design System (Sidebar, Topbar, Toolbar, Tabela)
