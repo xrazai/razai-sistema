@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Regra de SKU de 4 caracteres, tela de detalhes/edição alinhada ao cadastro e exclusão de tecidos
+
 ## 2026-08-18 — Módulo de tecidos com tabela inicial, formulário de cadastro em grid e auto-cálculo de rendimento e gramaturas
 
 ## 2026-08-18 — Módulos Tecidos, Cores e Vínculos adicionados ao sidebar e layout em 100% de largura
