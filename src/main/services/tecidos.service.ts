@@ -39,6 +39,36 @@ function mapRowToRecord(row: DbTecidoRow): TecidoRecord {
   }
 }
 
+function validateTecidoFields(
+  nome: string,
+  composicao: string,
+  largura: number,
+  rendimento?: number | null,
+  gramaturaLinear?: number | null,
+  gramaturaM2?: number | null
+) {
+  if (!nome || !nome.trim()) {
+    throw new Error('O campo "nome" é obrigatório.')
+  }
+  if (!composicao || !composicao.trim()) {
+    throw new Error('O campo "composicao" é obrigatório.')
+  }
+  if (typeof largura !== 'number' || isNaN(largura) || largura <= 0) {
+    throw new Error('O campo "largura" é obrigatório e deve ser um número maior que zero.')
+  }
+
+  const hasSecondary =
+    (typeof rendimento === 'number' && !isNaN(rendimento) && rendimento > 0) ||
+    (typeof gramaturaLinear === 'number' && !isNaN(gramaturaLinear) && gramaturaLinear > 0) ||
+    (typeof gramaturaM2 === 'number' && !isNaN(gramaturaM2) && gramaturaM2 > 0)
+
+  if (!hasSecondary) {
+    throw new Error(
+      'É obrigatório fornecer ao menos uma métrica secundária válida (rendimento, gramaturaLinear ou gramaturaM2).'
+    )
+  }
+}
+
 function getUniqueSku(nome: string, currentId?: string): string {
   const db = getDb()
   const baseSku = generateTecidoSku(nome)
@@ -121,10 +151,8 @@ export class TecidosService {
 
   static create(input: CreateTecidoInput): TecidoRecord {
     const db = getDb()
-    const id = randomUUID()
-    const codigo = getUniqueSku(input.nome)
-    const now = new Date().toISOString()
-
+    const nome = input.nome ? input.nome.trim() : ''
+    const composicao = input.composicao ? input.composicao.trim() : ''
     const largura = input.largura
     const rendimento = input.rendimento ?? null
     const gramaturaLinear = input.gramaturaLinear ?? null
@@ -133,6 +161,12 @@ export class TecidosService {
     const transparencia = input.transparencia ?? null
     const elasticidade = input.elasticidade ?? null
     const acabamento = input.acabamento ?? null
+
+    validateTecidoFields(nome, composicao, largura, rendimento, gramaturaLinear, gramaturaM2)
+
+    const id = randomUUID()
+    const codigo = getUniqueSku(nome)
+    const now = new Date().toISOString()
 
     db.prepare(`
       INSERT INTO tecidos (
@@ -144,8 +178,8 @@ export class TecidosService {
     `).run(
       id,
       codigo,
-      input.nome.trim(),
-      input.composicao.trim(),
+      nome,
+      composicao,
       largura,
       rendimento,
       gramaturaLinear,
@@ -182,6 +216,8 @@ export class TecidosService {
     const transparencia = input.transparencia !== undefined ? input.transparencia : existing.transparencia
     const elasticidade = input.elasticidade !== undefined ? input.elasticidade : existing.elasticidade
     const acabamento = input.acabamento !== undefined ? input.acabamento : existing.acabamento
+
+    validateTecidoFields(nome, composicao, largura, rendimento, gramaturaLinear, gramaturaM2)
 
     const codigo = nome !== existing.nome ? getUniqueSku(nome, id) : existing.codigo
     const now = new Date().toISOString()
