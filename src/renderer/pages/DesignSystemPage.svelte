@@ -33,6 +33,18 @@
   let checked = $state(true)
   let toggled = $state(false)
   let tab = $state('one')
+
+  // Form playground state
+  let demoNome = $state('Algodão Cru')
+  let demoComposicao = $state('100% Algodão')
+  let demoLargura = $state('1,50')
+  let demoRendimento = $state('2,80')
+  let demoGramaturaLin = $state('270')
+  let demoGramaturaM2 = $state('180')
+  let demoTipo = $state('')
+  let demoTransparencia = $state('')
+  let demoElasticidade = $state('')
+  let demoAcabamento = $state('')
 </script>
 
 <ScrollArea>
@@ -102,6 +114,8 @@
                 <Icon name="fabric" />
                 <Icon name="palette" />
                 <Icon name="link" />
+                <Icon name="plus" />
+                <Icon name="search" />
                 <Icon name="settings" />
                 <Icon name="system" />
               </Stack>
@@ -116,16 +130,30 @@
           <Grid cols={3}>
             <Cell>
               <Label text="Button" />
-              <Stack direction="horizontal" gap="2">
-                <Button variant="primary">Primary</Button>
-                <Button>Secondary</Button>
-                <Button variant="ghost">Ghost</Button>
-                <Button disabled>Disabled</Button>
+              <Stack gap="2">
+                <Stack direction="horizontal" gap="2">
+                  <Button variant="primary">Primary</Button>
+                  <Button>Secondary</Button>
+                  <Button variant="ghost">Ghost</Button>
+                  <Button disabled>Disabled</Button>
+                </Stack>
+                <Stack direction="horizontal" gap="2">
+                  <Button variant="primary" size="sm">
+                    <Icon name="plus" size="sm" />
+                    <span>Action SM</span>
+                  </Button>
+                  <Button size="sm">Secondary SM</Button>
+                  <Button variant="ghost" size="sm">Ghost SM</Button>
+                </Stack>
               </Stack>
             </Cell>
             <Cell>
               <Label text="Input" />
               <Input bind:value={inputValue} placeholder="entrada" />
+            </Cell>
+            <Cell>
+              <Label text="Input (com sufixo/unidade)" />
+              <Input bind:value={demoLargura} placeholder="1,50" suffix="m" />
             </Cell>
             <Cell>
               <Label text="Select" />
@@ -202,10 +230,117 @@
         <Divider />
 
         <section>
+          <h2 class="section">Form & Field Playground (Grid Modular)</h2>
+          <Panel title="Formulário Padrão de Cadastro">
+            {#snippet actions()}
+              <Stack direction="horizontal" gap="2">
+                <Button variant="ghost" size="sm">Cancelar</Button>
+                <Button variant="primary" size="sm">Salvar Registro</Button>
+              </Stack>
+            {/snippet}
+
+            <Stack gap="3">
+              <!-- Linha 1: 2 colunas -->
+              <Grid cols={2} bare>
+                <Cell pad={false}>
+                  <Label text="Nome" />
+                  <Input bind:value={demoNome} placeholder="Nome do item" />
+                </Cell>
+                <Cell pad={false}>
+                  <Label text="Composição" />
+                  <Input bind:value={demoComposicao} placeholder="Ex: 100% Algodão" />
+                </Cell>
+              </Grid>
+
+              <!-- Linha 2: 4 colunas -->
+              <Grid cols={4} bare>
+                <Cell pad={false}>
+                  <Label text="Largura (m)" />
+                  <Input bind:value={demoLargura} placeholder="1,50" suffix="m" />
+                </Cell>
+                <Cell pad={false}>
+                  <Label text="Rendimento (m/kg)" />
+                  <Input bind:value={demoRendimento} placeholder="2,80" suffix="m/kg" />
+                </Cell>
+                <Cell pad={false}>
+                  <Label text="Gramatura (linear)" />
+                  <Input bind:value={demoGramaturaLin} placeholder="270" suffix="g/m" />
+                </Cell>
+                <Cell pad={false}>
+                  <Label text="Gramatura (g/m²)" />
+                  <Input bind:value={demoGramaturaM2} placeholder="180" suffix="g/m²" />
+                </Cell>
+              </Grid>
+
+              <!-- Linha 3: 4 colunas -->
+              <Grid cols={4} bare>
+                <Cell pad={false}>
+                  <Label text="Tipo" />
+                  <Select
+                    bind:value={demoTipo}
+                    options={[
+                      { value: '', label: 'Selecione' },
+                      { value: 'liso', label: 'Liso' },
+                      { value: 'estampado', label: 'Estampado' }
+                    ]}
+                  />
+                </Cell>
+                <Cell pad={false}>
+                  <Label text="Transparência" />
+                  <Select
+                    bind:value={demoTransparencia}
+                    options={[
+                      { value: '', label: 'Selecione' },
+                      { value: 'nenhuma', label: 'Nenhuma' },
+                      { value: 'baixa', label: 'Baixa' },
+                      { value: 'media', label: 'Média' },
+                      { value: 'alta', label: 'Alta' }
+                    ]}
+                  />
+                </Cell>
+                <Cell pad={false}>
+                  <Label text="Elasticidade" />
+                  <Select
+                    bind:value={demoElasticidade}
+                    options={[
+                      { value: '', label: 'Selecione' },
+                      { value: 'nenhuma', label: 'Nenhuma' },
+                      { value: 'baixa', label: 'Baixa' },
+                      { value: 'media', label: 'Média' },
+                      { value: 'alta', label: 'Alta' }
+                    ]}
+                  />
+                </Cell>
+                <Cell pad={false}>
+                  <Label text="Acabamento" />
+                  <Select
+                    bind:value={demoAcabamento}
+                    options={[
+                      { value: '', label: 'Selecione' },
+                      { value: 'fosco', label: 'Fosco' },
+                      { value: 'semi_brilho', label: 'Semi-brilho' },
+                      { value: 'brilhante', label: 'Brilhante' }
+                    ]}
+                  />
+                </Cell>
+              </Grid>
+            </Stack>
+          </Panel>
+        </section>
+
+        <Divider />
+
+        <section>
           <h2 class="section">Layout</h2>
           <Stack gap="3">
-            <Panel title="Panel">
-              Conteúdo em compartimento rígido.
+            <Panel title="Panel com Ações">
+              {#snippet actions()}
+                <Button variant="primary" size="sm">
+                  <Icon name="plus" size="sm" />
+                  <span>Novo</span>
+                </Button>
+              {/snippet}
+              Conteúdo em compartimento rígido com slot de ações no cabeçalho.
             </Panel>
             <SplitPane ratio="1fr 1fr">
               {#snippet left()}

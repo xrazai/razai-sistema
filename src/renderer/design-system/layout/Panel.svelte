@@ -5,14 +5,22 @@
     title?: string
     flush?: boolean
     children?: Snippet
+    actions?: Snippet
   }
 
-  let { title = '', flush = false, children }: Props = $props()
+  let { title = '', flush = false, children, actions }: Props = $props()
 </script>
 
 <section class="panel">
-  {#if title}
-    <header class="head">{title}</header>
+  {#if title || actions}
+    <header class="head">
+      <span class="title">{title}</span>
+      {#if actions}
+        <div class="actions">
+          {@render actions()}
+        </div>
+      {/if}
+    </header>
   {/if}
   <div class="body" class:flush>
     {@render children?.()}
@@ -29,13 +37,30 @@
   }
 
   .head {
-    padding: var(--space-2) var(--space-3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-height: 36px;
+    padding: var(--space-1) var(--space-3);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-header);
     text-transform: uppercase;
     color: var(--color-fg-muted);
     background: var(--color-bg-elevated);
+  }
+
+  .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
   }
 
   .body {

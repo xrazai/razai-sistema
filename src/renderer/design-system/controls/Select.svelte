@@ -32,14 +32,29 @@
     border-radius: var(--radius);
     background: var(--color-bg-sunken);
     color: var(--color-fg);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
+    outline: none;
+    cursor: pointer;
+    transition: border-color var(--motion-fast);
   }
 
   .select:hover:not(:disabled) {
     border-color: var(--color-accent);
   }
 
+  .select:focus:not(:disabled) {
+    border-color: var(--color-accent);
+    background: var(--color-bg);
+  }
+
   .select:disabled {
     opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  option {
+    background: var(--color-bg-elevated);
+    color: var(--color-fg);
   }
 </style>
