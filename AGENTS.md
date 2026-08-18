@@ -44,7 +44,7 @@ Toda tarefa é cadastrada, movida e iterada **no board** (GitHub Projects). Não
 
 Uma task só está **fechada** quando:
 1. O PR foi **mergeado** e a issue movida para **Done** no board.
-2. Há entrada correspondente no topo do `CHANGELOG.md` (`## YYYY-MM-DD — resumo curto`).
+2. Há entrada correspondente no topo do `CHANGELOG.md` (`## YYYY-MM-DD — resumo curto`), incluída no próprio PR da task.
 
 ### Prioridade e Ordem
 
@@ -54,15 +54,23 @@ Uma task só está **fechada** quando:
 
 ### Ciclo da Task
 
-1. **Cadastrar**: criar issue com título `Task <N> — <resumo>` e body com prioridade/score, justificativa e fluxo de branch. Adicionar ao board com Priority e Status.
-2. **Iniciar**: atualizar `main`, criar branch `task/<N>-<slug>` a partir de `main` e mover issue para `In progress`.
-3. **Desenvolver e validar**: implementar o escopo focado da task e validar localmente.
-4. **Submeter**: abrir PR via GitHub CLI (`gh pr create` ou `gh stack submit`) **somente quando o usuário pedir explicitamente**, mover para `In review`.
-5. **Concluir**: após o merge, adicionar linha no topo do `CHANGELOG.md`, fechar issue (ou mover para `Done`), apagar branch local/remota e atualizar `main`.
+1. **Cadastrar**: criar issue com título `Task <N> — <resumo>` e body com prioridade/score, justificativa e fluxo de branch. Adicionar ao board via CLI (`gh project item-add 6 --owner xrazai --url <url>`) com Priority e Status.
+2. **Iniciar**: atualizar `main`, criar branch `task/<N>-<slug>` a partir de `main` (ou da branch anterior se stack) e mover issue para `In progress`.
+3. **Desenvolver e validar**: implementar o escopo focado da task, atualizar `CHANGELOG.md` na própria branch/stack e validar localmente (`npm run typecheck` e `npm run build`).
+4. **Submeter**: abrir PR via GitHub CLI (`gh pr create` ou `gh stack submit --auto --open`) **somente quando o usuário pedir explicitamente**, mover para `In review`.
+5. **Concluir**: após o merge, fechar issue (ou mover para `Done`), apagar branch local/remota e atualizar `main`.
 6. Se gerou UI genérica nova: atualizar `DesignSystemPage.svelte` antes de considerar completa.
+
+### Execução Sequencial em Lote
+
+Quando o usuário solicitar a execução de tasks em fila ou em ordem:
+- Executar todas as tasks da sequência de forma autônoma e contínua.
+- Criar as branches encadeadas (`task/<N>-<slug>`), fazer um commit atômico por task com mensagem padronizada e avançar imediatamente para a próxima sem pausar entre cada uma.
+- Ao finalizar todo o lote, realizar a validação completa e aguardar a confirmação do usuário antes de submeter PRs.
 
 **O que agentes NÃO devem fazer**:
 - Abrir PR ou fazer push para o repositório remoto sem pedido explícito do usuário.
+- Abrir PR isolado exclusivo para documentação ou atualização do `CHANGELOG.md` (o changelog deve ser incluído no próprio PR/stack da task).
 - Fechar task no chat sem atualizar board e `CHANGELOG.md`.
 - Criar backlog paralelo (markdown local, Notion, etc.).
 - Escrever changelog verboso (apenas o resumo curto de uma linha).
@@ -131,16 +139,16 @@ gh extension install github/gh-stack   # gh >= 2.90
 
 gh stack init task/<N>-<slug>          # camada base (target: main)
 gh stack add task/<M>-<slug>           # próxima camada (depende da anterior)
-gh stack submit                        # push + criação de PRs vinculados
+gh stack submit --auto --open          # push + criação não interativa de PRs prontos para review
 gh stack sync --prune                  # sincronizar após merges ou alterações
 gh stack merge --yes --squash          # merge bottom-up não interativo
 ```
 
 - **Não esperar merge para avançar**: continue desenvolvendo as camadas superiores imediatamente sem aguardar o merge da camada de baixo.
 - Cada camada = 1 branch = 1 PR com mudanças incrementais.
-- **Propagação de correções**: se alterar uma camada intermediária, execute `gh stack sync --prune` seguido de `gh stack submit` (nunca faça rebase manual complexo).
+- **Propagação de correções**: se alterar uma camada intermediária, execute `gh stack sync --prune` seguido de `gh stack submit --auto --open` (nunca faça rebase manual complexo).
 - Merge sempre **bottom-up**; rebase em cascata automático pelo GitHub.
-- Branch protection e CI valem para todas as camadas.
+- Branch protection e CI valem para todas as camadas. O workflow `ci.yml` deve disparar em qualquer `pull_request` (sem filtro de branches) para que os PRs intermediários recebam checks de CI.
 - Não suportado: cross-fork stacks e GitHub Desktop.
 
 ### 6. Validação Local Pré-PR (Obrigatória para QUALQUER PR)
