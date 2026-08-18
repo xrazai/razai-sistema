@@ -96,7 +96,19 @@ task/<N>-<slug-kebab>
 ### 3. Decisão: PR Normal vs. Stacked PR
 
 - **PR Normal (padrão)**: para mudanças pequenas, autocontidas e fáceis de revisar como unidade.
-- **Stacked PR**: apenas quando uma entrega grande pode ser dividida em camadas dependentes e significativas (ex.: Schema → Service → IPC → UI).
+- **Stacked PR**: apenas quando uma entrega grande pode ser dividida em camadas dependentes e significativas:
+
+```text
+Exemplo de Stack arquitetural:
+PR 1 (base): Schema / Migration SQLite (src/main/database)
+  ↑
+PR 2:        Serviço de Negócio & Handlers IPC (src/main/services + src/shared)
+  ↑
+PR 3:        Preload Bridge & Tipagens (src/preload + src/shared)
+  ↑
+PR 4 (topo): Componentes UI Svelte (src/renderer/features)
+```
+
 - Não criar stacked PRs apenas por ter múltiplos commits.
 - Tasks independentes devem usar branches/worktrees independentes.
 
@@ -120,25 +132,28 @@ gh extension install github/gh-stack   # gh >= 2.90
 gh stack init task/<N>-<slug>          # camada base (target: main)
 gh stack add task/<M>-<slug>           # próxima camada (depende da anterior)
 gh stack submit                        # push + criação de PRs vinculados
-gh stack sync --prune                  # sincronizar após merges
+gh stack sync --prune                  # sincronizar após merges ou alterações
 gh stack merge --yes --squash          # merge bottom-up não interativo
 ```
 
+- **Não esperar merge para avançar**: continue desenvolvendo as camadas superiores imediatamente sem aguardar o merge da camada de baixo.
 - Cada camada = 1 branch = 1 PR com mudanças incrementais.
-- Merge sempre **bottom-up**; rebase em cascata automático.
+- **Propagação de correções**: se alterar uma camada intermediária, execute `gh stack sync --prune` seguido de `gh stack submit` (nunca faça rebase manual complexo).
+- Merge sempre **bottom-up**; rebase em cascata automático pelo GitHub.
 - Branch protection e CI valem para todas as camadas.
 - Não suportado: cross-fork stacks e GitHub Desktop.
 
-### 6. Validação Local Pré-PR
+### 6. Validação Local Pré-PR (Obrigatória para QUALQUER PR)
 
-Antes de submeter PR normal ou stack completa:
+Antes de submeter **qualquer** PR (seja normal ou stack), execute a validação local completa:
 1. `npm run typecheck`
 2. Testes automatizados relevantes
-3. `npm run build` (build completo da aplicação)
+3. `npm run build` (build completo da aplicação Electron + Svelte)
 
-O build completo é etapa **pré-PR**, não do loop de edição. Nunca abra PR com build falhando.
+> **Regra Fundamental**: Nunca submeta um PR sem rodar o `npm run build` localmente com sucesso. A CI do GitHub é apenas uma verificação automatizada rápida, não substitui a validação local prévia.
 
-**Regra em stack**: não execute o build completo para cada camada individual. Valide a branch mais alta a ser submetida/mergeada (representa o estado combinado final).
+- **Em PR Normal**: rode `npm run build` sempre antes do PR.
+- **Em Stack**: durante o desenvolvimento entre camadas use checks rápidos (`typecheck`), mas antes de submeter a stack, rode o `npm run build` a partir da branch do topo (que representa o estado combinado final).
 
 ### 7. Submissão e Vinculação de Issues
 
