@@ -6,6 +6,8 @@ export type AppInfo = {
 export type DbHealth = {
   ok: boolean
   schemaVersion: string
+  error?: string
+  timestamp?: string
 }
 
 export type TecidoRecord = {

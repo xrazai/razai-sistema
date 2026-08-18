@@ -6,6 +6,7 @@
   import Button from '../../design-system/controls/Button.svelte'
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
+  import EmptyState from '../../design-system/compositions/EmptyState.svelte'
   import TecidosCadastroPage from './TecidosCadastroPage.svelte'
   import TecidosDetalhesPage from './TecidosDetalhesPage.svelte'
   import { generateTecidoSku } from './utils'
@@ -201,35 +202,48 @@
           </div>
         </div>
 
-        <!-- Tabela padrão de itens -->
+        <!-- Tabela padrão de itens ou estado de erro -->
         <div class="table-container">
-          <Table
-            {columns}
-            rows={tecidos}
-            bordered={false}
-            emptyMessage={isLoading ? 'Carregando dados...' : 'Nenhum tecido encontrado no banco de dados.'}
-            onrowclick={handleRowClick}
-          >
-            {#snippet cell({ row, column, value })}
-              {#if column.key === 'codigo'}
-                <span class="code">{value}</span>
-              {:else if column.key === 'largura'}
-                <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m` : '—'}</span>
-              {:else if column.key === 'rendimento'}
-                <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m/kg` : '—'}</span>
-              {:else if column.key === 'gramaturaLinear'}
-                <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m` : '—'}</span>
-              {:else if column.key === 'gramaturaM2'}
-                <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m²` : '—'}</span>
-              {:else if column.key === 'tipo' || column.key === 'acabamento'}
-                <span class="muted-tag">{formatDisplayLabel(value)}</span>
-              {:else if column.key === 'nome'}
-                <span class="fabric-name">{value}</span>
-              {:else}
-                <span>{value || '—'}</span>
-              {/if}
-            {/snippet}
-          </Table>
+          {#if errorMsg && tecidos.length === 0}
+            <div class="error-container">
+              <EmptyState
+                title="Falha na Comunicação com o Banco de Dados"
+                description={errorMsg}
+                tone="danger"
+                actionLabel="Tentar Novamente"
+                actionIcon="search"
+                onaction={() => loadTecidos(searchTerm)}
+              />
+            </div>
+          {:else}
+            <Table
+              {columns}
+              rows={tecidos}
+              bordered={false}
+              emptyMessage={isLoading ? 'Carregando dados...' : 'Nenhum tecido encontrado no banco de dados.'}
+              onrowclick={handleRowClick}
+            >
+              {#snippet cell({ row, column, value })}
+                {#if column.key === 'codigo'}
+                  <span class="code">{value}</span>
+                {:else if column.key === 'largura'}
+                  <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m` : '—'}</span>
+                {:else if column.key === 'rendimento'}
+                  <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m/kg` : '—'}</span>
+                {:else if column.key === 'gramaturaLinear'}
+                  <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m` : '—'}</span>
+                {:else if column.key === 'gramaturaM2'}
+                  <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m²` : '—'}</span>
+                {:else if column.key === 'tipo' || column.key === 'acabamento'}
+                  <span class="muted-tag">{formatDisplayLabel(value)}</span>
+                {:else if column.key === 'nome'}
+                  <span class="fabric-name">{value}</span>
+                {:else}
+                  <span>{value || '—'}</span>
+                {/if}
+              {/snippet}
+            </Table>
+          {/if}
         </div>
 
         <!-- Barra de rodapé informativa -->
@@ -337,6 +351,15 @@
     overflow: auto;
     background: var(--color-bg);
     width: 100%;
+  }
+
+  .error-container {
+    padding: var(--space-6) var(--space-4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    box-sizing: border-box;
   }
 
   .code {
