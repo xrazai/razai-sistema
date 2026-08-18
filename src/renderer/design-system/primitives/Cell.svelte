@@ -18,6 +18,8 @@
   .cell {
     min-width: 0;
     background: var(--color-bg);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .pad {
