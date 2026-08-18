@@ -10,6 +10,7 @@
   import TecidosCadastroPage from './TecidosCadastroPage.svelte'
   import TecidosDetalhesPage from './TecidosDetalhesPage.svelte'
   import { generateTecidoSku } from './utils'
+  import { router } from '../../shell/router.svelte'
   import type { TecidoRecord, CreateTecidoInput, UpdateTecidoInput } from '../../../shared/types'
 
   const columns: Column[] = [
@@ -24,12 +25,32 @@
     { key: 'acabamento', label: 'Acabamento', width: '120px' }
   ]
 
-  let viewMode = $state<'list' | 'create' | 'details'>('list')
+  let viewMode = $derived.by<'list' | 'create' | 'details'>(() => {
+    if (router.route !== 'tecidos') return 'list'
+    if (router.subRoute === 'cadastro') return 'create'
+    if (router.subRoute && router.subRoute !== '') return 'details'
+    return 'list'
+  })
+
   let searchTerm = $state('')
   let selectedTecido = $state<TecidoRecord | null>(null)
   let tecidos = $state<TecidoRecord[]>([])
   let isLoading = $state(true)
   let errorMsg = $state<string | null>(null)
+
+  $effect(() => {
+    if (router.route === 'tecidos' && router.subRoute && router.subRoute !== 'cadastro') {
+      const id = router.subRoute
+      const found = tecidos.find((t) => t.id === id)
+      if (found) {
+        selectedTecido = found
+      } else if (typeof window !== 'undefined' && window.razai?.tecidos) {
+        window.razai.tecidos.getById(id).then((t) => {
+          if (t) selectedTecido = t
+        })
+      }
+    }
+  })
 
   async function loadTecidos(query = '') {
     isLoading = true
@@ -78,7 +99,7 @@
         tecidos = [localItem, ...tecidos]
         selectedTecido = localItem
       }
-      viewMode = 'list'
+      router.navigate('tecidos')
     } catch (err: any) {
       console.error('Erro ao cadastrar tecido:', err)
       errorMsg = err?.message || 'Erro ao cadastrar tecido no banco de dados.'
@@ -105,7 +126,7 @@
           return item
         })
       }
-      viewMode = 'list'
+      router.navigate('tecidos')
     } catch (err: any) {
       console.error('Erro ao atualizar tecido:', err)
       errorMsg = err?.message || 'Erro ao atualizar tecido.'
@@ -122,7 +143,7 @@
       }
       selectedTecido = null
       await loadTecidos(searchTerm)
-      viewMode = 'list'
+      router.navigate('tecidos')
     } catch (err: any) {
       console.error('Erro ao excluir tecido:', err)
       errorMsg = err?.message || 'Erro ao excluir tecido.'
@@ -132,7 +153,7 @@
 
   function handleRowClick(row: any) {
     selectedTecido = row as TecidoRecord
-    viewMode = 'details'
+    router.navigate(`tecidos/${selectedTecido.id}`)
   }
 
   function formatDisplayLabel(val: string | null | undefined): string {
@@ -154,13 +175,13 @@
 
 {#if viewMode === 'create'}
   <TecidosCadastroPage
-    oncancel={() => (viewMode = 'list')}
+    oncancel={() => router.navigate('tecidos')}
     onsave={handleNovoTecido}
   />
 {:else if viewMode === 'details' && selectedTecido}
   <TecidosDetalhesPage
     tecido={selectedTecido}
-    onback={() => (viewMode = 'list')}
+    onback={() => router.navigate('tecidos')}
     onsave={handleSalvarEdicao}
     ondelete={handleExcluirTecido}
   />
@@ -168,7 +189,7 @@
   <div class="page">
     <Panel title="Tecidos" flush>
       {#snippet actions()}
-        <Button variant="primary" size="sm" onclick={() => (viewMode = 'create')}>
+        <Button variant="primary" size="sm" onclick={() => router.navigate('tecidos/cadastro')}>
           <Icon name="plus" size="sm" />
           <span>Cadastrar Tecido</span>
         </Button>

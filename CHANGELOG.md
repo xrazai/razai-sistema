@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Roteador reativo sem dependências externas via hash URL e navegação modular (Task 4)
+
 ## 2026-08-18 — Tratamento de falhas de IPC/DB na UI com Status, Topbar resiliente e EmptyState contextual (Task 8)
 
 ## 2026-08-18 — Design System atualizado com catálogo de todos os componentes e variações de produção
