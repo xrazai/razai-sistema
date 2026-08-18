@@ -285,7 +285,7 @@
 
 <style>
   .page {
-    max-width: 1100px;
+    width: 100%;
   }
 
   .hero h1 {
