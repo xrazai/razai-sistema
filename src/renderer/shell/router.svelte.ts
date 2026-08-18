@@ -1,0 +1,107 @@
+export type Route =
+  | 'dashboard'
+  | 'tecidos'
+  | 'cores'
+  | 'vinculos'
+  | 'settings'
+  | 'design-system'
+
+export interface RouterState {
+  path: string
+  route: Route
+  subRoute: string
+  param: string | null
+}
+
+const VALID_ROUTES: Route[] = [
+  'dashboard',
+  'tecidos',
+  'cores',
+  'vinculos',
+  'settings',
+  'design-system'
+]
+
+function parseHash(hash: string): RouterState {
+  const clean = hash.replace(/^#\/?/, '').trim()
+
+  if (!clean) {
+    return {
+      path: 'dashboard',
+      route: 'dashboard',
+      subRoute: '',
+      param: null
+    }
+  }
+
+  const parts = clean.split('/').filter(Boolean)
+  const root = parts[0] as Route
+  const route: Route = VALID_ROUTES.includes(root) ? root : 'dashboard'
+  const subRoute = parts.slice(1).join('/')
+  const param = parts.length > 1 ? parts[1] : null
+
+  return {
+    path: clean,
+    route,
+    subRoute,
+    param
+  }
+}
+
+class Router {
+  #state = $state<RouterState>({
+    path: 'dashboard',
+    route: 'dashboard',
+    subRoute: '',
+    param: null
+  })
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      this.#state = parseHash(window.location.hash)
+
+      window.addEventListener('hashchange', () => {
+        this.#state = parseHash(window.location.hash)
+      })
+    }
+  }
+
+  get path(): string {
+    return this.#state.path
+  }
+
+  get route(): Route {
+    return this.#state.route
+  }
+
+  get subRoute(): string {
+    return this.#state.subRoute
+  }
+
+  get param(): string | null {
+    return this.#state.param
+  }
+
+  navigate(to: string): void {
+    if (typeof window !== 'undefined') {
+      const target = to.startsWith('#') ? to : `#${to.replace(/^\//, '')}`
+      if (window.location.hash !== target) {
+        window.location.hash = target
+      } else {
+        this.#state = parseHash(target)
+      }
+    }
+  }
+
+  back(fallback = 'dashboard'): void {
+    if (typeof window !== 'undefined') {
+      if (window.history.length > 1) {
+        window.history.back()
+      } else {
+        this.navigate(fallback)
+      }
+    }
+  }
+}
+
+export const router = new Router()

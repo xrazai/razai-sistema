@@ -6,24 +6,21 @@
   import VinculosPage from './features/vinculos/VinculosPage.svelte'
   import SettingsPage from './features/settings/SettingsPage.svelte'
   import DesignSystemPage from './pages/DesignSystemPage.svelte'
-
-  type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
-
-  let route = $state<Route>('dashboard')
+  import { router } from './shell/router.svelte'
 </script>
 
-<AppShell {route} onnavigate={(r) => (route = r)}>
-  {#if route === 'dashboard'}
+<AppShell route={router.route} onnavigate={(r) => router.navigate(r)}>
+  {#if router.route === 'dashboard'}
     <DashboardPage />
-  {:else if route === 'tecidos'}
+  {:else if router.route === 'tecidos'}
     <TecidosPage />
-  {:else if route === 'cores'}
+  {:else if router.route === 'cores'}
     <CoresPage />
-  {:else if route === 'vinculos'}
+  {:else if router.route === 'vinculos'}
     <VinculosPage />
-  {:else if route === 'settings'}
+  {:else if router.route === 'settings'}
     <SettingsPage />
-  {:else}
+  {:else if router.route === 'design-system'}
     <DesignSystemPage />
   {/if}
 </AppShell>
