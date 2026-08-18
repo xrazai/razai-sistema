@@ -238,27 +238,21 @@
 <div class="detalhes-page">
   <div class="content-scroll">
     <div class="form-wrapper">
-      <!-- Subheader informativo -->
-      <div class="form-header">
-          <div class="header-info">
-            <span class="code-badge">{codigoExibicao}</span>
-            <span class="header-desc">
-              SKU de 4 caracteres calculado automaticamente com base no nome do tecido.
-            </span>
-          </div>
-          {#if erroMsg}
-            <Badge text={erroMsg} tone="danger" />
-          {/if}
-        </div>
-
-        <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          <div class="grid-form">
-            <!-- Linha 1: 2 colunas (Nome e Composição) -->
-            <div class="section-row">
-              <header class="section-head">
+      <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <div class="grid-form">
+          <!-- Linha 1: 2 colunas (Nome e Composição) -->
+          <div class="section-row">
+            <header class="section-head">
+              <div class="head-title-wrap">
                 <span>01. Identificação Básica</span>
+                <span class="code-badge">{codigoExibicao}</span>
+              </div>
+              {#if erroMsg}
+                <Badge text={erroMsg} tone="danger" />
+              {:else}
                 <span class="head-rule">Campos obrigatórios</span>
-              </header>
+              {/if}
+            </header>
               <Grid cols={2} bare>
                 <div class="field-cell">
                   <Label text="Nome *" for="nome" />
@@ -486,68 +480,13 @@
     box-sizing: border-box;
   }
 
-  .form-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    height: 48px;
-    min-height: 48px;
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-bg-sunken);
-    border-bottom: var(--border-width) solid var(--color-border);
-    width: 100%;
-    box-sizing: border-box;
-    line-height: 100%;
-  }
-
-  .header-info {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .code-badge {
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-header);
-    padding: 2px var(--space-2);
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    font-weight: 700;
-  }
-
-  .header-desc {
-    font-size: var(--text-xs);
-    color: var(--color-fg-muted);
-    font-family: var(--font-mono);
-  }
-
-  .form-body {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .grid-form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .section-row {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    border-bottom: var(--border-width) solid var(--color-border);
-  }
-
   .section-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 32px;
-    min-height: 32px;
-    padding: var(--space-1) var(--space-4);
+    height: 40px;
+    min-height: 40px;
+    padding: var(--space-2) var(--space-4);
     background: var(--color-bg-elevated);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
@@ -557,6 +496,21 @@
     font-family: var(--font-mono);
     box-sizing: border-box;
     line-height: 100%;
+  }
+
+  .head-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .code-badge {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-header);
+    padding: 2px var(--space-2);
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+    font-weight: 700;
   }
 
   .head-rule {

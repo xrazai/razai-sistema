@@ -60,11 +60,11 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 >
 > ### 3. Tabela de Amarração de Alturas e Proporções
 > A altura somada total de qualquer componente pronto (somando conteúdo, padding e bordas de 1px com `box-sizing: border-box`) deve resultar estritamente em um múltiplo de 4 ou 8px:
-> - **Ritmo Primário de Linhas e Navegação (`40px`)**: `Topbar`, `NavItem`, `Brand`, `Toolbar`, `Table th`, `Table td`, `Table footer`, `Panel .head`.
+> - **Ritmo Primário de Linhas e Navegação (`40px`)**: `Topbar`, `NavItem`, `Brand`, `Toolbar`, `Table th`, `Table td`, `Table footer`, `Panel .head`, `.section-head`.
 > - **Controles Padrão (`32px`)**: `Button` (`size="md"`), `Input`, `Select`, `Tabs` $\rightarrow$ dentro de uma linha de 40px, recebem 4px de respiro vertical ou ocupam 100% (40px) quando flush.
 > - **Controles Compactos (`24px`)**: `Button` (`size="sm"`), `Checkbox`, `Toggle` $\rightarrow$ dentro de uma linha de 40px, recebem 8px de respiro vertical (múltiplo de 8).
 > - **Badges e Indicadores de Estado (`20px`)**: `Badge`, `Status` $\rightarrow$ `height: 20px;` (múltiplo de 4), centralizados no eixo vertical com `display: inline-flex; align-items: center;`.
-> - **Cabeçalhos de Seção / Modais (`48px`)**: `.form-header`, `.modal-header` $\rightarrow$ `height: 48px;` ($6 \times 8\text{px}$).
+> - **Cabeçalhos de Modais (`48px`)**: `.modal-header` $\rightarrow$ `height: 48px;` ($6 \times 8\text{px}$).
 > - **Rodapés de Ação de Formulário (`.form-footer`)**: `80px` ($10 \times 8\text{px}$, com `padding: var(--space-3) var(--space-4)` e `min-height: 56px`).
 > - **Rodapés de Modais (`.modal-footer`)**: `56px` ($7 \times 8\text{px}$).
 >
