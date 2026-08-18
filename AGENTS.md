@@ -145,6 +145,7 @@ O build completo é etapa **pré-PR**, não do loop de edição. Nunca abra PR c
   ```powershell
   git push -u origin HEAD
   gh pr create --title "..." --body "Closes #<issue> ..." --base main
+  gh pr merge --auto --squash
   ```
 - **Stacked PR**:
   - Submeter com `gh stack submit`.
