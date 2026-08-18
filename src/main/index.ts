@@ -4,6 +4,11 @@ import { existsSync } from 'node:fs'
 import { openDatabase, closeDatabase } from './database/db'
 import { registerIpcHandlers } from './ipc/handlers'
 
+// Define identificador único e exclusivo no Windows para isolamento na barra de tarefas, notificações e processos
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.razai.sistema')
+}
+
 if (process.env.WSL_DISTRO_NAME) {
   app.disableHardwareAcceleration()
 }
@@ -16,6 +21,7 @@ function getPreloadPath(): string {
 
 function createWindow(): void {
   const win = new BrowserWindow({
+    title: 'Razai Sistema',
     width: 1280,
     height: 800,
     minWidth: 960,

@@ -15,6 +15,7 @@ asarUnpack:
   - "**/*.node"
 
 win:
+  executableName: Razai Sistema
   target:
     - target: nsis
       arch:
