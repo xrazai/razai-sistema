@@ -41,8 +41,8 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 > - **Botão Pequeno (`size="sm"`)**: `24px` (múltiplo de 8)
 > - **Botão Padrão (`size="md"`) / Input / Select**: `32px` (múltiplo de 8)
 > - **Item de Menu Lateral (`NavItem`)**: `40px` (múltiplo de 8)
-> - **Abas (`Tabs`) / Cabeçalho de Tabela (`th`)**: `32px` (múltiplo de 8)
-> - **Linhas de Tabela (`td`) / Topbar / Painéis**: `40px` (múltiplo de 8)
+> - **Abas (`Tabs`)**: `32px` (múltiplo de 8)
+> - **Cabeçalho de Tabela (`th`) / Linhas de Tabela (`td`) / Topbar / Painéis**: `40px` (múltiplo de 8)
 > - **Toolbars de Busca / Cabeçalhos de Formulário / Modais**: `48px` (múltiplo de 8)
 > - **Rodapés de Ação (`.form-footer`)**: `56px` (múltiplo de 8)
 >

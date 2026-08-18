@@ -181,7 +181,7 @@
   }
 
   th {
-    height: 32px;
+    height: 40px;
     font-size: var(--text-xs);
     font-weight: 500;
     letter-spacing: var(--tracking-label);
