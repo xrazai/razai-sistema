@@ -26,7 +26,8 @@
     return String(val).replace('.', ',')
   }
 
-  // Estado dos campos iniciado com os dados do tecido selecionado
+  // Estado dos campos do formulário
+  let currentTecidoId = $state<string | null>(null)
   let nome = $state('')
   let composicao = $state('')
   let largura = $state('')
@@ -37,27 +38,32 @@
   let transparencia = $state('')
   let elasticidade = $state('')
   let acabamento = $state('')
-
-  $effect(() => {
-    nome = tecido.nome || ''
-    composicao = tecido.composicao || ''
-    largura = formatNumeric(tecido.largura)
-    rendimento = formatNumeric(tecido.rendimento)
-    gramaturaLinear = formatNumeric(tecido.gramaturaLinear)
-    gramaturaM2 = formatNumeric(tecido.gramaturaM2)
-    tipo = tecido.tipo || ''
-    transparencia = tecido.transparencia || ''
-    elasticidade = tecido.elasticidade || ''
-    acabamento = tecido.acabamento || ''
-  })
-
-  // SKU derivado dinamicamente do nome conforme a regra de 4 caracteres
-  let skuDinamico = $derived(generateTecidoSku(nome))
-
   let lastEditedMetric = $state<'rendimento' | 'gramaturaLinear' | 'gramaturaM2' | null>(null)
   let erroMsg = $state('')
   let isSaving = $state(false)
   let showDeleteConfirm = $state(false)
+
+  $effect(() => {
+    if (tecido.id !== currentTecidoId) {
+      currentTecidoId = tecido.id
+      nome = tecido.nome || ''
+      composicao = tecido.composicao || ''
+      largura = formatNumeric(tecido.largura)
+      rendimento = formatNumeric(tecido.rendimento)
+      gramaturaLinear = formatNumeric(tecido.gramaturaLinear)
+      gramaturaM2 = formatNumeric(tecido.gramaturaM2)
+      tipo = tecido.tipo || ''
+      transparencia = tecido.transparencia || ''
+      elasticidade = tecido.elasticidade || ''
+      acabamento = tecido.acabamento || ''
+      lastEditedMetric = null
+      erroMsg = ''
+      showDeleteConfirm = false
+    }
+  })
+
+  // SKU derivado dinamicamente do nome conforme a regra de 4 caracteres
+  let skuDinamico = $derived(generateTecidoSku(nome))
 
   const tipoOptions = [
     { value: '', label: 'Selecione' },
@@ -148,7 +154,11 @@
   }
 
   function handleLarguraInput() {
-    if (lastEditedMetric) {
+    const activeMetric =
+      lastEditedMetric ||
+      (rendimento ? 'rendimento' : gramaturaM2 ? 'gramaturaM2' : gramaturaLinear ? 'gramaturaLinear' : null)
+    if (activeMetric) {
+      lastEditedMetric = activeMetric
       recalculateMetrics('largura')
     }
   }
@@ -182,6 +192,16 @@
     const numLargura = parsePtBrNumber(largura)
     if (!numLargura) {
       erroMsg = 'O campo Largura (m) é obrigatório e deve ser um número válido.'
+      return
+    }
+
+    const hasSecondaryNumeric =
+      parsePtBrNumber(rendimento) !== null ||
+      parsePtBrNumber(gramaturaLinear) !== null ||
+      parsePtBrNumber(gramaturaM2) !== null
+
+    if (!hasSecondaryNumeric) {
+      erroMsg = 'Preencha ao menos mais um dado numérico na Seção 02: Rendimento, Gramatura linear ou Gramatura (g/m²).'
       return
     }
 
