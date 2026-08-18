@@ -50,10 +50,36 @@ export type TecidosApi = {
   delete: (id: string) => Promise<boolean>
 }
 
+export type CorRecord = {
+  id: string
+  nome: string
+  hex: string
+  lab: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type CreateCorInput = {
+  nome: string
+  hex: string
+  lab: string
+}
+
+export type UpdateCorInput = Partial<CreateCorInput>
+
+export type CoresApi = {
+  list: (search?: string) => Promise<CorRecord[]>
+  getById: (id: string) => Promise<CorRecord | null>
+  create: (input: CreateCorInput) => Promise<CorRecord>
+  update: (id: string, input: UpdateCorInput) => Promise<CorRecord>
+  delete: (id: string) => Promise<boolean>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
   tecidos: TecidosApi
+  cores: CoresApi
 }
 
 declare global {

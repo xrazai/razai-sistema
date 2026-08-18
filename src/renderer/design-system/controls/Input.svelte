@@ -7,6 +7,7 @@
     id?: string
     prefix?: string
     suffix?: string
+    swatch?: string | null
     oninput?: (e: Event) => void
   }
 
@@ -18,17 +19,29 @@
     id,
     prefix,
     suffix,
+    swatch,
     oninput
   }: Props = $props()
+
+  let hasCustomRight = $derived(Boolean(suffix || swatch !== undefined))
 </script>
 
-{#if prefix || suffix}
+{#if prefix || hasCustomRight}
   <div class="input-group" class:disabled>
     {#if prefix}
       <span class="affix prefix">{prefix}</span>
     {/if}
     <input class="input grouped" {id} {type} {placeholder} {disabled} bind:value {oninput} />
-    {#if suffix}
+    {#if swatch !== undefined}
+      <div class="swatch-container">
+        <div
+          class="inline-swatch"
+          style:background-color={swatch || 'transparent'}
+          class:is-empty={!swatch}
+          title={swatch ? `Amostra: ${swatch}` : 'Sem cor válida'}
+        ></div>
+      </div>
+    {:else if suffix}
       <span class="affix suffix">{suffix}</span>
     {/if}
   </div>
@@ -119,5 +132,28 @@
 
   .affix.suffix {
     border-left: var(--border-width) solid var(--color-border);
+  }
+
+  .swatch-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-2);
+    background: var(--color-bg-elevated);
+    border-left: var(--border-width) solid var(--color-border);
+  }
+
+  .inline-swatch {
+    width: 18px;
+    height: 18px;
+    border: var(--border-width) solid var(--color-border-strong);
+    box-sizing: border-box;
+  }
+
+  .inline-swatch.is-empty {
+    background: repeating-conic-gradient(
+      var(--color-bg-elevated) 0% 25%,
+      var(--color-bg-sunken) 0% 50%
+    ) 50% / 8px 8px;
   }
 </style>

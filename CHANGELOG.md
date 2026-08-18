@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Módulo de cores completo com CRUD SQLite, tabela, cadastro, detalhes e input swatch com conversão LAB/HEX
+
 ## 2026-08-18 — Refinamento de UX em Tecidos: debounce na busca, estados vazios contextualizados e diálogo semântico de exclusão
 
 ## 2026-08-18 — Regras de isolamento de banco de dados em testes e limpeza obrigatória de mocks

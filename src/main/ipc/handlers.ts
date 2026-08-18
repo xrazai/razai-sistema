@@ -1,7 +1,15 @@
 import { ipcMain } from 'electron'
 import { getDb } from '../database/db'
 import { TecidosService } from '../services/tecidos.service'
-import type { AppInfo, DbHealth, CreateTecidoInput, UpdateTecidoInput } from '../../shared/types'
+import { CoresService } from '../services/cores.service'
+import type {
+  AppInfo,
+  DbHealth,
+  CreateTecidoInput,
+  UpdateTecidoInput,
+  CreateCorInput,
+  UpdateCorInput
+} from '../../shared/types'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('app:getInfo', (): AppInfo => ({
@@ -49,5 +57,26 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('tecidos:delete', (_event, id: string) => {
     return TecidosService.delete(id)
+  })
+
+  // Handlers para o CRUD de Cores
+  ipcMain.handle('cores:list', (_event, search?: string) => {
+    return CoresService.list(search)
+  })
+
+  ipcMain.handle('cores:getById', (_event, id: string) => {
+    return CoresService.getById(id)
+  })
+
+  ipcMain.handle('cores:create', (_event, input: CreateCorInput) => {
+    return CoresService.create(input)
+  })
+
+  ipcMain.handle('cores:update', (_event, id: string, input: UpdateCorInput) => {
+    return CoresService.update(id, input)
+  })
+
+  ipcMain.handle('cores:delete', (_event, id: string) => {
+    return CoresService.delete(id)
   })
 }
