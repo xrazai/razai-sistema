@@ -42,6 +42,24 @@
     <svg viewBox="0 0 14 14">
       <rect x="2.5" y="2.5" width="9" height="9" stroke-dasharray="2 2" />
     </svg>
+  {:else if name === 'fabric'}
+    <svg viewBox="0 0 14 14">
+      <rect x="0.5" y="0.5" width="13" height="13" />
+      <path d="M0.5 4.5 H13.5 M0.5 9.5 H13.5 M4.5 0.5 V13.5 M9.5 0.5 V13.5" />
+    </svg>
+  {:else if name === 'palette'}
+    <svg viewBox="0 0 14 14">
+      <rect x="0.5" y="0.5" width="5.5" height="5.5" />
+      <rect class="fill" x="8" y="0.5" width="5.5" height="5.5" />
+      <rect class="fill" x="0.5" y="8" width="5.5" height="5.5" />
+      <rect x="8" y="8" width="5.5" height="5.5" />
+    </svg>
+  {:else if name === 'link'}
+    <svg viewBox="0 0 14 14">
+      <rect x="0.5" y="4.5" width="4.5" height="5" />
+      <rect x="9" y="4.5" width="4.5" height="5" />
+      <path d="M5 7 H9" />
+    </svg>
   {:else}
     <svg viewBox="0 0 14 14">
       <rect class="fill" x="6" y="6" width="2" height="2" />

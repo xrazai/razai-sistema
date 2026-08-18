@@ -3,7 +3,7 @@
   import NavItem from '../design-system/navigation/NavItem.svelte'
   import Divider from '../design-system/primitives/Divider.svelte'
 
-  type Route = 'dashboard' | 'settings' | 'design-system'
+  type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
 
   type Props = {
     route: Route
@@ -22,6 +22,25 @@
     active={route === 'dashboard'}
     onclick={() => onnavigate('dashboard')}
   />
+  <NavItem
+    label="Tecidos"
+    icon="fabric"
+    active={route === 'tecidos'}
+    onclick={() => onnavigate('tecidos')}
+  />
+  <NavItem
+    label="Cores"
+    icon="palette"
+    active={route === 'cores'}
+    onclick={() => onnavigate('cores')}
+  />
+  <NavItem
+    label="Vínculos"
+    icon="link"
+    active={route === 'vinculos'}
+    onclick={() => onnavigate('vinculos')}
+  />
+  <Divider />
   <NavItem
     label="Settings"
     icon="settings"

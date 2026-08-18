@@ -99,6 +99,9 @@
               <Stack direction="horizontal" gap="2">
                 <Icon name="grid" />
                 <Icon name="dash" />
+                <Icon name="fabric" />
+                <Icon name="palette" />
+                <Icon name="link" />
                 <Icon name="settings" />
                 <Icon name="system" />
               </Stack>

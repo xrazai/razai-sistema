@@ -2,7 +2,7 @@
   import Topbar from '../design-system/navigation/Topbar.svelte'
   import Status from '../design-system/data-display/Status.svelte'
 
-  type Route = 'dashboard' | 'settings' | 'design-system'
+  type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
 
   type Props = {
     route: Route
@@ -12,6 +12,9 @@
 
   const titles: Record<Route, string> = {
     dashboard: 'Início',
+    tecidos: 'Tecidos',
+    cores: 'Cores',
+    vinculos: 'Vínculos',
     settings: 'Settings',
     'design-system': 'Design System'
   }
