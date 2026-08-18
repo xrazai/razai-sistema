@@ -1,7 +1,5 @@
 <script lang="ts">
-  import Panel from '../../design-system/layout/Panel.svelte'
   import Icon from '../../design-system/primitives/Icon.svelte'
-  import Button from '../../design-system/controls/Button.svelte'
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
   import EmptyState from '../../design-system/compositions/EmptyState.svelte'
@@ -189,17 +187,9 @@
   />
 {:else}
   <div class="page">
-    <Panel title="Cores" flush>
-      {#snippet actions()}
-        <Button variant="primary" size="sm" onclick={() => router.navigate('cores/cadastro')}>
-          <Icon name="plus" size="sm" />
-          <span>Cadastrar Cor</span>
-        </Button>
-      {/snippet}
-
-      <div class="layout">
-        <!-- Barra superior de ferramentas e contadores -->
-        <div class="toolbar">
+    <div class="layout">
+      <!-- Barra superior de ferramentas e contadores -->
+      <div class="toolbar">
           <div class="search-box">
             <Icon name="search" size="sm" />
             <input
@@ -273,16 +263,15 @@
         </div>
 
         <!-- Rodapé informativo -->
-        <footer class="footer">
-          <span class="footer-note">Clique em uma linha para abrir a tela de detalhes e editar o cadastro</span>
-          {#if selectedCor}
-            <span class="footer-selected">
-              Última selecionada: <strong>{selectedCor.hex} — {selectedCor.nome}</strong>
-            </span>
-          {/if}
-        </footer>
-      </div>
-    </Panel>
+      <footer class="footer">
+        <span class="footer-note">Clique em uma linha para abrir a tela de detalhes e editar o cadastro</span>
+        {#if selectedCor}
+          <span class="footer-selected">
+            Última selecionada: <strong>{selectedCor.hex} — {selectedCor.nome}</strong>
+          </span>
+        {/if}
+      </footer>
+    </div>
   </div>
 {/if}
 
