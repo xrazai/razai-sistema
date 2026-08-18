@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — UI de tecidos conectada ao SQLite via IPC, ordenação alfabética padrão e ampliação de paddings (Task 19)
+
 ## 2026-08-18 — Migrations SQLite, schema/seed de tecidos, serviço IPC e breadcrumb navegável (Tasks 2, 3, 18)
 
 ## 2026-08-18 — Regra de SKU de 4 caracteres, tela de detalhes/edição alinhada ao cadastro e exclusão de tecidos
