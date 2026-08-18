@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Tratamento de falhas de IPC/DB na UI com Status, Topbar resiliente e EmptyState contextual (Task 8)
+
 ## 2026-08-18 — Design System atualizado com catálogo de todos os componentes e variações de produção
 
 ## 2026-08-18 — Refinamentos de tecidos: validações em detalhes/backend, ajustes de SKU, busca unaccented e docs (Tasks 20–24)

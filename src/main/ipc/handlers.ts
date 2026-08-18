@@ -10,13 +10,23 @@ export function registerIpcHandlers(): void {
   }))
 
   ipcMain.handle('db:health', (): DbHealth => {
-    const row = getDb()
-      .prepare(`SELECT value FROM app_meta WHERE key = 'schema_version'`)
-      .get() as { value: string } | undefined
+    try {
+      const row = getDb()
+        .prepare(`SELECT value FROM app_meta WHERE key = 'schema_version'`)
+        .get() as { value: string } | undefined
 
-    return {
-      ok: true,
-      schemaVersion: row?.value ?? 'unknown'
+      return {
+        ok: true,
+        schemaVersion: row?.value ?? 'unknown',
+        timestamp: new Date().toISOString()
+      }
+    } catch (err: any) {
+      return {
+        ok: false,
+        schemaVersion: 'none',
+        error: err?.message || 'Falha ao conectar com o banco de dados SQLite',
+        timestamp: new Date().toISOString()
+      }
     }
   })
 
