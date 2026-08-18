@@ -79,7 +79,7 @@ export class TecidosService {
              OR LOWER(nome) LIKE ?
              OR LOWER(composicao) LIKE ?
              OR LOWER(COALESCE(tipo, '')) LIKE ?
-          ORDER BY created_at DESC
+          ORDER BY nome COLLATE NOCASE ASC
         `)
         .all(term, term, term, term) as DbTecidoRow[]
 
@@ -87,7 +87,7 @@ export class TecidosService {
     }
 
     const rows = db
-      .prepare('SELECT * FROM tecidos ORDER BY created_at DESC')
+      .prepare('SELECT * FROM tecidos ORDER BY nome COLLATE NOCASE ASC')
       .all() as DbTecidoRow[]
 
     return rows.map(mapRowToRecord)
