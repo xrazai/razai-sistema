@@ -19,9 +19,13 @@ export function generateTecidoSku(nome: string): string {
     .replace(/[^a-zA-Z0-9\s]/g, ' ')
     .trim()
 
-  const words = clean.split(/\s+/).filter((w) => w.length > 0)
+  const allTokens = clean.split(/\s+/).filter((w) => w.length > 0)
 
-  if (words.length === 0) return 'XXXX'
+  if (allTokens.length === 0) return 'XXXX'
+
+  // Filtra tokens puramente numéricos (como '100' proveniente de '100%') para priorizar palavras reais
+  const letterTokens = allTokens.filter((w) => /[a-zA-Z]/.test(w))
+  const words = letterTokens.length > 0 ? letterTokens : allTokens
 
   if (words.length === 1) {
     const single = words[0]

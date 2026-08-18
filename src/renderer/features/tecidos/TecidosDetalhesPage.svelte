@@ -62,8 +62,9 @@
     }
   })
 
-  // SKU derivado dinamicamente do nome conforme a regra de 4 caracteres
+  // SKU dinâmico preliminar e código de exibição (mantém o código persistido caso o nome não tenha mudado)
   let skuDinamico = $derived(generateTecidoSku(nome))
+  let codigoExibicao = $derived(nome === tecido.nome ? (tecido.codigo || skuDinamico) : skuDinamico)
 
   const tipoOptions = [
     { value: '', label: 'Selecione' },
@@ -244,7 +245,7 @@
       <Breadcrumb
         items={[
           { label: 'Tecidos', onclick: onback },
-          { label: `Detalhes: ${skuDinamico} — ${nome || tecido.nome}`, active: true }
+          { label: `Detalhes: ${codigoExibicao} — ${nome || tecido.nome}`, active: true }
         ]}
       />
     {/snippet}
@@ -277,7 +278,7 @@
         <!-- Subheader informativo -->
         <div class="form-header">
           <div class="header-info">
-            <span class="code-badge">{skuDinamico}</span>
+            <span class="code-badge">{codigoExibicao}</span>
             <span class="header-desc">
               SKU de 4 caracteres calculado automaticamente com base no nome do tecido.
             </span>
