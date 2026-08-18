@@ -8,6 +8,7 @@
   import Input from '../../design-system/controls/Input.svelte'
   import Select from '../../design-system/controls/Select.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
+  import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
   import { generateTecidoSku } from './utils'
 
   export type Tecido = {
@@ -220,7 +221,15 @@
 </script>
 
 <div class="detalhes-page">
-  <Panel title={`Tecidos / Detalhes: ${skuDinamico} — ${nome || tecido.nome}`} flush>
+  <Panel flush>
+    {#snippet header()}
+      <Breadcrumb
+        items={[
+          { label: 'Tecidos', onclick: onback },
+          { label: `Detalhes: ${skuDinamico} — ${nome || tecido.nome}`, active: true }
+        ]}
+      />
+    {/snippet}
     {#snippet actions()}
       <Stack direction="horizontal" gap="2">
         <Button variant="ghost" size="sm" onclick={onback}>
