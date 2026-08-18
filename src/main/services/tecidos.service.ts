@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { getDb } from '../database/db'
-import { generateTecidoSku } from '../../shared/sku'
+import { generateTecidoSku, normalizeUnaccent } from '../../shared/sku'
 import type { TecidoRecord, CreateTecidoInput, UpdateTecidoInput } from '../../shared/types'
 
 type DbTecidoRow = {
@@ -118,17 +118,18 @@ export class TecidosService {
     const db = getDb()
 
     if (search && search.trim()) {
-      const term = `%${search.trim().toLowerCase()}%`
+      const term = `%${normalizeUnaccent(search.trim())}%`
       const rows = db
         .prepare(`
           SELECT * FROM tecidos
-          WHERE LOWER(codigo) LIKE ?
-             OR LOWER(nome) LIKE ?
-             OR LOWER(composicao) LIKE ?
-             OR LOWER(COALESCE(tipo, '')) LIKE ?
+          WHERE unaccent(codigo) LIKE ?
+             OR unaccent(nome) LIKE ?
+             OR unaccent(composicao) LIKE ?
+             OR unaccent(COALESCE(tipo, '')) LIKE ?
+             OR unaccent(COALESCE(acabamento, '')) LIKE ?
           ORDER BY nome COLLATE NOCASE ASC
         `)
-        .all(term, term, term, term) as DbTecidoRow[]
+        .all(term, term, term, term, term) as DbTecidoRow[]
 
       return rows.map(mapRowToRecord)
     }
