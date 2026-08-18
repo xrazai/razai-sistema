@@ -3,6 +3,8 @@
   import Topbar from '../design-system/navigation/Topbar.svelte'
   import Status from '../design-system/data-display/Status.svelte'
   import Icon from '../design-system/primitives/Icon.svelte'
+  import Button from '../design-system/controls/Button.svelte'
+  import { router } from './router.svelte'
   import type { DbHealth } from '../../shared/types'
 
   type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
@@ -21,6 +23,20 @@
     settings: 'Settings',
     'design-system': 'Design System'
   }
+
+  let displayTitle = $derived.by(() => {
+    if (router.route === 'tecidos') {
+      if (router.subRoute === 'cadastro') return 'Tecidos / Cadastro'
+      if (router.subRoute) return 'Tecidos / Detalhes'
+      return 'Tecidos'
+    }
+    if (router.route === 'cores') {
+      if (router.subRoute === 'cadastro') return 'Cores / Cadastro'
+      if (router.subRoute) return 'Cores / Detalhes'
+      return 'Cores'
+    }
+    return titles[route] || 'Razai Sistema'
+  })
 
   let dbHealth = $state<DbHealth | null>(null)
   let isChecking = $state(false)
@@ -47,24 +63,44 @@
   })
 </script>
 
-<Topbar title={titles[route]}>
-  <div class="topbar-status" title={dbHealth?.error || (dbHealth?.ok ? `SQLite v${dbHealth.schemaVersion} conectado` : 'Clique para revalidar conexão')}>
-    {#if isChecking && !dbHealth}
-      <Status label="Conectando..." tone="warn" />
-    {:else if dbHealth?.ok}
-      <button class="status-btn" onclick={checkHealth} aria-label="Revalidar conexão SQLite">
-        <Status label="SQLite Online" tone="ok" />
-      </button>
-    {:else}
-      <button class="status-btn offline" onclick={checkHealth} aria-label="Reconectar banco de dados">
-        <Status label="SQLite Offline" tone="danger" />
-        <Icon name="search" size="sm" />
-      </button>
+<Topbar title={displayTitle}>
+  <div class="topbar-actions">
+    <div class="topbar-status" title={dbHealth?.error || (dbHealth?.ok ? `SQLite v${dbHealth.schemaVersion} conectado` : 'Clique para revalidar conexão')}>
+      {#if isChecking && !dbHealth}
+        <Status label="Conectando..." tone="warn" />
+      {:else if dbHealth?.ok}
+        <button class="status-btn" onclick={checkHealth} aria-label="Revalidar conexão SQLite">
+          <Status label="SQLite Online" tone="ok" />
+        </button>
+      {:else}
+        <button class="status-btn offline" onclick={checkHealth} aria-label="Reconectar banco de dados">
+          <Status label="SQLite Offline" tone="danger" />
+          <Icon name="search" size="sm" />
+        </button>
+      {/if}
+    </div>
+
+    {#if router.route === 'tecidos' && !router.subRoute}
+      <Button variant="primary" size="sm" onclick={() => router.navigate('tecidos/cadastro')}>
+        <Icon name="plus" size="sm" />
+        <span>Cadastrar Tecido</span>
+      </Button>
+    {:else if router.route === 'cores' && !router.subRoute}
+      <Button variant="primary" size="sm" onclick={() => router.navigate('cores/cadastro')}>
+        <Icon name="plus" size="sm" />
+        <span>Cadastrar Cor</span>
+      </Button>
     {/if}
   </div>
 </Topbar>
 
 <style>
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
   .topbar-status {
     display: flex;
     align-items: center;

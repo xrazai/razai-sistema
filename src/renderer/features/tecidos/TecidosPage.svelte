@@ -1,9 +1,5 @@
 <script lang="ts">
-  import Panel from '../../design-system/layout/Panel.svelte'
-  import Stack from '../../design-system/layout/Stack.svelte'
-  import Cell from '../../design-system/primitives/Cell.svelte'
   import Icon from '../../design-system/primitives/Icon.svelte'
-  import Button from '../../design-system/controls/Button.svelte'
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
   import EmptyState from '../../design-system/compositions/EmptyState.svelte'
@@ -212,17 +208,9 @@
   />
 {:else}
   <div class="page">
-    <Panel title="Tecidos" flush>
-      {#snippet actions()}
-        <Button variant="primary" size="sm" onclick={() => router.navigate('tecidos/cadastro')}>
-          <Icon name="plus" size="sm" />
-          <span>Cadastrar Tecido</span>
-        </Button>
-      {/snippet}
-
-      <div class="layout">
-        <!-- Barra superior de ferramentas / busca / contadores -->
-        <div class="toolbar">
+    <div class="layout">
+      <!-- Barra superior de ferramentas / busca / contadores -->
+      <div class="toolbar">
           <div class="search-box">
             <Icon name="search" size="sm" />
             <input
@@ -298,16 +286,15 @@
         </div>
 
         <!-- Barra de rodapé informativa -->
-        <footer class="footer">
-          <span class="footer-note">Clique em uma linha para abrir a tela de detalhes e editar o cadastro</span>
-          {#if selectedTecido}
-            <span class="footer-selected">
-              Último selecionado: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong>
-            </span>
-          {/if}
-        </footer>
-      </div>
-    </Panel>
+      <footer class="footer">
+        <span class="footer-note">Clique em uma linha para abrir a tela de detalhes e editar o cadastro</span>
+        {#if selectedTecido}
+          <span class="footer-selected">
+            Último selecionado: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong>
+          </span>
+        {/if}
+      </footer>
+    </div>
   </div>
 {/if}
 

@@ -9,6 +9,9 @@ if (process.platform === 'win32') {
   app.setAppUserModelId('com.razai.sistema')
 }
 
+// Garante caminho canônico permanente do banco e dados em %APPDATA%/razai-sistema
+app.setPath('userData', join(app.getPath('appData'), 'razai-sistema'))
+
 if (process.env.WSL_DISTRO_NAME) {
   app.disableHardwareAcceleration()
 }

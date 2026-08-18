@@ -1,23 +1,25 @@
 # Módulo de Tecidos — Especificação e Regras de Negócio
 
-Este documento descreve o funcionamento, regras de validação e cálculos técnicos do **Módulo de Tecidos** do **razai-sistema**.
+Este documento descreve o funcionamento, regras de validação, cálculos de engenharia têxtil e persistência do **Módulo de Tecidos** do **razai-sistema**.
 
 ---
 
-## 1. Fluxo do Módulo
+## 1. Fluxo e Visões do Módulo
 
-O módulo é composto por três visões principais:
-1. **Listagem / Catálogo (`TecidosPage.svelte`)**:
-   - Tabela com headers técnicos (`SKU`, `Nome`, `Composição`, `Largura (m)`, `Rendimento (m/kg)`, `Gramatura Linear (g/m)`, `Gramatura (g/m²)`, `Tipo`, `Acabamento`).
-   - Busca em tempo real (insensível a acentos e case-insensitive) e contador dinâmico de itens.
-   - Botão de ação superior **"Cadastrar Tecido"**.
-   - Clique na linha para visualização e edição detalhada.
-2. **Cadastro (`TecidosCadastroPage.svelte`)**:
-   - Formulário em grade modular ocupando 100% da largura útil.
+O módulo é estruturado em três visões principais integradas ao roteador reativo:
+
+1. **Listagem / Catálogo (`TecidosPage.svelte` - rota `#tecidos`)**:
+   - Cabeçalho integrado na **Topbar Unificada** com o botão **"+ Cadastrar Tecido"** e status do banco.
+   - Barra de ferramentas com busca em tempo real (*unaccented* e insensível a maiúsculas) e contadores dinâmicos de resultados.
+   - Tabela de alta densidade (`SKU`, `Nome`, `Composição`, `Largura (m)`, `Rendimento (m/kg)`, `Gramatura Linear (g/m)`, `Gramatura (g/m²)`, `Tipo`, `Acabamento`).
+   - Ordenação interativa por cabeçalho de coluna e clique na linha para abrir a tela de detalhes.
+2. **Cadastro (`TecidosCadastroPage.svelte` - rota `#tecidos/cadastro`)**:
+   - Formulário em grid modular preenchendo 100% da largura útil.
    - Três seções estruturadas: Identificação Básica, Dimensões/Rendimento e Propriedades/Acabamento.
-3. **Detalhes / Edição (`TecidosDetalhesPage.svelte`)**:
-   - Visualização e edição completa dos dados técnicos e métricas recalculadas.
-   - Ações de atualização e exclusão com confirmação.
+   - Validações estritas de negócio com mensagens de feedback contextualizadas.
+3. **Detalhes e Edição (`TecidosDetalhesPage.svelte` - rota `#tecidos/<id>`)**:
+   - Visualização completa e recálculo automático de métricas ao editar valores numéricos.
+   - Ações de salvar alterações, cancelar e exclusão com diálogo semântico de confirmação.
 
 ---
 
@@ -79,7 +81,7 @@ $$R = \frac{1000}{GL} = \frac{1000}{GM \times L}$$
 
 ---
 
-## 5. Regra de Geração de SKU / Código do Tecido
+## 4. Regra de Geração de SKU do Tecido
 
 Para o catálogo de tecidos, o identificador de SKU é padronizado em **4 caracteres maiúsculos**, gerados deterministicamente a partir do nome do tecido:
 

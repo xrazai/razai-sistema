@@ -419,6 +419,10 @@
             <div class="nav-main">
               <Topbar title="Módulo de Tecidos">
                 <Status label="SQLite Online" tone="ok" />
+                <Button variant="primary" size="sm">
+                  <Icon name="plus" size="sm" />
+                  <span>Cadastrar Tecido</span>
+                </Button>
               </Topbar>
               <Tabs
                 tabs={[
