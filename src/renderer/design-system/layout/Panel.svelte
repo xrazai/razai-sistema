@@ -47,9 +47,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-2);
-    min-height: 36px;
-    padding: var(--space-1) var(--space-3);
+    gap: var(--space-3);
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-header);

@@ -407,7 +407,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     background: var(--color-bg-sunken);
     border-bottom: var(--border-width) solid var(--color-border);
     width: 100%;
@@ -458,7 +458,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-1) var(--space-3);
+    padding: var(--space-2) var(--space-4);
     background: var(--color-bg-elevated);
     border-bottom: var(--border-width) solid var(--color-border);
     font-size: var(--text-xs);
@@ -476,7 +476,7 @@
   }
 
   .field-cell {
-    padding: var(--space-3);
+    padding: var(--space-3) var(--space-4);
     background: var(--color-bg);
     width: 100%;
     box-sizing: border-box;
@@ -487,7 +487,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: var(--space-3);
-    padding: var(--space-3);
+    padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);
     border-top: var(--border-width) solid var(--color-border);
     width: 100%;

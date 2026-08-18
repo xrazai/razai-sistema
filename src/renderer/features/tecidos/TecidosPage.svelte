@@ -218,7 +218,8 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    min-height: 52px;
+    padding: var(--space-3) var(--space-4);
     background: var(--color-bg-sunken);
     border-bottom: var(--border-width) solid var(--color-border);
     width: 100%;
@@ -304,7 +305,8 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    min-height: 40px;
+    padding: var(--space-3) var(--space-4);
     border-top: var(--border-width) solid var(--color-border);
     background: var(--color-bg-elevated);
     font-size: var(--text-xs);

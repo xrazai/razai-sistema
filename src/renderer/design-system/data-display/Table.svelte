@@ -94,7 +94,7 @@
 
   th,
   td {
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border-bottom: var(--border-width) solid var(--color-border);
     border-right: var(--border-width) solid var(--color-border);
     text-align: left;
@@ -138,7 +138,7 @@
   .empty-cell {
     text-align: center;
     color: var(--color-fg-dim);
-    padding: var(--space-6) var(--space-3);
+    padding: var(--space-6) var(--space-4);
     font-style: italic;
     border-right: none;
   }
