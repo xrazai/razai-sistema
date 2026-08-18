@@ -75,16 +75,22 @@ $$R = \frac{1000}{GL} = \frac{1000}{GM \times L}$$
 
 ---
 
-## 4. Regras de Arredondamento
+## 5. Regra de Geração de SKU / Código do Tecido
 
-Para garantir consistência com o uso fabril e comercial:
+Para o catálogo de tecidos, o identificador de SKU é padronizado em **4 caracteres maiúsculos**, gerados deterministicamente a partir do nome do tecido:
 
-1. **Gramaturas ($GL$ e $GM$)**:
-   - Arredondamento para a **dezena inteira mais próxima**:
-     $$\text{arredondado} = \operatorname{round}\left(\frac{\text{valor}}{10}\right) \times 10$$
-   - Exemplos: $273 \to 270\text{ g/m}$; $186 \to 190\text{ g/m²}$.
+- **2 primeiros caracteres da primeira palavra** + **2 primeiros caracteres da última palavra**.
+- Caso o nome seja composto por uma **única palavra**, utilizam-se os **4 primeiros caracteres** dessa palavra.
+- Caracteres especiais e acentos são removidos (*unaccented*).
 
-2. **Rendimento ($R$)**:
-   - Arredondamento para o **decimal mais próximo terminado em `,00` ou `,50`** (passo de $0,50$):
-     $$\text{arredondado} = \frac{\operatorname{round}(\text{valor} \times 2)}{2}$$
-   - Exemplos: $2,80 \to 3,00\text{ m/kg}$; $2,30 \to 2,50\text{ m/kg}$; $3,68 \to 3,50\text{ m/kg}$.
+### Exemplos:
+| Nome do Tecido | Primeira Palavra | Última Palavra | SKU Gerado |
+| --- | --- | --- | --- |
+| **Anarruga** | `AN` (Anarruga) | — | **`ANAR`** |
+| **Cetim** | `CE` (Cetim) | — | **`CETI`** |
+| **Cetim com Elastano** | `CE` (Cetim) | `EL` (Elastano) | **`CEEL`** |
+| **Tricoline Lisa 100% Algodão** | `TR` (Tricoline) | `AL` (Algodão) | **`TRAL`** |
+| **Linho Puro Rústico** | `LI` (Linho) | `RU` (Rústico) | **`LIRU`** |
+| **Sarja Acetinada com Elastano** | `SA` (Sarja) | `EL` (Elastano) | **`SAEL`** |
+| **Viscose Sarjada** | `VI` (Viscose) | `SA` (Sarjada) | **`VISA`** |
+| **Jeans Denim Pesado** | `JE` (Jeans) | `PE` (Pesado) | **`JEPE`** |

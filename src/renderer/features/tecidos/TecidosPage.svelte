@@ -8,34 +8,35 @@
   import Badge from '../../design-system/data-display/Badge.svelte'
   import TecidosCadastroPage, { type NovoTecidoData } from './TecidosCadastroPage.svelte'
   import TecidosDetalhesPage, { type Tecido } from './TecidosDetalhesPage.svelte'
+  import { generateTecidoSku } from './utils'
 
   const columns: Column[] = [
-    { key: 'codigo', label: 'Código', width: '110px' },
-    { key: 'nome', label: 'Nome / Descrição' },
+    { key: 'codigo', label: 'SKU', width: '90px' },
+    { key: 'nome', label: 'Nome' },
     { key: 'composicao', label: 'Composição' },
-    { key: 'gramatura', label: 'Gramatura (g/m²)', width: '150px' },
-    { key: 'largura', label: 'Largura', width: '110px' },
-    { key: 'fornecedor', label: 'Fornecedor' },
-    { key: 'status', label: 'Status', width: '110px', align: 'center' }
+    { key: 'largura', label: 'Largura (m)', width: '120px' },
+    { key: 'rendimento', label: 'Rendimento (m/kg)', width: '150px' },
+    { key: 'gramaturaLinear', label: 'Gramatura Linear (g/m)', width: '170px' },
+    { key: 'gramaturaM2', label: 'Gramatura (g/m²)', width: '150px' },
+    { key: 'tipo', label: 'Tipo', width: '110px' },
+    { key: 'acabamento', label: 'Acabamento', width: '120px' }
   ]
 
   let viewMode = $state<'list' | 'create' | 'details'>('list')
   let searchTerm = $state('')
   let selectedTecido = $state<Tecido | null>(null)
 
-  // Lista padrão inicial de tecidos cadastrados
+  // Lista inicial de tecidos com SKUs de 4 caracteres
   let tecidos = $state<Tecido[]>([
     {
       id: '1',
-      codigo: 'TC-001',
+      codigo: 'TRAL',
       nome: 'Tricoline Lisa 100% Algodão',
       composicao: '100% Algodão',
-      gramatura: '120 g/m²',
-      largura: '1.50 m',
-      fornecedor: 'Têxtil Santa Catarina',
-      status: 'ativo',
-      rendimento: '2.80 m/kg',
-      gramaturaLinear: '180 g/m',
+      largura: '1,50',
+      rendimento: '5,50',
+      gramaturaLinear: '180',
+      gramaturaM2: '120',
       tipo: 'liso',
       transparencia: 'nenhuma',
       elasticidade: 'nenhuma',
@@ -43,31 +44,27 @@
     },
     {
       id: '2',
-      codigo: 'TC-002',
-      nome: 'Linho Puro Rústico',
-      composicao: '100% Linho',
-      gramatura: '240 g/m²',
-      largura: '1.45 m',
-      fornecedor: 'Fiação & Tecelagem Imperial',
-      status: 'ativo',
-      rendimento: '2.40 m/kg',
-      gramaturaLinear: '348 g/m',
+      codigo: 'CETI',
+      nome: 'Cetim',
+      composicao: '100% Poliéster',
+      largura: '1,50',
+      rendimento: '6,50',
+      gramaturaLinear: '150',
+      gramaturaM2: '100',
       tipo: 'liso',
-      transparencia: 'baixa',
+      transparencia: 'nenhuma',
       elasticidade: 'nenhuma',
-      acabamento: 'fosco'
+      acabamento: 'brilhante'
     },
     {
       id: '3',
-      codigo: 'TC-003',
-      nome: 'Sarja Acetinada com Elastano',
-      composicao: '97% Algodão / 3% Elastano',
-      gramatura: '260 g/m²',
-      largura: '1.60 m',
-      fornecedor: 'Vicunha Têxtil',
-      status: 'ativo',
-      rendimento: '2.10 m/kg',
-      gramaturaLinear: '416 g/m',
+      codigo: 'CEEL',
+      nome: 'Cetim com Elastano',
+      composicao: '97% Poliéster / 3% Elastano',
+      largura: '1,45',
+      rendimento: '5,00',
+      gramaturaLinear: '200',
+      gramaturaM2: '140',
       tipo: 'liso',
       transparencia: 'nenhuma',
       elasticidade: 'baixa',
@@ -75,31 +72,27 @@
     },
     {
       id: '4',
-      codigo: 'TC-004',
-      nome: 'Crepe Georgette Premium',
-      composicao: '100% Poliéster',
-      gramatura: '85 g/m²',
-      largura: '1.40 m',
-      fornecedor: 'Tecidos Finos Aurora',
-      status: 'esgotado',
-      rendimento: '8.40 m/kg',
-      gramaturaLinear: '119 g/m',
+      codigo: 'ANAR',
+      nome: 'Anarruga',
+      composicao: '100% Algodão',
+      largura: '1,40',
+      rendimento: '4,50',
+      gramaturaLinear: '220',
+      gramaturaM2: '160',
       tipo: 'estampado',
-      transparencia: 'alta',
+      transparencia: 'baixa',
       elasticidade: 'nenhuma',
-      acabamento: 'semi_brilho'
+      acabamento: 'fosco'
     },
     {
       id: '5',
-      codigo: 'TC-005',
-      nome: 'Viscose Sarjada',
-      composicao: '100% Viscose',
-      gramatura: '165 g/m²',
-      largura: '1.48 m',
-      fornecedor: 'Malharia Sul',
-      status: 'ativo',
-      rendimento: '4.10 m/kg',
-      gramaturaLinear: '244 g/m',
+      codigo: 'LIRU',
+      nome: 'Linho Puro Rústico',
+      composicao: '100% Linho',
+      largura: '1,45',
+      rendimento: '3,00',
+      gramaturaLinear: '350',
+      gramaturaM2: '240',
       tipo: 'liso',
       transparencia: 'baixa',
       elasticidade: 'nenhuma',
@@ -107,15 +100,41 @@
     },
     {
       id: '6',
-      codigo: 'TC-006',
-      nome: 'Jeans Denim Pesado 12oz',
+      codigo: 'SAEL',
+      nome: 'Sarja Acetinada com Elastano',
+      composicao: '97% Algodão / 3% Elastano',
+      largura: '1,60',
+      rendimento: '2,50',
+      gramaturaLinear: '420',
+      gramaturaM2: '260',
+      tipo: 'liso',
+      transparencia: 'nenhuma',
+      elasticidade: 'baixa',
+      acabamento: 'semi_brilho'
+    },
+    {
+      id: '7',
+      codigo: 'VISA',
+      nome: 'Viscose Sarjada',
+      composicao: '100% Viscose',
+      largura: '1,48',
+      rendimento: '4,00',
+      gramaturaLinear: '240',
+      gramaturaM2: '170',
+      tipo: 'liso',
+      transparencia: 'baixa',
+      elasticidade: 'nenhuma',
+      acabamento: 'fosco'
+    },
+    {
+      id: '8',
+      codigo: 'JEPE',
+      nome: 'Jeans Denim Pesado',
       composicao: '98% Algodão / 2% Elastano',
-      gramatura: '380 g/m²',
-      largura: '1.65 m',
-      fornecedor: 'Santana Textiles',
-      status: 'inativo',
-      rendimento: '1.60 m/kg',
-      gramaturaLinear: '627 g/m',
+      largura: '1,65',
+      rendimento: '1,50',
+      gramaturaLinear: '630',
+      gramaturaM2: '380',
       tipo: 'liso',
       transparencia: 'nenhuma',
       elasticidade: 'baixa',
@@ -131,29 +150,27 @@
         item.codigo.toLowerCase().includes(term) ||
         item.nome.toLowerCase().includes(term) ||
         item.composicao.toLowerCase().includes(term) ||
-        item.fornecedor.toLowerCase().includes(term)
+        (item.tipo && item.tipo.toLowerCase().includes(term)) ||
+        (item.acabamento && item.acabamento.toLowerCase().includes(term))
       )
     })
   )
 
   function handleNovoTecido(novo: NovoTecidoData) {
-    const nextNum = tecidos.length + 1
-    const padNum = String(nextNum).padStart(3, '0')
+    const sku = generateTecidoSku(novo.nome)
     const novoItem: Tecido = {
       id: String(Date.now()),
-      codigo: `TC-${padNum}`,
+      codigo: sku,
       nome: novo.nome,
-      composicao: novo.composicao || '—',
-      gramatura: novo.gramaturaM2 ? `${novo.gramaturaM2} g/m²` : '—',
-      largura: novo.largura ? `${novo.largura} m` : '—',
-      fornecedor: 'Padrão Local',
-      status: 'ativo',
-      rendimento: novo.rendimento ? `${novo.rendimento} m/kg` : undefined,
-      gramaturaLinear: novo.gramaturaLinear ? `${novo.gramaturaLinear} g/m` : undefined,
-      tipo: novo.tipo || undefined,
-      transparencia: novo.transparencia || undefined,
-      elasticidade: novo.elasticidade || undefined,
-      acabamento: novo.acabamento || undefined
+      composicao: novo.composicao,
+      largura: novo.largura,
+      rendimento: novo.rendimento,
+      gramaturaLinear: novo.gramaturaLinear,
+      gramaturaM2: novo.gramaturaM2,
+      tipo: novo.tipo,
+      transparencia: novo.transparencia,
+      elasticidade: novo.elasticidade,
+      acabamento: novo.acabamento
     }
 
     tecidos = [novoItem, ...tecidos]
@@ -178,16 +195,20 @@
     viewMode = 'details'
   }
 
-  function getStatusTone(status: Tecido['status']): 'ok' | 'warn' | 'danger' {
-    if (status === 'ativo') return 'ok'
-    if (status === 'esgotado') return 'warn'
-    return 'danger'
-  }
-
-  function getStatusLabel(status: Tecido['status']): string {
-    if (status === 'ativo') return 'Ativo'
-    if (status === 'esgotado') return 'Esgotado'
-    return 'Inativo'
+  function formatDisplayLabel(val: string | undefined): string {
+    if (!val) return '—'
+    const map: Record<string, string> = {
+      liso: 'Liso',
+      estampado: 'Estampado',
+      nenhuma: 'Nenhuma',
+      baixa: 'Baixa',
+      media: 'Média',
+      alta: 'Alta',
+      fosco: 'Fosco',
+      semi_brilho: 'Semi-brilho',
+      brilhante: 'Brilhante'
+    }
+    return map[val] || val
   }
 </script>
 
@@ -222,7 +243,7 @@
               type="text"
               class="search-input"
               bind:value={searchTerm}
-              placeholder="Buscar por código, nome, composição ou fornecedor..."
+              placeholder="Buscar por SKU, nome, composição, tipo..."
             />
             {#if searchTerm}
               <button class="clear-btn" onclick={() => (searchTerm = '')} aria-label="Limpar busca">
@@ -247,12 +268,20 @@
             {#snippet cell({ row, column, value })}
               {#if column.key === 'codigo'}
                 <span class="code">{value}</span>
-              {:else if column.key === 'status'}
-                <Badge text={getStatusLabel(value)} tone={getStatusTone(value)} />
+              {:else if column.key === 'largura'}
+                <span>{value ? `${value} m` : '—'}</span>
+              {:else if column.key === 'rendimento'}
+                <span>{value ? `${value} m/kg` : '—'}</span>
+              {:else if column.key === 'gramaturaLinear'}
+                <span>{value ? `${value} g/m` : '—'}</span>
+              {:else if column.key === 'gramaturaM2'}
+                <span>{value ? `${value} g/m²` : '—'}</span>
+              {:else if column.key === 'tipo' || column.key === 'acabamento'}
+                <span class="muted-tag">{formatDisplayLabel(value)}</span>
               {:else if column.key === 'nome'}
                 <span class="fabric-name">{value}</span>
               {:else}
-                <span>{value ?? '—'}</span>
+                <span>{value || '—'}</span>
               {/if}
             {/snippet}
           </Table>
@@ -365,13 +394,19 @@
   }
 
   .code {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-accent);
-    letter-spacing: var(--tracking-tight);
+    letter-spacing: var(--tracking-header);
+    font-family: var(--font-mono);
   }
 
   .fabric-name {
     color: var(--color-fg);
+  }
+
+  .muted-tag {
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
   }
 
   .footer {

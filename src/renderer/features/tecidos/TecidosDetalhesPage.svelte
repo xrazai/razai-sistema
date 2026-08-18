@@ -8,22 +8,21 @@
   import Input from '../../design-system/controls/Input.svelte'
   import Select from '../../design-system/controls/Select.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
+  import { generateTecidoSku } from './utils'
 
   export type Tecido = {
     id: string
     codigo: string
     nome: string
     composicao: string
-    gramatura: string
     largura: string
-    fornecedor: string
-    status: 'ativo' | 'inativo' | 'esgotado'
-    rendimento?: string
-    gramaturaLinear?: string
-    tipo?: string
-    transparencia?: string
-    elasticidade?: string
-    acabamento?: string
+    rendimento: string
+    gramaturaLinear: string
+    gramaturaM2: string
+    tipo: string
+    transparencia: string
+    elasticidade: string
+    acabamento: string
   }
 
   type Props = {
@@ -35,50 +34,42 @@
 
   let { tecido, onback, onsave, ondelete }: Props = $props()
 
-  // Extrair valores limpos (sem sufixos como "m" ou "g/m²" se já existirem)
   function cleanNumeric(val: string | undefined): string {
     if (!val) return ''
     return val.replace(/[^\d,\.]/g, '').trim()
   }
 
-  // Estado dos campos
+  // Estado dos campos iniciado com os dados do tecido selecionado
   let nome = $state('')
   let composicao = $state('')
   let largura = $state('')
   let rendimento = $state('')
   let gramaturaLinear = $state('')
   let gramaturaM2 = $state('')
-  let fornecedor = $state('')
-  let status = $state<'ativo' | 'inativo' | 'esgotado'>('ativo')
   let tipo = $state('')
   let transparencia = $state('')
   let elasticidade = $state('')
   let acabamento = $state('')
 
   $effect(() => {
-    nome = tecido.nome
-    composicao = tecido.composicao
+    nome = tecido.nome || ''
+    composicao = tecido.composicao || ''
     largura = cleanNumeric(tecido.largura)
     rendimento = cleanNumeric(tecido.rendimento)
     gramaturaLinear = cleanNumeric(tecido.gramaturaLinear)
-    gramaturaM2 = cleanNumeric(tecido.gramatura)
-    fornecedor = tecido.fornecedor || ''
-    status = tecido.status
+    gramaturaM2 = cleanNumeric(tecido.gramaturaM2)
     tipo = tecido.tipo || ''
     transparencia = tecido.transparencia || ''
     elasticidade = tecido.elasticidade || ''
     acabamento = tecido.acabamento || ''
   })
 
+  // SKU derivado dinamicamente do nome conforme a regra de 4 caracteres
+  let skuDinamico = $derived(generateTecidoSku(nome))
+
   let lastEditedMetric = $state<'rendimento' | 'gramaturaLinear' | 'gramaturaM2' | null>(null)
   let erroMsg = $state('')
   let showDeleteConfirm = $state(false)
-
-  const statusOptions = [
-    { value: 'ativo', label: 'Ativo' },
-    { value: 'esgotado', label: 'Esgotado' },
-    { value: 'inativo', label: 'Inativo' }
-  ]
 
   const tipoOptions = [
     { value: '', label: 'Selecione' },
@@ -209,18 +200,17 @@
     erroMsg = ''
     onsave({
       ...tecido,
+      codigo: skuDinamico,
       nome: nome.trim(),
       composicao: composicao.trim(),
-      largura: largura.trim() ? `${largura.trim()} m` : '—',
-      rendimento: rendimento.trim() ? `${rendimento.trim()} m/kg` : undefined,
-      gramaturaLinear: gramaturaLinear.trim() ? `${gramaturaLinear.trim()} g/m` : undefined,
-      gramatura: gramaturaM2.trim() ? `${gramaturaM2.trim()} g/m²` : '—',
-      fornecedor: fornecedor.trim() || '—',
-      status,
-      tipo: tipo || undefined,
-      transparencia: transparencia || undefined,
-      elasticidade: elasticidade || undefined,
-      acabamento: acabamento || undefined
+      largura: largura.trim(),
+      rendimento: rendimento.trim(),
+      gramaturaLinear: gramaturaLinear.trim(),
+      gramaturaM2: gramaturaM2.trim(),
+      tipo,
+      transparencia,
+      elasticidade,
+      acabamento
     })
   }
 
@@ -230,7 +220,7 @@
 </script>
 
 <div class="detalhes-page">
-  <Panel title={`Tecidos / Detalhes: ${tecido.codigo} — ${tecido.nome}`} flush>
+  <Panel title={`Tecidos / Detalhes: ${skuDinamico} — ${nome || tecido.nome}`} flush>
     {#snippet actions()}
       <Stack direction="horizontal" gap="2">
         <Button variant="ghost" size="sm" onclick={onback}>
@@ -260,9 +250,9 @@
         <!-- Subheader informativo -->
         <div class="form-header">
           <div class="header-info">
-            <span class="code-badge">{tecido.codigo}</span>
+            <span class="code-badge">{skuDinamico}</span>
             <span class="header-desc">
-              Edite as especificações técnicas e parâmetros do tecido. O auto-cálculo mantém a coerência das dimensões.
+              SKU de 4 caracteres calculado automaticamente com base no nome do tecido.
             </span>
           </div>
           {#if erroMsg}
@@ -272,19 +262,19 @@
 
         <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <div class="grid-form">
-            <!-- Linha 1: 3 colunas (Identificação Básica + Status) -->
+            <!-- Linha 1: 2 colunas (Nome e Composição) -->
             <div class="section-row">
               <header class="section-head">
                 <span>01. Identificação Básica</span>
-                <span class="head-rule">Informações cadastrais</span>
+                <span class="head-rule">Campos obrigatórios</span>
               </header>
-              <Grid cols={3} bare>
+              <Grid cols={2} bare>
                 <div class="field-cell">
                   <Label text="Nome *" for="nome" />
                   <Input
                     id="nome"
                     bind:value={nome}
-                    placeholder="Ex: Tricoline Lisa"
+                    placeholder="Ex: Cetim com Elastano, Anarruga"
                   />
                 </div>
                 <div class="field-cell">
@@ -292,25 +282,17 @@
                   <Input
                     id="composicao"
                     bind:value={composicao}
-                    placeholder="Ex: 100% Algodão"
-                  />
-                </div>
-                <div class="field-cell">
-                  <Label text="Status" for="status" />
-                  <Select
-                    id="status"
-                    bind:value={status}
-                    options={statusOptions}
+                    placeholder="Ex: 100% Algodão, 97% Algodão 3% Elastano"
                   />
                 </div>
               </Grid>
             </div>
 
-            <!-- Linha 2: 4 colunas (Dimensões e Rendimento) -->
+            <!-- Linha 2: 4 colunas (Dimensões e Rendimento com Auto-cálculo) -->
             <div class="section-row">
               <header class="section-head">
                 <span>02. Dimensões e Rendimento (Padrão Brasileiro)</span>
-                <span class="head-rule">Auto-cálculo e arredondamento industrial ativo</span>
+                <span class="head-rule">Largura obrigatória + ao menos 1 parâmetro numérico (auto-cálculo ativo)</span>
               </header>
               <Grid cols={4} bare>
                 <div class="field-cell">
@@ -356,11 +338,11 @@
               </Grid>
             </div>
 
-            <!-- Linha 3: 4 colunas (Propriedades Físicas, Acabamento e Fornecedor) -->
+            <!-- Linha 3: 4 colunas (Propriedades Físicas e Acabamento) -->
             <div class="section-row">
               <header class="section-head">
-                <span>03. Propriedades Técnicas e Fornecedor</span>
-                <span class="head-rule">Classificação e procedência</span>
+                <span>03. Propriedades e Acabamento</span>
+                <span class="head-rule">Classificação técnica</span>
               </header>
               <Grid cols={4} bare>
                 <div class="field-cell">
@@ -394,27 +376,6 @@
                     bind:value={acabamento}
                     options={acabamentoOptions}
                   />
-                </div>
-              </Grid>
-            </div>
-
-            <!-- Linha 4: 1 coluna para Fornecedor -->
-            <div class="section-row">
-              <header class="section-head">
-                <span>04. Fornecedor e Origem</span>
-              </header>
-              <Grid cols={2} bare>
-                <div class="field-cell">
-                  <Label text="Fornecedor / Fabricante" for="fornecedor" />
-                  <Input
-                    id="fornecedor"
-                    bind:value={fornecedor}
-                    placeholder="Ex: Têxtil Santa Catarina, Vicunha"
-                  />
-                </div>
-                <div class="field-cell readonly-info">
-                  <Label text="Identificador do Sistema" />
-                  <div class="id-display">ID: {tecido.id} · Ref: {tecido.codigo}</div>
                 </div>
               </Grid>
             </div>
@@ -541,19 +502,6 @@
     background: var(--color-bg);
     width: 100%;
     box-sizing: border-box;
-  }
-
-  .readonly-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .id-display {
-    font-size: var(--text-xs);
-    color: var(--color-fg-muted);
-    font-family: var(--font-mono);
-    padding-top: var(--space-1);
   }
 
   .form-footer {
