@@ -57,11 +57,12 @@ Uma task só está **fechada** quando:
 1. **Cadastrar**: criar issue com título `Task <N> — <resumo>` e body com prioridade/score, justificativa e fluxo de branch. Adicionar ao board com Priority e Status.
 2. **Iniciar**: atualizar `main`, criar branch `task/<N>-<slug>` a partir de `main` e mover issue para `In progress`.
 3. **Desenvolver e validar**: implementar o escopo focado da task e validar localmente.
-4. **Submeter**: abrir PR via GitHub CLI (`gh pr create` ou `gh stack submit`), mover para `In review`.
+4. **Submeter**: abrir PR via GitHub CLI (`gh pr create` ou `gh stack submit`) **somente quando o usuário pedir explicitamente**, mover para `In review`.
 5. **Concluir**: após o merge, adicionar linha no topo do `CHANGELOG.md`, fechar issue (ou mover para `Done`), apagar branch local/remota e atualizar `main`.
 6. Se gerou UI genérica nova: atualizar `DesignSystemPage.svelte` antes de considerar completa.
 
 **O que agentes NÃO devem fazer**:
+- Abrir PR ou fazer push para o repositório remoto sem pedido explícito do usuário.
 - Fechar task no chat sem atualizar board e `CHANGELOG.md`.
 - Criar backlog paralelo (markdown local, Notion, etc.).
 - Escrever changelog verboso (apenas o resumo curto de uma linha).
@@ -140,6 +141,8 @@ O build completo é etapa **pré-PR**, não do loop de edição. Nunca abra PR c
 **Regra em stack**: não execute o build completo para cada camada individual. Valide a branch mais alta a ser submetida/mergeada (representa o estado combinado final).
 
 ### 7. Submissão e Vinculação de Issues
+
+> **Atenção**: Agentes só devem fazer push e abrir PR quando o usuário **pedir explicitamente**.
 
 - **PR Normal**:
   ```powershell
