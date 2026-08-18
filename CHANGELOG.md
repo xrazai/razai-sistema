@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Suíte de testes unitários de domínio e testes E2E com Playwright para fluxos de QA em Tecidos
+
 ## 2026-08-18 — Roteador reativo sem dependências externas via hash URL e navegação modular (Task 4)
 
 ## 2026-08-18 — Tratamento de falhas de IPC/DB na UI com Status, Topbar resiliente e EmptyState contextual (Task 8)

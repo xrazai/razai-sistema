@@ -9,12 +9,16 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "typecheck": "svelte-check --tsconfig ./tsconfig.json"
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run tests/unit",
+    "test:unit": "vitest run tests/unit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@sveltejs/vite-plugin-svelte": "^5.1.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.21",
@@ -23,6 +27,7 @@
     "svelte": "^5.33.3",
     "svelte-check": "^4.2.1",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^4.1.11"
   }
 }

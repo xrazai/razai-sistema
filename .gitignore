@@ -7,5 +7,7 @@ out
 .env.*
 !.env.example
 release
+test-results
+playwright-report
 .vscode/*
 !.vscode/extensions.json
