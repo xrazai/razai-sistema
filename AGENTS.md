@@ -15,6 +15,15 @@ Orientações obrigatórias para qualquer agente (humano ou IA) que trabalhar ne
 
 ---
 
+## 🔀 Transição Automática de Branch (Nunca trabalhar direto na `main`)
+
+Se o usuário solicitar uma tarefa, feature ou correção enquanto o workspace estiver na branch `main`:
+1. **Nunca desenvolver diretamente na `main`**: O agente deve criar e trocar para uma branch de trabalho automaticamente (`task/<N>-<slug>` ou `task/<slug>`).
+2. **Preservar alterações em andamento**: Se houver arquivos modificados ou commits locais à frente da `origin/main`, o agente deve transferi-los para a nova branch sem perda de código.
+3. **Sincronização**: Manter a base alinhada com a `origin/main`. O usuário não precisa se preocupar em trocar de branch manualmente antes de pedir uma alteração.
+
+---
+
 ## Stack
 
 - **Electron** (processo main + preload + renderer)

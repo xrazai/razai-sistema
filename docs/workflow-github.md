@@ -110,6 +110,8 @@ Configurar as seguintes colunas/campos no board do projeto:
 
 Utilizado para tarefas autocontidas e independentes.
 
+> **Transição Automática de Branch**: Se o agente ou usuário estiver na `main` ao iniciar uma solicitação, o agente cria e troca para a branch de trabalho automaticamente (`task/<N>-<slug>`), preservando alterações e commits locais sem perda de dados.
+
 ```mermaid
 flowchart LR
     A[Criar Issue no Board] --> B[Criar Branch task/N-slug]
