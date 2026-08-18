@@ -3,6 +3,7 @@
 
   type Props = {
     variant?: 'primary' | 'secondary' | 'ghost'
+    size?: 'sm' | 'md'
     disabled?: boolean
     type?: 'button' | 'submit' | 'reset'
     onclick?: (e: MouseEvent) => void
@@ -11,6 +12,7 @@
 
   let {
     variant = 'secondary',
+    size = 'md',
     disabled = false,
     type = 'button',
     onclick,
@@ -18,7 +20,7 @@
   }: Props = $props()
 </script>
 
-<button class="btn" data-variant={variant} {type} {disabled} {onclick}>
+<button class="btn" data-variant={variant} data-size={size} {type} {disabled} {onclick}>
   {@render children?.()}
 </button>
 
@@ -38,6 +40,12 @@
     text-transform: uppercase;
     transition: background var(--motion-fast), border-color var(--motion-fast),
       color var(--motion-fast);
+  }
+
+  .btn[data-size='sm'] {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    gap: var(--space-1);
   }
 
   .btn:hover:not(:disabled) {

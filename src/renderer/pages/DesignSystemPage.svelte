@@ -102,6 +102,8 @@
                 <Icon name="fabric" />
                 <Icon name="palette" />
                 <Icon name="link" />
+                <Icon name="plus" />
+                <Icon name="search" />
                 <Icon name="settings" />
                 <Icon name="system" />
               </Stack>
@@ -116,11 +118,21 @@
           <Grid cols={3}>
             <Cell>
               <Label text="Button" />
-              <Stack direction="horizontal" gap="2">
-                <Button variant="primary">Primary</Button>
-                <Button>Secondary</Button>
-                <Button variant="ghost">Ghost</Button>
-                <Button disabled>Disabled</Button>
+              <Stack gap="2">
+                <Stack direction="horizontal" gap="2">
+                  <Button variant="primary">Primary</Button>
+                  <Button>Secondary</Button>
+                  <Button variant="ghost">Ghost</Button>
+                  <Button disabled>Disabled</Button>
+                </Stack>
+                <Stack direction="horizontal" gap="2">
+                  <Button variant="primary" size="sm">
+                    <Icon name="plus" size="sm" />
+                    <span>Action SM</span>
+                  </Button>
+                  <Button size="sm">Secondary SM</Button>
+                  <Button variant="ghost" size="sm">Ghost SM</Button>
+                </Stack>
               </Stack>
             </Cell>
             <Cell>
@@ -204,8 +216,14 @@
         <section>
           <h2 class="section">Layout</h2>
           <Stack gap="3">
-            <Panel title="Panel">
-              Conteúdo em compartimento rígido.
+            <Panel title="Panel com Ações">
+              {#snippet actions()}
+                <Button variant="primary" size="sm">
+                  <Icon name="plus" size="sm" />
+                  <span>Novo</span>
+                </Button>
+              {/snippet}
+              Conteúdo em compartimento rígido com slot de ações no cabeçalho.
             </Panel>
             <SplitPane ratio="1fr 1fr">
               {#snippet left()}

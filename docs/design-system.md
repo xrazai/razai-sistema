@@ -34,7 +34,10 @@ Regras estruturais:
 - **Estado ativo por inversão**: NavItem/Tab ativo = fundo `--color-accent` + texto `--color-accent-fg` (nunca borda > 1px).
 - **Ícones**: SVG autoral, stroke 1px, `shape-rendering: crispEdges`, monocromáticos (`currentColor`).
 - **Checkbox/Toggle**: customizados (quadrado 1px), sem styling nativo do OS; focus visível via `:focus-visible` no irmão visual.
-- **Panel `flush`**: corpo sem padding quando contém Table/Grid encostados na moldura (`Table bordered={false}`, `Grid bare`).
+- **Panel `flush` & `actions`**: corpo sem padding quando contém Table/Grid encostados na moldura (`Table bordered={false}`, `Grid bare`); cabeçalho com suporte a snippet `actions` para botões e controles contextuais alinhados à direita.
+- **Table padrão**: suporte a colunas com alinhamento (`align`), largura (`width`), linhas clicáveis (`clickable`), fallback de estado vazio (`emptyMessage`) e snippet customizado por célula (`cell`).
+- **Button com variantes de tamanho**: `size="md"` (padrão) e `size="sm"` (compacto para toolbars e cabeçalhos de painéis).
+- **Ícones**: SVG autoral, stroke 1px, `shape-rendering: crispEdges`, monocromáticos (`currentColor`). Inclui `grid`, `dash`, `settings`, `system`, `chevron`, `check`, `empty`, `fabric`, `palette`, `link`, `plus`, `search`.
 
 ## Camadas de componentes
 

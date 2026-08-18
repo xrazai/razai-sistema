@@ -60,6 +60,15 @@
       <rect x="9" y="4.5" width="4.5" height="5" />
       <path d="M5 7 H9" />
     </svg>
+  {:else if name === 'plus'}
+    <svg viewBox="0 0 14 14">
+      <path d="M7 1.5 V12.5 M1.5 7 H12.5" />
+    </svg>
+  {:else if name === 'search'}
+    <svg viewBox="0 0 14 14">
+      <circle cx="5.5" cy="5.5" r="3.5" />
+      <path d="M8.5 8.5 L12.5 12.5" />
+    </svg>
   {:else}
     <svg viewBox="0 0 14 14">
       <rect class="fill" x="6" y="6" width="2" height="2" />
