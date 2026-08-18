@@ -10,34 +10,20 @@
   import Badge from '../../design-system/data-display/Badge.svelte'
   import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
   import { generateTecidoSku } from './utils'
-
-  export type Tecido = {
-    id: string
-    codigo: string
-    nome: string
-    composicao: string
-    largura: string
-    rendimento: string
-    gramaturaLinear: string
-    gramaturaM2: string
-    tipo: string
-    transparencia: string
-    elasticidade: string
-    acabamento: string
-  }
+  import type { TecidoRecord, UpdateTecidoInput } from '../../../shared/types'
 
   type Props = {
-    tecido: Tecido
+    tecido: TecidoRecord
     onback: () => void
-    onsave: (tecido: Tecido) => void
-    ondelete: (id: string) => void
+    onsave: (id: string, input: UpdateTecidoInput) => void | Promise<void>
+    ondelete: (id: string) => void | Promise<void>
   }
 
   let { tecido, onback, onsave, ondelete }: Props = $props()
 
-  function cleanNumeric(val: string | undefined): string {
-    if (!val) return ''
-    return val.replace(/[^\d,\.]/g, '').trim()
+  function formatNumeric(val: number | null | undefined): string {
+    if (val === null || val === undefined || isNaN(val)) return ''
+    return String(val).replace('.', ',')
   }
 
   // Estado dos campos iniciado com os dados do tecido selecionado
@@ -55,10 +41,10 @@
   $effect(() => {
     nome = tecido.nome || ''
     composicao = tecido.composicao || ''
-    largura = cleanNumeric(tecido.largura)
-    rendimento = cleanNumeric(tecido.rendimento)
-    gramaturaLinear = cleanNumeric(tecido.gramaturaLinear)
-    gramaturaM2 = cleanNumeric(tecido.gramaturaM2)
+    largura = formatNumeric(tecido.largura)
+    rendimento = formatNumeric(tecido.rendimento)
+    gramaturaLinear = formatNumeric(tecido.gramaturaLinear)
+    gramaturaM2 = formatNumeric(tecido.gramaturaM2)
     tipo = tecido.tipo || ''
     transparencia = tecido.transparencia || ''
     elasticidade = tecido.elasticidade || ''
@@ -70,6 +56,7 @@
 
   let lastEditedMetric = $state<'rendimento' | 'gramaturaLinear' | 'gramaturaM2' | null>(null)
   let erroMsg = $state('')
+  let isSaving = $state(false)
   let showDeleteConfirm = $state(false)
 
   const tipoOptions = [
@@ -181,7 +168,7 @@
     recalculateMetrics('gramaturaM2')
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!nome.trim()) {
       erroMsg = 'O campo Nome é obrigatório.'
       return
@@ -199,24 +186,35 @@
     }
 
     erroMsg = ''
-    onsave({
-      ...tecido,
-      codigo: skuDinamico,
-      nome: nome.trim(),
-      composicao: composicao.trim(),
-      largura: largura.trim(),
-      rendimento: rendimento.trim(),
-      gramaturaLinear: gramaturaLinear.trim(),
-      gramaturaM2: gramaturaM2.trim(),
-      tipo,
-      transparencia,
-      elasticidade,
-      acabamento
-    })
+    isSaving = true
+    try {
+      await onsave(tecido.id, {
+        nome: nome.trim(),
+        composicao: composicao.trim(),
+        largura: numLargura,
+        rendimento: parsePtBrNumber(rendimento),
+        gramaturaLinear: parsePtBrNumber(gramaturaLinear),
+        gramaturaM2: parsePtBrNumber(gramaturaM2),
+        tipo: tipo || null,
+        transparencia: transparencia || null,
+        elasticidade: elasticidade || null,
+        acabamento: acabamento || null
+      })
+    } catch (err: any) {
+      erroMsg = err?.message || 'Erro ao salvar alterações no banco.'
+    } finally {
+      isSaving = false
+    }
   }
 
-  function handleDelete() {
-    ondelete(tecido.id)
+  async function handleDelete() {
+    isSaving = true
+    try {
+      await ondelete(tecido.id)
+    } catch (err: any) {
+      erroMsg = err?.message || 'Erro ao excluir tecido.'
+      isSaving = false
+    }
   }
 </script>
 
@@ -232,24 +230,24 @@
     {/snippet}
     {#snippet actions()}
       <Stack direction="horizontal" gap="2">
-        <Button variant="ghost" size="sm" onclick={onback}>
+        <Button variant="ghost" size="sm" onclick={onback} disabled={isSaving}>
           <Icon name="arrow-left" size="sm" />
           <span>Voltar para Lista</span>
         </Button>
         {#if showDeleteConfirm}
-          <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = false)}>
+          <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = false)} disabled={isSaving}>
             <span>Cancelar Exclusão</span>
           </Button>
-          <Button variant="primary" size="sm" onclick={handleDelete}>
+          <Button variant="primary" size="sm" onclick={handleDelete} disabled={isSaving}>
             <span>Confirmar Exclusão</span>
           </Button>
         {:else}
-          <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = true)}>
+          <Button variant="ghost" size="sm" onclick={() => (showDeleteConfirm = true)} disabled={isSaving}>
             <span>Excluir Tecido</span>
           </Button>
         {/if}
-        <Button variant="primary" size="sm" onclick={handleSubmit}>
-          <span>Salvar Alterações</span>
+        <Button variant="primary" size="sm" onclick={handleSubmit} disabled={isSaving}>
+          <span>{isSaving ? 'Salvando...' : 'Salvar Alterações'}</span>
         </Button>
       </Stack>
     {/snippet}
@@ -393,11 +391,11 @@
 
         <!-- Barra de rodapé com ações -->
         <footer class="form-footer">
-          <Button variant="ghost" onclick={onback}>
+          <Button variant="ghost" onclick={onback} disabled={isSaving}>
             Cancelar
           </Button>
-          <Button variant="primary" onclick={handleSubmit}>
-            Salvar Alterações
+          <Button variant="primary" onclick={handleSubmit} disabled={isSaving}>
+            <span>{isSaving ? 'Salvando...' : 'Salvar Alterações'}</span>
           </Button>
         </footer>
       </div>

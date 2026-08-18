@@ -9,23 +9,11 @@
   import Select from '../../design-system/controls/Select.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
   import Breadcrumb from '../../design-system/navigation/Breadcrumb.svelte'
-
-  export type NovoTecidoData = {
-    nome: string
-    composicao: string
-    largura: string
-    rendimento: string
-    gramaturaLinear: string
-    gramaturaM2: string
-    tipo: string
-    transparencia: string
-    elasticidade: string
-    acabamento: string
-  }
+  import type { CreateTecidoInput } from '../../../shared/types'
 
   type Props = {
     oncancel: () => void
-    onsave: (tecido: NovoTecidoData) => void
+    onsave: (tecido: CreateTecidoInput) => void | Promise<void>
   }
 
   let { oncancel, onsave }: Props = $props()
@@ -44,6 +32,7 @@
 
   let lastEditedMetric = $state<'rendimento' | 'gramaturaLinear' | 'gramaturaM2' | null>(null)
   let erroMsg = $state('')
+  let isSaving = $state(false)
 
   const tipoOptions = [
     { value: '', label: 'Selecione' },
@@ -162,7 +151,7 @@
     recalculateMetrics('gramaturaM2')
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!nome.trim()) {
       erroMsg = 'O campo Nome é obrigatório.'
       return
@@ -190,18 +179,25 @@
     }
 
     erroMsg = ''
-    onsave({
-      nome: nome.trim(),
-      composicao: composicao.trim(),
-      largura: largura.trim(),
-      rendimento: rendimento.trim(),
-      gramaturaLinear: gramaturaLinear.trim(),
-      gramaturaM2: gramaturaM2.trim(),
-      tipo,
-      transparencia,
-      elasticidade,
-      acabamento
-    })
+    isSaving = true
+    try {
+      await onsave({
+        nome: nome.trim(),
+        composicao: composicao.trim(),
+        largura: numLargura,
+        rendimento: parsePtBrNumber(rendimento),
+        gramaturaLinear: parsePtBrNumber(gramaturaLinear),
+        gramaturaM2: parsePtBrNumber(gramaturaM2),
+        tipo: tipo || null,
+        transparencia: transparencia || null,
+        elasticidade: elasticidade || null,
+        acabamento: acabamento || null
+      })
+    } catch (err: any) {
+      erroMsg = err?.message || 'Erro ao cadastrar tecido no banco de dados.'
+    } finally {
+      isSaving = false
+    }
   }
 </script>
 
@@ -217,12 +213,12 @@
     {/snippet}
     {#snippet actions()}
       <Stack direction="horizontal" gap="2">
-        <Button variant="ghost" size="sm" onclick={oncancel}>
+        <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSaving}>
           <Icon name="arrow-left" size="sm" />
           <span>Voltar para Lista</span>
         </Button>
-        <Button variant="primary" size="sm" onclick={handleSubmit}>
-          <span>Salvar Tecido</span>
+        <Button variant="primary" size="sm" onclick={handleSubmit} disabled={isSaving}>
+          <span>{isSaving ? 'Salvando...' : 'Salvar Tecido'}</span>
         </Button>
       </Stack>
     {/snippet}
@@ -366,11 +362,11 @@
 
         <!-- Barra de rodapé com ações em largura total -->
         <footer class="form-footer">
-          <Button variant="ghost" onclick={oncancel}>
+          <Button variant="ghost" onclick={oncancel} disabled={isSaving}>
             Cancelar
           </Button>
-          <Button variant="primary" onclick={handleSubmit}>
-            Salvar Tecido
+          <Button variant="primary" onclick={handleSubmit} disabled={isSaving}>
+            <span>{isSaving ? 'Salvando...' : 'Salvar Tecido'}</span>
           </Button>
         </footer>
       </div>
