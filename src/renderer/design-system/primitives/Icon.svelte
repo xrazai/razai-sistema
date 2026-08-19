@@ -72,6 +72,11 @@
     <svg viewBox="0 0 14 14">
       <path d="M7 1.5 V12.5 M1.5 7 H12.5" />
     </svg>
+  {:else if name === 'copy'}
+    <svg viewBox="0 0 14 14">
+      <rect x="4.5" y="4.5" width="8" height="8" />
+      <path d="M9.5 4.5 V1.5 H1.5 V9.5 H4.5" />
+    </svg>
   {:else if name === 'search'}
     <svg viewBox="0 0 14 14">
       <circle cx="5.5" cy="5.5" r="3.5" />

@@ -84,6 +84,7 @@
     'chevron-left',
     'arrow-left',
     'check',
+    'copy',
     'empty'
   ]
 </script>
