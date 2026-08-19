@@ -74,6 +74,11 @@ const api: RazaiApi = {
     exportTecidosCsv: (filePath?: string) => ipcRenderer.invoke('backup:exportTecidosCsv', filePath),
     exportCoresCsv: (filePath?: string) => ipcRenderer.invoke('backup:exportCoresCsv', filePath),
     exportDatabase: (destinationPath?: string) => ipcRenderer.invoke('backup:exportDatabase', destinationPath)
+  },
+  diagnostics: {
+    getLogs: (limit?: number) => ipcRenderer.invoke('diagnostics:getLogs', limit),
+    clearLogs: () => ipcRenderer.invoke('diagnostics:clearLogs'),
+    getMetrics: () => ipcRenderer.invoke('diagnostics:getMetrics')
   }
 }
 
