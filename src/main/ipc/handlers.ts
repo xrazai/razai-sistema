@@ -365,4 +365,16 @@ export function registerIpcHandlers(): void {
       return ShopeeSessionManager.simularMensagemRecebida(agenteId, clienteNome, textoPergunta)
     }
   )
+
+  ipcMain.handle('agentes:shopee:iniciarMapeamento', async () => {
+    return ShopeeSessionManager.iniciarMapeamento()
+  })
+
+  ipcMain.handle('agentes:shopee:obterMapa', async () => {
+    return ShopeeSessionManager.obterMapa()
+  })
+
+  ipcMain.handle('agentes:shopee:atualizarMapa', async () => {
+    return ShopeeSessionManager.atualizarMapa()
+  })
 }

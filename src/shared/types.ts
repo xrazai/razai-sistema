@@ -526,6 +526,34 @@ export type ShopeeSessionStatus = {
   ultimaVerificacao: string
 }
 
+export type ShopeeChatEndpoint = {
+  method: string
+  url: string
+  kind: 'conversas' | 'mensagens' | 'envio' | 'chat'
+  vistoEm: string
+}
+
+export type ShopeeMappedConversation = {
+  id: string
+  clienteNome: string
+  ultimaMensagem: string
+  ultimaMensagemAt: string
+  ultimaMensagemLabel: string
+  unread: number
+  fonte: 'network' | 'dom'
+}
+
+export type ShopeeChatMapSnapshot = {
+  urlAtual: string
+  mapeando: boolean
+  endpoints: ShopeeChatEndpoint[]
+  conversasRecentes: ShopeeMappedConversation[]
+  conversasIgnoradas: number
+  janelaHoje: string
+  janelaOntem: string
+  atualizadoEm: string
+}
+
 export type AgentesApi = {
   list: () => Promise<AgenteRecord[]>
   getById: (id: string) => Promise<AgenteRecord | null>
@@ -552,6 +580,9 @@ export type AgentesApi = {
       clienteNome: string,
       textoPergunta: string
     ) => Promise<{ conversaId: string; msgClienteId: string; msgSugestaoId: string; respostaIa: string; confianca: number }>
+    iniciarMapeamento: () => Promise<ShopeeChatMapSnapshot>
+    obterMapa: () => Promise<ShopeeChatMapSnapshot>
+    atualizarMapa: () => Promise<ShopeeChatMapSnapshot>
   }
 }
 
