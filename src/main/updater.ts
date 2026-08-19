@@ -1,7 +1,14 @@
 import { app, BrowserWindow } from 'electron'
-import { autoUpdater, type ProgressInfo, type UpdateInfo as ElectronUpdateInfo } from 'electron-updater'
+import electronUpdaterPkg from 'electron-updater'
+import type { ProgressInfo, UpdateInfo as ElectronUpdateInfo } from 'electron-updater'
 import { logger } from './logger'
 import type { UpdateInfo, UpdaterCheckResult, UpdateStatus } from '../shared/types'
+
+// Suporta CJS getter export e ESM interop
+const autoUpdater =
+  (electronUpdaterPkg as any)?.autoUpdater ||
+  (electronUpdaterPkg as any)?.default?.autoUpdater ||
+  electronUpdaterPkg
 
 let currentStatus: UpdateStatus = 'idle'
 let currentVersion: string = app.isPackaged ? app.getVersion() : '0.1.0'
