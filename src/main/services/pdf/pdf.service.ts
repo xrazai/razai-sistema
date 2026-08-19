@@ -1,8 +1,12 @@
 import { BrowserWindow, shell } from 'electron'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import * as os from 'node:os'
 import type { PedidoRecord } from '../../../shared/types'
+
+const execFileAsync = promisify(execFile)
 
 export class PdfService {
   /**
@@ -333,7 +337,8 @@ export class PdfService {
   }
 
   /**
-   * Abre o PDF gerado diretamente no visualizador nativo ou tela de compartilhamento do Windows.
+   * Abre o compartilhamento nativo do Windows (Windows Share Sheet) para o PDF do pedido,
+   * permitindo envio direto para WhatsApp, Outlook, Telegram, etc.
    */
   static async sharePedidoPdf(pedido: PedidoRecord): Promise<{ ok: boolean; filePath?: string; error?: string }> {
     const res = await this.generatePedidoPdf(pedido)
@@ -341,6 +346,59 @@ export class PdfService {
       return res
     }
 
+    // No Windows, tenta invocar o Windows Share Sheet via IDataTransferManagerInterop
+    if (process.platform === 'win32') {
+      try {
+        const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
+        let hwnd = '0'
+        if (mainWindow) {
+          const hwndBuffer = mainWindow.getNativeWindowHandle()
+          hwnd =
+            hwndBuffer.length >= 8
+              ? hwndBuffer.readBigInt64LE(0).toString()
+              : hwndBuffer.length >= 4
+                ? hwndBuffer.readInt32LE(0).toString()
+                : '0'
+        }
+
+        let scriptPath = path.resolve(__dirname, 'services/pdf/share-window.ps1')
+        try {
+          await fs.access(scriptPath)
+        } catch {
+          scriptPath = path.resolve(process.cwd(), 'src/main/services/pdf/share-window.ps1')
+        }
+
+        const numeroFormatado = `#PED-${String(pedido.numero).padStart(4, '0')}`
+        const shareTitle = `Pedido ${numeroFormatado} - ${pedido.clienteNome || 'Razai Sistema'}`
+
+        const { stdout, stderr } = await execFileAsync('powershell.exe', [
+          '-NoProfile',
+          '-NonInteractive',
+          '-ExecutionPolicy',
+          'Bypass',
+          '-File',
+          scriptPath,
+          '-FilePath',
+          res.filePath,
+          '-Title',
+          shareTitle,
+          '-Hwnd',
+          hwnd
+        ])
+
+        if (stdout.includes('OK')) {
+          return { ok: true, filePath: res.filePath }
+        }
+
+        if (stderr && stderr.trim().length > 0) {
+          console.warn('[PdfService] Aviso no Share Sheet nativo:', stderr)
+        }
+      } catch (err: any) {
+        console.warn('[PdfService] Falha ao acionar Windows Share Sheet, abrindo fallback nativo:', err?.message)
+      }
+    }
+
+    // Fallback: abre o PDF diretamente no visualizador do sistema operacional
     try {
       await shell.openPath(res.filePath)
       return { ok: true, filePath: res.filePath }
