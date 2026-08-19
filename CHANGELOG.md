@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Validação de autoupdate ponta a ponta e release v0.2.2
+
 ## 2026-08-19 — Mecanismo de autoupdate com electron-updater apontando para GitHub releases e painel em Settings (Task 17)
 
 ## 2026-08-19 — Sistema de logs no Main e painel visual de Diagnóstico em Settings (Task 13)
