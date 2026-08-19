@@ -34,7 +34,7 @@ win:
     - target: portable
       arch:
         - x64
-  artifactName: "${productName}-Setup-${version}-${arch}.${ext}"
+  artifactName: "Razai-Sistema-Setup-${version}-${arch}.${ext}"
 
 nsis:
   oneClick: false
@@ -47,4 +47,4 @@ nsis:
   uninstallDisplayName: "${productName} ${version}"
 
 portable:
-  artifactName: "${productName}-Portable-${version}.${ext}"
+  artifactName: "Razai-Sistema-Portable-${version}.${ext}"
