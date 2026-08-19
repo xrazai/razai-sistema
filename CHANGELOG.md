@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Mecanismo de autoupdate com electron-updater apontando para GitHub releases e painel em Settings (Task 17)
+
 ## 2026-08-19 — Sistema de logs no Main e painel visual de Diagnóstico em Settings (Task 13)
 
 ## 2026-08-19 — Exportação CSV de dados (UTF-8 BOM para Excel) e backup do banco SQLite (Task 12)
