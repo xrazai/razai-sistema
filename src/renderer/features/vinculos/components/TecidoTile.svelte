@@ -26,19 +26,13 @@
   aria-pressed={selected}
 >
   <div class="tile-head">
+    <span class="tecido-name" title={tecido.nome}>{tecido.nome}</span>
     <span class="sku-tag">{tecido.codigo}</span>
   </div>
 
-  <div class="tile-body">
-    <span class="tecido-name" title={tecido.nome}>{tecido.nome}</span>
-    <span class="tecido-comp" title={tecido.composicao}>{tecido.composicao}</span>
+  <div class="tile-foot">
+    <span class="tecido-specs">{tecido.composicao}{specs ? ` • ${specs}` : ''}</span>
   </div>
-
-  {#if specs}
-    <div class="tile-foot">
-      <span class="tecido-specs">{specs}</span>
-    </div>
-  {/if}
 </button>
 
 <style>
@@ -46,7 +40,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 96px;
+    height: 80px;
     padding: var(--space-2) var(--space-3);
     background: var(--color-bg);
     box-shadow: inset 0 0 0 1px var(--color-border);
@@ -75,8 +69,19 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-2);
-    height: 20px;
+    min-height: 24px;
     line-height: 100%;
+  }
+
+  .tecido-name {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-fg);
+    line-height: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
   }
 
   .sku-tag {
@@ -86,46 +91,23 @@
     color: var(--color-accent);
     letter-spacing: var(--tracking-header);
     line-height: 100%;
+    flex-shrink: 0;
   }
 
-  .tile-body {
+  .tile-foot {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    align-items: center;
+    height: 18px;
     line-height: 100%;
-    min-width: 0;
   }
 
-  .tecido-name {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--color-fg);
-    line-height: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .tecido-comp {
+  .tecido-specs {
+    font-family: var(--font-mono);
     font-size: 11px;
     color: var(--color-fg-muted);
     line-height: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .tile-foot {
-    display: flex;
-    align-items: center;
-    height: 16px;
-    line-height: 100%;
-  }
-
-  .tecido-specs {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--color-fg-dim);
-    line-height: 100%;
   }
 </style>
