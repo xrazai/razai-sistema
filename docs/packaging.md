@@ -1,127 +1,124 @@
-# Guia de Empacotamento e Distribuição (Windows)
+# Packaging, Distribuição e Autoupdate — Razai Sistema
 
-Este documento descreve o fluxo de empacotamento, compilação de módulos nativos C++ (`better-sqlite3`), configuração do `electron-builder` e o checklist de **Smoke Test** para validação dos executáveis gerados do **Razai Sistema**.
-
----
-
-## 1. Visão Geral
-
-O empacotamento do Razai Sistema utiliza a combinação de **electron-vite** (para bundle do processo Main, Preload e Renderer Svelte 5) e **electron-builder** (para montagem dos artefatos executáveis e instaladores para Windows x64).
-
-### Artefatos Gerados:
-- **Instalador NSIS (`.exe`)**: Instalador assistido configurável (atalhos no desktop e menu iniciar).
-- **Executável Portátil (`Portable .exe`)**: Executável único autocontido sem necessidade de instalação prévia.
-- **Diretório Descompactado (`dist/win-unpacked`)**: Binário montado para inspeção e testes rápidos locais sem passar pelo instalador.
+Este documento descreve a arquitetura de empacotamento, distribuição Windows e atualização automática do **Razai Sistema**.
 
 ---
 
-## 2. Dependências Nativas (`better-sqlite3`)
+## 1. Stack e Ferramentas de Packaging
 
-O `better-sqlite3` é um módulo nativo C++ compilado via `node-gyp`. No ambiente Electron, a versão da ABI do Node interno do Electron difere do Node do sistema operacional.
+- **Electron Builder**: `electron-builder` (v26+) configurado via `electron-builder.yml`.
+- **Compilação de Binários Nativos C#**: .NET 8 AOT/SingleFile (`dotnet publish` para `resources/bin/WindowsShare.exe`).
+- **Bundle de Aplicação**: `electron-vite` gerando código em `out/main`, `out/preload` e `out/renderer`.
+- **Mecanismo de Autoupdate**: `electron-updater` consumindo metadados (`latest.yml`), instaladores diferenciais (`.blockmap`) e executáveis das Releases oficiais do GitHub (`xrazai/razai-sistema`).
 
-O `electron-builder` cuida automaticamente da reconstrução do módulo para a versão do Electron em uso através do `@electron/rebuild`.
+---
 
-### Configuração ASAR (`electron-builder.yml`):
-Para garantir que o arquivo binário nativo (`better_sqlite3.node`) seja acessado corretamente em runtime:
+## 2. Configuração do `electron-builder.yml`
+
 ```yaml
+appId: com.razai.sistema
+productName: Razai Sistema
+copyright: Copyright © 2026 Razai
+
+publish:
+  provider: github
+  owner: xrazai
+  repo: razai-sistema
+
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - out/**/*
+  - package.json
+
 asar: true
 asarUnpack:
   - "**/*.node"
+
+extraResources:
+  - from: resources/bin
+    to: bin
+    filter:
+      - "**/*"
+
+win:
+  executableName: Razai Sistema
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  artifactName: "Razai-Sistema-Setup-${version}-${arch}.${ext}"
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Razai Sistema
+  uninstallDisplayName: "${productName} ${version}"
+
+portable:
+  artifactName: "Razai-Sistema-Portable-${version}.${ext}"
 ```
-Isso descompacta os binários `.node` para fora do arquivo `app.asar`, permitindo que o processo Node.js/Electron carregue a biblioteca dinâmica C++ sem erros.
+
+### ⚠️ Regra Crítica de Nomenclatura de Artefatos (`artifactName`)
+> **NUNCA use espaços em `artifactName`**:
+> O GitHub Releases converte espaços em pontos (`Razai.Sistema-...`), enquanto o arquivo `latest.yml` gerado pelo `electron-builder` aponta para nomes com hífen (`Razai-Sistema-...`).
+> Se houver divergência, o `electron-updater` receberá **HTTP 404** ao tentar baixar a atualização.
+> O `artifactName` deve ser fixado como `Razai-Sistema-Setup-${version}-${arch}.${ext}`.
 
 ---
 
-## 3. Caminhos de Dados e Persistência em Produção
+## 3. Integração de Autoupdate (`electron-updater`)
 
-Em modo de desenvolvimento ou empacotado, o banco SQLite segue o padrão:
-- **Produção / Empacotado**: `%APPDATA%\razai-sistema\data\razai.sqlite` (obtido via `app.getPath('userData')`).
-- **Override para Testes / CI**: Variável de ambiente `RAZAI_DB_PATH`.
+### 3.1 Interop CJS / ESM no Main Process
+Como o projeto utiliza ES Modules nativos (`"type": "module"`), o import do `electron-updater` deve ser resiliente para resolver os getters dinâmicos de CommonJS sem quebrar a inicialização:
 
-No startup da aplicação (`src/main/database/db.ts`):
-1. O diretório de dados é criado automaticamente caso não exista (`mkdirSync(dir, { recursive: true })`).
-2. Conexão SQLite é aberta com modo WAL (`db.pragma('journal_mode = WAL')`) e foreign keys ativadas.
-3. As migrations versionadas (`src/main/database/migrations`) são executadas em ordem de versão idempotente.
+```ts
+import electronUpdaterPkg from 'electron-updater'
+
+const autoUpdater =
+  (electronUpdaterPkg as any)?.autoUpdater ||
+  (electronUpdaterPkg as any)?.default?.autoUpdater ||
+  electronUpdaterPkg
+```
+
+### 3.2 Fluxo de Eventos e Comunicação IPC
+
+```mermaid
+sequenceDiagram
+    participant Main as Main (updater.ts)
+    participant GH as GitHub Releases
+    participant Preload as Preload Bridge
+    participant UI as Settings (AppearanceSettings)
+
+    UI->>Preload: window.razai.updater.check()
+    Preload->>Main: ipcRenderer.invoke('updater:check')
+    Main->>GH: Consulta latest.yml
+    GH-->>Main: Versão nova detectada (vX.X.X)
+    Main-->>UI: Evento 'updater:status-changed' (available)
+    Main->>GH: Download em background (blockmap diferencial)
+    Main-->>UI: Evento 'updater:status-changed' (downloading + progresso %)
+    GH-->>Main: Download concluído
+    Main-->>UI: Evento 'updater:status-changed' (downloaded)
+    UI->>Preload: window.razai.updater.install()
+    Preload->>Main: ipcRenderer.invoke('updater:install')
+    Main->>Main: autoUpdater.quitAndInstall(false, true)
+```
 
 ---
 
-## 4. Scripts de Build e Empacotamento
-
-No `package.json`:
+## 4. Comandos de Build de Produção
 
 | Comando | Descrição |
 |---|---|
-| `npm run build` | Compila o código TypeScript, Main, Preload e Svelte para a pasta `out/`. |
-| `npm run package:win` | Compila o app e gera o executável descompactado em `dist/win-unpacked/` (ideal para smoke test rápido). |
-| `npm run build:win` | Compila e empacota os instaladores finais NSIS e Portable na pasta `dist/`. |
-| `npm run postinstall` | Executa `electron-builder install-app-deps` para sincronizar os headers nativos locais. |
-
----
-
-## 5. Passo a Passo para Gerar os Binários Localmente
-
-1. **Garantir dependências instaladas**:
-   ```powershell
-   npm install
-   ```
-
-2. **Validação de tipos e testes unitários**:
-   ```powershell
-   npm run typecheck
-   npm run test
-   ```
-
-3. **Geração do pacote descompactado para validação rápida**:
-   ```powershell
-   npm run package:win
-   ```
-   O executável estará em `dist/win-unpacked/Razai Sistema.exe`.
-
-4. **Geração dos instaladores completos (NSIS / Portable)**:
-   ```powershell
-   npm run build:win
-   ```
-   Os artefatos estarão em `dist/`.
-
----
-
-## 6. Checklist de Smoke Test (Validação Pré-Release)
-
-Após gerar o pacote via `npm run package:win` ou `npm run build:win`, execute o seguinte roteiro de smoke test no Windows:
-
-- [ ] **1. Inicialização da Aplicação**:
-  - Executar `dist/win-unpacked/Razai Sistema.exe`.
-  - A janela principal deve abrir sem tela branca (White Screen of Death) ou travamento.
-  - O tema escuro industrial brutalist deve ser renderizado corretamente.
-
-- [ ] **2. Inicialização do Banco de Dados SQLite**:
-  - Verificar se o arquivo de banco foi criado em `%APPDATA%\razai-sistema\data\razai.sqlite`.
-  - Confirmar que as migrations foram aplicadas (tabelas `schema_migrations`, `tecidos`, `cores`, etc. presentes).
-
-- [ ] **3. Operações CRUD — Módulo de Tecidos**:
-  - Navegar até o módulo de **Tecidos**.
-  - Cadastrar um novo tecido com composição e gramatura.
-  - Verificar a listagem e os cálculos de rendimento.
-  - Editar e excluir um registro para confirmar a integridade das transações SQLite.
-
-- [ ] **4. Operações CRUD — Módulo de Cores**:
-  - Navegar até o módulo de **Cores**.
-  - Cadastrar uma cor com swatch hexadecimal / RGB / Pantone.
-  - Filtrar e buscar na lista.
-
-- [ ] **5. Persistência e Fechamento**:
-  - Fechar a aplicação (`Alt+F4` ou botão fechar).
-  - Reabrir o executável e confirmar que os dados cadastrados persistem intactos.
-  - Verificar se nenhum processo zumbi do Electron permanece ativo no Gerenciador de Tarefas.
-
----
-
-## 7. Resolução de Problemas Comuns
-
-### Erro: `The module '...better_sqlite3.node' was compiled against a different Node.js version`
-- **Causa**: O módulo nativo foi compilado com o Node do sistema em vez dos headers do Electron.
-- **Solução**: Execute `npx electron-builder install-app-deps` ou rode novamente `npm run package:win`.
-
-### Erro: `EPERM: operation not permitted` no `dist/`
-- **Causa**: Uma instância anterior do `Razai Sistema.exe` ainda está aberta e bloqueando a sobrescrita dos arquivos na pasta `dist/`.
-- **Solução**: Feche o processo no Gerenciador de Tarefas e repita o comando de build.
+| `npm run build` | Compila o C# nativo (`WindowsShare.exe`) e empacota bundles Vite (Main, Preload, Renderer) |
+| `npm run build:win` | Executa o build completo e gera os instaladores NSIS, Portable e `latest.yml` na pasta `dist/` |
+| `npm run package:win` | Gera a pasta desempacotada (`dist/win-unpacked`) para teste local rápido sem criar instalador |
