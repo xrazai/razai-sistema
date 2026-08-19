@@ -9,6 +9,9 @@ out
 release
 test-results
 playwright-report
+native/**/bin
+native/**/obj
+resources/bin
 .vscode/*
 !.vscode/extensions.json
 .impeccable

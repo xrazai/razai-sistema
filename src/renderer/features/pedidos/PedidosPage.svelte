@@ -7,6 +7,7 @@
   import PedidosLancamentoPage from './PedidosLancamentoPage.svelte'
   import PedidosDetalhesPage from './PedidosDetalhesPage.svelte'
   import { router } from '../../shell/router.svelte'
+  import { sharePedidoPdf } from './sharePedidoPdf'
   import type { PedidoRecord, CreatePedidoInput, UpdatePedidoInput } from '../../../shared/types'
 
   let viewMode = $derived.by<'list' | 'create' | 'details'>(() => {
@@ -92,9 +93,13 @@
         const created = await window.razai.pedidos.create(input)
         if (sharePdf) {
           try {
-            await window.razai.pedidos.compartilhar(created.id)
-          } catch (pdfErr) {
+            await sharePedidoPdf(created.id)
+          } catch (pdfErr: any) {
             console.error('Erro ao compartilhar PDF:', pdfErr)
+            notification = pdfErr?.message || 'Pedido salvo, mas o compartilhamento do PDF falhou.'
+            setTimeout(() => {
+              notification = null
+            }, 4000)
           }
         }
         router.navigate('pedidos')
@@ -137,14 +142,7 @@
   }
 
   async function handleSharePdf(id: string) {
-    try {
-      if (typeof window !== 'undefined' && window.razai?.pedidos) {
-        await window.razai.pedidos.compartilhar(id)
-      }
-    } catch (err: any) {
-      console.error('Erro ao compartilhar PDF:', err)
-      alert(err?.message || 'Erro ao gerar e abrir PDF.')
-    }
+    await sharePedidoPdf(id)
   }
 
   async function handleExcluirPedido(id: string) {
@@ -261,7 +259,12 @@
                   <button
                     type="button"
                     class="action-btn"
-                    onclick={() => handleSharePdf(row.id)}
+                    onclick={() => {
+                      handleSharePdf(row.id).catch((err) => {
+                        console.error('Erro ao compartilhar PDF:', err)
+                        errorMsg = err?.message || 'Erro ao gerar e compartilhar PDF.'
+                      })
+                    }}
                     title="Compartilhar PDF (WhatsApp)"
                   >
                     <Icon name="copy" size="sm" />

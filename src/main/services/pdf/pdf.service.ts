@@ -1,17 +1,63 @@
-import { BrowserWindow, shell } from 'electron'
+import { BrowserWindow, shell, app } from 'electron'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import * as fs from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import * as path from 'node:path'
 import * as os from 'node:os'
-import type { PedidoRecord } from '../../../shared/types'
+import type { PedidoPdfResult, PedidoRecord } from '../../../shared/types'
 
 const execFileAsync = promisify(execFile)
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '\u0026amp;')
+    .replace(/</g, '\u0026lt;')
+    .replace(/>/g, '\u0026gt;')
+    .replace(/"/g, '\u0026quot;')
+}
+
+function formatQty(value: unknown): string {
+  const num = Number(value)
+  return (Number.isFinite(num) ? num : 0).toFixed(2).replace('.', ',')
+}
+
+function isAllowedSharePath(filePath: string): boolean {
+  const resolved = path.resolve(filePath)
+  if (!resolved.toLowerCase().endsWith('.pdf')) return false
+
+  const allowedRoots = [
+    path.resolve(os.tmpdir(), 'razai-pedidos'),
+    path.resolve(app.getPath('userData'), 'shares')
+  ]
+
+  return allowedRoots.some((root) => {
+    const relative = path.relative(root, resolved)
+    return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative)
+  })
+}
+
+function getWindowsShareBinaryPath(): string | null {
+  const possiblePaths = [
+    process.resourcesPath ? path.join(process.resourcesPath, 'bin/WindowsShare.exe') : '',
+    path.resolve(process.cwd(), 'resources/bin/WindowsShare.exe'),
+    path.resolve(
+      process.cwd(),
+      'native/windows-share/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish/WindowsShare.exe'
+    ),
+    path.resolve(__dirname, '../../resources/bin/WindowsShare.exe'),
+    path.resolve(__dirname, '../resources/bin/WindowsShare.exe')
+  ].filter(Boolean)
+
+  for (const p of possiblePaths) {
+    if (existsSync(p)) {
+      return p
+    }
+  }
+  return null
+}
+
 export class PdfService {
-  /**
-   * Renderiza o HTML do pedido com design Industrial Brutalist A4 de alto contraste e sem tintas pesadas.
-   */
   static generatePedidoHtml(pedido: PedidoRecord): string {
     const formatCurrency = (val: number) =>
       `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -24,12 +70,12 @@ export class PdfService {
         (item, index) => `
         <tr>
           <td style="width: 35px; text-align: center;">${index + 1}</td>
-          <td style="width: 170px; font-weight: 700;">${item.sku}</td>
-          <td>${item.tecidoNome}</td>
-          <td>${item.corNome}</td>
-          <td style="width: 80px; text-align: right;">${item.quantidade.toFixed(2).replace('.', ',')}</td>
-          <td style="width: 100px; text-align: right;">${formatCurrency(item.precoUnitario)}</td>
-          <td style="width: 110px; text-align: right; font-weight: 700;">${formatCurrency(item.subtotal)}</td>
+          <td style="width: 170px; font-weight: 700;">${escapeHtml(item.sku)}</td>
+          <td>${escapeHtml(item.tecidoNome)}</td>
+          <td>${escapeHtml(item.corNome)}</td>
+          <td style="width: 80px; text-align: right;">${formatQty(item.quantidade)}</td>
+          <td style="width: 100px; text-align: right;">${formatCurrency(Number(item.precoUnitario) || 0)}</td>
+          <td style="width: 110px; text-align: right; font-weight: 700;">${formatCurrency(Number(item.subtotal) || 0)}</td>
         </tr>
       `
       )
@@ -217,11 +263,11 @@ export class PdfService {
         <div class="meta-grid">
           <div class="meta-item">
             <span class="meta-label">Cliente</span>
-            <span class="meta-val">${pedido.clienteNome || 'CONSUMIDOR FINAL / BALCÃO'}</span>
+            <span class="meta-val">${escapeHtml(pedido.clienteNome || 'CONSUMIDOR FINAL / BALCÃO')}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Status</span>
-            <span class="meta-val">${pedido.status.toUpperCase()}</span>
+            <span class="meta-val">${escapeHtml((pedido.status || 'pendente').toUpperCase())}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Total de Itens</span>
@@ -253,11 +299,11 @@ export class PdfService {
           </div>
           <div class="total-box">
             <span class="total-box-label">Quantidade Total</span>
-            <span class="total-box-val" style="font-size: 12px;">${pedido.quantidadeTotal.toFixed(2).replace('.', ',')}</span>
+            <span class="total-box-val" style="font-size: 12px;">${formatQty(pedido.quantidadeTotal)}</span>
           </div>
           <div class="total-box">
             <span class="total-box-label">Valor Total do Pedido</span>
-            <span class="total-box-val">${formatCurrency(pedido.valorTotal)}</span>
+            <span class="total-box-val">${formatCurrency(Number(pedido.valorTotal) || 0)}</span>
           </div>
         </div>
 
@@ -266,7 +312,7 @@ export class PdfService {
             ? `
           <div class="obs-box">
             <div class="obs-title">Observações do Pedido:</div>
-            <div>${pedido.observacoes}</div>
+            <div>${escapeHtml(pedido.observacoes)}</div>
           </div>
         `
             : ''
@@ -286,10 +332,7 @@ export class PdfService {
     `
   }
 
-  /**
-   * Gera o arquivo PDF e o salva no diretório temporário/pedidos.
-   */
-  static async generatePedidoPdf(pedido: PedidoRecord): Promise<{ ok: boolean; filePath?: string; error?: string }> {
+  static async generatePedidoPdf(pedido: PedidoRecord): Promise<PedidoPdfResult> {
     let win: BrowserWindow | null = null
     try {
       const htmlContent = this.generatePedidoHtml(pedido)
@@ -299,6 +342,7 @@ export class PdfService {
       const outputDir = path.join(os.tmpdir(), 'razai-pedidos')
       await fs.mkdir(outputDir, { recursive: true })
       const finalPdfPath = path.join(outputDir, fileName)
+      const htmlPath = path.join(outputDir, fileName.replace(/\.pdf$/i, '.html'))
 
       win = new BrowserWindow({
         show: false,
@@ -310,11 +354,9 @@ export class PdfService {
         }
       })
 
-      const encodedHtml = `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`
-      await win.loadURL(encodedHtml)
-
-      // Aguarda renderização
-      await new Promise((resolve) => setTimeout(resolve, 300))
+      await fs.writeFile(htmlPath, htmlContent, 'utf8')
+      await win.loadFile(htmlPath)
+      await fs.unlink(htmlPath).catch(() => undefined)
 
       const pdfBuffer = await win.webContents.printToPDF({
         pageSize: 'A4',
@@ -324,8 +366,18 @@ export class PdfService {
         }
       })
 
+      if (pdfBuffer.subarray(0, 4).toString('utf8') !== '%PDF') {
+        return { ok: false, error: 'Falha ao renderizar o PDF do pedido.' }
+      }
+
       await fs.writeFile(finalPdfPath, pdfBuffer)
-      return { ok: true, filePath: finalPdfPath }
+      return {
+        ok: true,
+        filePath: finalPdfPath,
+        fileName,
+        title: `Pedido PED-${numeroPad} - ${pedido.clienteNome || 'Razai Sistema'}`,
+        data: new Uint8Array(pdfBuffer)
+      }
     } catch (err: any) {
       console.error('[PdfService] Erro ao gerar PDF:', err)
       return { ok: false, error: err?.message || 'Falha na geração do PDF' }
@@ -336,75 +388,44 @@ export class PdfService {
     }
   }
 
-  /**
-   * Abre o compartilhamento nativo do Windows (Windows Share Sheet) para o PDF do pedido,
-   * permitindo envio direto para WhatsApp, Outlook, Telegram, etc.
-   */
-  static async sharePedidoPdf(pedido: PedidoRecord): Promise<{ ok: boolean; filePath?: string; error?: string }> {
+  static async sharePedidoPdf(pedido: PedidoRecord): Promise<PedidoPdfResult> {
     const res = await this.generatePedidoPdf(pedido)
     if (!res.ok || !res.filePath) {
       return res
     }
+    return this.openWindowsShare(res.filePath, res.title || 'Pedido Razai Sistema')
+  }
 
-    // No Windows, tenta invocar o Windows Share Sheet via IDataTransferManagerInterop
+  static async openWindowsShare(filePath: string, title: string): Promise<PedidoPdfResult> {
+    if (!isAllowedSharePath(filePath) || !existsSync(filePath)) {
+      return { ok: false, error: 'Arquivo de compartilhamento inválido.' }
+    }
+
+    let sharePath = path.resolve(filePath)
     if (process.platform === 'win32') {
-      try {
-        const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
-        let hwnd = '0'
-        if (mainWindow) {
-          const hwndBuffer = mainWindow.getNativeWindowHandle()
-          hwnd =
-            hwndBuffer.length >= 8
-              ? hwndBuffer.readBigInt64LE(0).toString()
-              : hwndBuffer.length >= 4
-                ? hwndBuffer.readInt32LE(0).toString()
-                : '0'
-        }
-
-        let scriptPath = path.resolve(__dirname, 'services/pdf/share-window.ps1')
+      const helperExe = getWindowsShareBinaryPath()
+      if (helperExe) {
         try {
-          await fs.access(scriptPath)
-        } catch {
-          scriptPath = path.resolve(process.cwd(), 'src/main/services/pdf/share-window.ps1')
+          const shareDir = path.join(app.getPath('userData'), 'shares')
+          await fs.mkdir(shareDir, { recursive: true })
+          sharePath = path.join(shareDir, path.basename(filePath))
+          await fs.copyFile(filePath, sharePath)
+
+          await execFileAsync(helperExe, ['--file', sharePath, '--title', title], {
+            timeout: 10 * 60 * 1000,
+            windowsHide: false
+          })
+          return { ok: true, filePath: sharePath }
+        } catch (err: any) {
+          console.warn('[PdfService] Falha ao acionar helper nativo WindowsShare, acionando fallback:', err?.message)
         }
-
-        const numeroFormatado = `#PED-${String(pedido.numero).padStart(4, '0')}`
-        const shareTitle = `Pedido ${numeroFormatado} - ${pedido.clienteNome || 'Razai Sistema'}`
-
-        const { stdout, stderr } = await execFileAsync('powershell.exe', [
-          '-NoProfile',
-          '-NonInteractive',
-          '-ExecutionPolicy',
-          'Bypass',
-          '-File',
-          scriptPath,
-          '-FilePath',
-          res.filePath,
-          '-Title',
-          shareTitle,
-          '-Hwnd',
-          hwnd
-        ])
-
-        if (stdout.includes('OK')) {
-          return { ok: true, filePath: res.filePath }
-        }
-
-        if (stderr && stderr.trim().length > 0) {
-          console.warn('[PdfService] Aviso no Share Sheet nativo:', stderr)
-        }
-      } catch (err: any) {
-        console.warn('[PdfService] Falha ao acionar Windows Share Sheet, abrindo fallback nativo:', err?.message)
       }
     }
 
-    // Fallback: abre o PDF diretamente no visualizador do sistema operacional
-    try {
-      await shell.openPath(res.filePath)
-      return { ok: true, filePath: res.filePath }
-    } catch (err: any) {
-      console.error('[PdfService] Erro ao abrir PDF:', err)
-      return { ok: false, filePath: res.filePath, error: err?.message }
+    const openError = await shell.openPath(sharePath)
+    if (openError) {
+      return { ok: false, filePath: sharePath, error: openError }
     }
+    return { ok: true, filePath: sharePath }
   }
 }

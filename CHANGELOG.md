@@ -12,6 +12,10 @@ Formato:
 
 ---
 
+## 2026-08-19 — Helper de share Windows sem janela Fechar
+
+## 2026-08-19 — PDF de pedido via Web Share nativo com fallback no helper Windows
+
 ## 2026-08-19 — Implementação completa dos módulos Vendas e Pedidos (fluxo 3 colunas, impressão térmica 80mm, PDF A4 e conversão de pedidos)
 
 ## 2026-08-19 — Criação dos módulos Vendas e Pedidos com tela de estado vazio e integração na navegação

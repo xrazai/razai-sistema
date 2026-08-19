@@ -175,6 +175,13 @@ export function registerIpcHandlers(): void {
     return PdfService.sharePedidoPdf(pedido)
   })
 
+  ipcMain.handle('pedidos:abrirShareNativo', async (_event, filePath: string, title: string) => {
+    if (typeof filePath !== 'string' || typeof title !== 'string') {
+      return { ok: false, error: 'Parâmetros inválidos para compartilhamento.' }
+    }
+    return PdfService.openWindowsShare(filePath, title)
+  })
+
   // Handlers para Preferências e Configurações (app_meta)
   ipcMain.handle('settings:get', (_event, key: string) => {
     return SettingsService.get(key)
