@@ -181,7 +181,7 @@
     min-height: 40px;
     padding: var(--space-2) var(--space-4);
     background: var(--color-bg-elevated);
-    border-bottom: var(--border-width) solid var(--color-border);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-header);
     text-transform: uppercase;
@@ -214,7 +214,7 @@
     min-height: 56px;
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);
-    border-top: var(--border-width) solid var(--color-border);
+    box-shadow: inset 0 1px 0 0 var(--color-border);
     width: 100%;
     box-sizing: border-box;
     line-height: 100%;

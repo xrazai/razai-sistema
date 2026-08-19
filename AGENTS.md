@@ -272,7 +272,7 @@ Regras visuais mandatórias:
 > - **Relação Pai-Filho**: Se um componente estiver dentro de outro componente, **tanto os elementos filhos quanto os elementos pais** devem ter sua altura somada estritamente múltipla de 4 ou 8.
 > - **Elementos de Layout**: Todo e qualquer bloco que compõe o layout da aplicação (barras laterais, topbars, toolbars, seções, cabeçalhos, rodapés de formulários, linhas de tabelas e modais) deve ter altura somada múltipla de 4 ou 8.
 > - **Compensação Exigida**: Todo componente criado exige compensação explícita de padding e/ou height com `box-sizing: border-box` para cravar no grid modular.
-> - **Fechamento Geométrico & Bordas Direcionais (Zero Colisão)**: Divisores desenhados apenas em `border-bottom` e `border-right`, sem bordas opostas redundantes (`border-top: none`), com compartimentos e linhas finais fechadas com borda de 1px.
+> - **Fechamento Geométrico & Divisores Inset (Zero Colisão & Zero Desvio)**: Linhas e divisores estruturais desenhados via `box-shadow: inset 0 -1px 0 0 var(--color-border)` e `box-shadow: inset -1px 0 0 0 var(--color-border)`, mantendo o box model físico limpo e a área interna simétrica (ex.: 24px de conteúdo + 16px de padding = 40px exatos).
 
 Preferir:
 - grids modulares rígidos

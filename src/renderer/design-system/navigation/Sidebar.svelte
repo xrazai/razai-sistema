@@ -18,7 +18,7 @@
     flex-direction: column;
     width: 220px;
     min-width: 220px;
-    border-right: var(--border-width) solid var(--color-border);
+    box-shadow: inset -1px 0 0 0 var(--color-border);
     background: var(--color-bg-elevated);
   }
 
