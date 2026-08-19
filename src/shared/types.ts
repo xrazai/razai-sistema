@@ -282,6 +282,63 @@ export type UpdateProgress = {
   total: number
 }
 
+export type RelatorioFiltroInput = {
+  dataInicio?: string
+  dataFim?: string
+}
+
+export type VendaDiariaItem = {
+  data: string
+  label: string
+  valorTotal: number
+  quantidadeTotal: number
+  vendasCount: number
+}
+
+export type RelatorioKpis = {
+  faturamentoTotal: number
+  quantidadeTotalMetros: number
+  totalVendas: number
+  ticketMedioVenda: number
+  precoMedioMetro: number
+}
+
+export type RelatorioCorItem = {
+  corId: string
+  corNome: string
+  corCodigo: string
+  corHex?: string
+  quantidadeTotal: number
+  valorTotal: number
+  precoMedio: number
+  percentualTecido: number
+  percentualGeral: number
+}
+
+export type RelatorioTecidoItem = {
+  tecidoId: string
+  tecidoNome: string
+  tecidoCodigo: string
+  quantidadeTotal: number
+  valorTotal: number
+  precoMedio: number
+  percentualGeral: number
+  cores: RelatorioCorItem[]
+}
+
+export type RelatorioVendasTecidoCor = {
+  kpis: RelatorioKpis
+  dataInicio?: string
+  dataFim?: string
+  tecidos: RelatorioTecidoItem[]
+}
+
+export type RelatoriosApi = {
+  getKpis: (filtro?: RelatorioFiltroInput) => Promise<RelatorioKpis>
+  getVendasUltimos7Dias: () => Promise<VendaDiariaItem[]>
+  getVendasPorTecidoCor: (filtro?: RelatorioFiltroInput) => Promise<RelatorioVendasTecidoCor>
+}
+
 export type UpdateInfo = {
   status: UpdateStatus
   version?: string
@@ -319,6 +376,7 @@ export type RazaiApi = {
   backup: BackupApi
   diagnostics: DiagnosticsApi
   updater: UpdaterApi
+  relatorios: RelatoriosApi
 }
 
 declare global {
