@@ -4,6 +4,7 @@
   import VendasPage from './features/vendas/VendasPage.svelte'
   import PedidosPage from './features/pedidos/PedidosPage.svelte'
   import RelatoriosPage from './features/relatorios/RelatoriosPage.svelte'
+  import AgentesPage from './features/agentes/AgentesPage.svelte'
   import TecidosPage from './features/tecidos/TecidosPage.svelte'
   import CoresPage from './features/cores/CoresPage.svelte'
   import VinculosPage from './features/vinculos/VinculosPage.svelte'
@@ -21,6 +22,8 @@
     <PedidosPage />
   {:else if router.route === 'relatorios'}
     <RelatoriosPage />
+  {:else if router.route === 'agentes'}
+    <AgentesPage />
   {:else if router.route === 'tecidos'}
     <TecidosPage />
   {:else if router.route === 'cores'}
