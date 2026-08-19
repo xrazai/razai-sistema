@@ -249,11 +249,9 @@
             {#if selectedTecido}
               <div class="detail-header">
                 <div class="detail-info">
-                  <div class="detail-sku-badge">{selectedTecido.codigo}</div>
-                  <div class="detail-titles">
-                    <h3 class="detail-name">{selectedTecido.nome}</h3>
-                    <span class="detail-sub">{selectedTecido.composicao} • Largura: {selectedTecido.largura}m</span>
-                  </div>
+                  <span class="detail-sku-badge">{selectedTecido.codigo}</span>
+                  <span class="detail-name">{selectedTecido.nome}</span>
+                  <span class="detail-sub">{selectedTecido.composicao} • {selectedTecido.largura}m</span>
                 </div>
 
                 <div class="detail-actions">
@@ -480,11 +478,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 36px;
-    min-height: 36px;
+    height: 40px;
+    min-height: 40px;
     padding: 0 var(--space-3);
     background: var(--color-bg-elevated);
     box-shadow: inset 0 -1px 0 0 var(--color-border);
+    box-sizing: border-box;
     line-height: 100%;
   }
 
@@ -592,19 +591,21 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    height: 48px;
-    min-height: 48px;
+    height: 40px;
+    min-height: 40px;
     padding: 0 var(--space-4);
     background: var(--color-bg-elevated);
     box-shadow: inset 0 -1px 0 0 var(--color-border);
+    box-sizing: border-box;
     line-height: 100%;
   }
 
   .detail-info {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     line-height: 100%;
+    min-width: 0;
   }
 
   .detail-sku-badge {
@@ -613,30 +614,30 @@
     font-weight: 700;
     color: var(--color-accent);
     background: var(--color-bg-sunken);
-    padding: var(--space-1) var(--space-2);
+    padding: 2px 6px;
     box-shadow: inset 0 0 0 1px var(--color-border);
     line-height: 100%;
-  }
-
-  .detail-titles {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    line-height: 100%;
+    flex-shrink: 0;
   }
 
   .detail-name {
     font-size: var(--text-xs);
     font-weight: 700;
     color: var(--color-fg);
-    margin: 0;
     line-height: 100%;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .detail-sub {
     font-size: 11px;
     color: var(--color-fg-muted);
     line-height: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .detail-table-wrap {
