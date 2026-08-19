@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Implementação completa dos módulos Vendas e Pedidos (fluxo 3 colunas, impressão térmica 80mm, PDF A4 e conversão de pedidos)
+
 ## 2026-08-19 — Criação dos módulos Vendas e Pedidos com tela de estado vazio e integração na navegação
 
 ## 2026-08-19 — Módulo de vínculos com grid de cards de tecidos, cartela de cores em lote e geração automática de SKU composto

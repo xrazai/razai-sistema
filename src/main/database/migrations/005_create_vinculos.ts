@@ -22,6 +22,14 @@ export const m005_create_vinculos: Migration = {
 
     // Popula seeds iniciais apenas se os tecidos e cores correspondentes existirem no banco
     const initialPairs = [
+      { tecidoCod: 'ANAR', corCod: 'PRETABSO' },
+      { tecidoCod: 'ANAR', corCod: 'BRANPURO' },
+      { tecidoCod: 'ANAR', corCod: 'AZULMARI' },
+      { tecidoCod: 'CETI', corCod: 'PRETABSO' },
+      { tecidoCod: 'CETI', corCod: 'BRANPURO' },
+      { tecidoCod: 'CETI', corCod: 'VERMCARM' },
+      { tecidoCod: 'CEEL', corCod: 'AZULMARI' },
+      { tecidoCod: 'CEEL', corCod: 'VERDMILI' },
       { tecidoCod: 'TRAL', corCod: 'PRETABSO' },
       { tecidoCod: 'TRAL', corCod: 'BRANPURO' },
       { tecidoCod: 'TRAL', corCod: 'AZULMARI' },
@@ -31,7 +39,9 @@ export const m005_create_vinculos: Migration = {
       { tecidoCod: 'SAEL', corCod: 'PRETABSO' },
       { tecidoCod: 'SAEL', corCod: 'AZULMARI' },
       { tecidoCod: 'VISA', corCod: 'BRANPURO' },
-      { tecidoCod: 'VISA', corCod: 'VERMCARM' }
+      { tecidoCod: 'VISA', corCod: 'VERMCARM' },
+      { tecidoCod: 'JEPE', corCod: 'AZULMARI' },
+      { tecidoCod: 'JEPE', corCod: 'PRETABSO' }
     ]
 
     const insertStmt = db.prepare(`

@@ -25,6 +25,16 @@
   }
 
   let displayTitle = $derived.by(() => {
+    if (router.route === 'vendas') {
+      if (router.subRoute === 'novo') return 'Vendas / Novo Lançamento'
+      if (router.subRoute.startsWith('confirmacao')) return 'Vendas / Comprovante'
+      return 'Vendas'
+    }
+    if (router.route === 'pedidos') {
+      if (router.subRoute === 'novo') return 'Pedidos / Novo Lançamento'
+      if (router.subRoute) return 'Pedidos / Detalhes'
+      return 'Pedidos'
+    }
     if (router.route === 'tecidos') {
       if (router.subRoute === 'cadastro') return 'Tecidos / Cadastro'
       if (router.subRoute) return 'Tecidos / Detalhes'
@@ -85,7 +95,27 @@
       {/if}
     </div>
 
-    {#if router.route === 'tecidos' && !router.subRoute}
+    {#if router.route === 'vendas' && !router.subRoute}
+      <Button variant="primary" size="sm" onclick={() => router.navigate('vendas/novo')}>
+        <Icon name="plus" size="sm" />
+        <span>Registrar Venda</span>
+      </Button>
+    {:else if router.route === 'vendas' && router.subRoute}
+      <Button variant="ghost" size="sm" onclick={() => router.navigate('vendas')}>
+        <Icon name="arrow-left" size="sm" />
+        <span>Voltar</span>
+      </Button>
+    {:else if router.route === 'pedidos' && !router.subRoute}
+      <Button variant="primary" size="sm" onclick={() => router.navigate('pedidos/novo')}>
+        <Icon name="plus" size="sm" />
+        <span>Novo Pedido</span>
+      </Button>
+    {:else if router.route === 'pedidos' && router.subRoute}
+      <Button variant="ghost" size="sm" onclick={() => router.navigate('pedidos')}>
+        <Icon name="arrow-left" size="sm" />
+        <span>Voltar</span>
+      </Button>
+    {:else if router.route === 'tecidos' && !router.subRoute}
       <Button variant="primary" size="sm" onclick={() => router.navigate('tecidos/cadastro')}>
         <Icon name="plus" size="sm" />
         <span>Cadastrar Tecido</span>

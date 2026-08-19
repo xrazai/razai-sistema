@@ -93,15 +93,15 @@ vi.mock('../../src/main/database/db', () => {
           }
         }
 
-        if (cleanSql.includes('SELECT') && cleanSql.includes('FROM vinculos v') && cleanSql.includes('WHERE v.id = ?')) {
+        if (cleanSql.includes('SELECT') && cleanSql.includes('FROM vinculos v') && (cleanSql.includes('WHERE v.id = ?') || cleanSql.includes('WHERE CAST(v.id AS TEXT) = ?'))) {
           return {
-            get: (id: string) => getJoinedRows().find((r) => r.id === id)
+            get: (id: string) => getJoinedRows().find((r) => String(r.id) === String(id))
           }
         }
 
-        if (cleanSql.includes('SELECT') && cleanSql.includes('FROM vinculos v') && cleanSql.includes('WHERE v.tecido_id = ?')) {
+        if (cleanSql.includes('SELECT') && cleanSql.includes('FROM vinculos v') && (cleanSql.includes('WHERE v.tecido_id = ?') || cleanSql.includes('WHERE CAST(v.tecido_id AS TEXT) = ?'))) {
           return {
-            all: (tId: string) => getJoinedRows().filter((r) => r.tecido_id === tId)
+            all: (tId: string) => getJoinedRows().filter((r) => String(r.tecido_id) === String(tId))
           }
         }
 

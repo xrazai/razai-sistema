@@ -5,6 +5,7 @@ import * as path from 'node:path'
 import * as os from 'node:os'
 import { EscPosBuilder } from './escpos.builder'
 import { SettingsService } from '../settings.service'
+import type { VendaRecord } from '../../../shared/types'
 
 const execFileAsync = promisify(execFile)
 
@@ -149,6 +150,79 @@ export class PrinterService {
       .line('TESTE DE ACENTUACAO PT-BR:')
       .line('A E I O U - C - a e i o u - c')
       .line('Corte automatico de guilhotina OK')
+      .divider('-')
+      .line('RAZAI INDUSTRIAL BRUTALIST')
+      .cut(false)
+
+    return this.printRaw(printerName, builder.toBuffer())
+  }
+
+  /**
+   * Gera e envia o cupom de venda em 80mm com itens, totais e corte.
+   */
+  static async printSaleReceipt(venda: VendaRecord, targetPrinterName?: string): Promise<{ ok: boolean; error?: string }> {
+    const printerName = targetPrinterName || SettingsService.get('printer_name') || 'G250'
+
+    const formatCurrency = (val: number) =>
+      `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+    const numeroFormatado = `#VEN-${String(venda.numero).padStart(4, '0')}`
+
+    const builder = new EscPosBuilder(48)
+      .init()
+      .align('center')
+      .size(2, 2)
+      .bold(true)
+      .line('RAZAI SISTEMA')
+      .size(1, 1)
+      .bold(false)
+      .line('COMPROVANTE DE VENDA')
+      .divider('=')
+      .align('left')
+      .twoColumns('VENDA:', numeroFormatado)
+      .twoColumns('DATA/HORA:', new Date(venda.createdAt).toLocaleString('pt-BR'))
+
+    if (venda.clienteNome) {
+      builder.twoColumns('CLIENTE:', venda.clienteNome)
+    }
+    if (venda.formaPagamento) {
+      builder.twoColumns('PAGAMENTO:', venda.formaPagamento)
+    }
+
+    builder
+      .divider('-')
+      .bold(true)
+      .table4Columns('ITEM / SKU', 'QTD', 'UNIT', 'TOTAL')
+      .bold(false)
+      .divider('-')
+
+    if (venda.itens && venda.itens.length > 0) {
+      for (const item of venda.itens) {
+        const itemDesc = `${item.tecidoNome} (${item.corNome})`
+        builder
+          .line(itemDesc.length > 48 ? itemDesc.substring(0, 48) : itemDesc)
+          .table4Columns(
+            item.sku,
+            `${item.quantidade}m`,
+            item.precoUnitario.toFixed(2).replace('.', ','),
+            item.subtotal.toFixed(2).replace('.', ',')
+          )
+      }
+    }
+
+    builder
+      .divider('-')
+      .twoColumns('TOTAL DE ITENS:', `${venda.itensCount} itens`)
+      .twoColumns('METRAGEM TOTAL:', `${venda.quantidadeTotal} m`)
+      .divider('-')
+      .bold(true)
+      .size(2, 1)
+      .twoColumns('TOTAL GERAL:', formatCurrency(venda.valorTotal))
+      .size(1, 1)
+      .bold(false)
+      .divider('=')
+      .align('center')
+      .line('OBRIGADO PELA PREFERENCIA!')
       .divider('-')
       .line('RAZAI INDUSTRIAL BRUTALIST')
       .cut(false)

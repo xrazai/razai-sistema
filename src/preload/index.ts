@@ -7,7 +7,10 @@ import type {
   UpdateTecidoInput,
   CreateCorInput,
   UpdateCorInput,
-  CreateVinculosInput
+  CreateVinculosInput,
+  CreateVendaInput,
+  CreatePedidoInput,
+  UpdatePedidoInput
 } from '../shared/types'
 
 const api: RazaiApi = {
@@ -34,6 +37,27 @@ const api: RazaiApi = {
     delete: (id: string) => ipcRenderer.invoke('vinculos:delete', id),
     deleteByTecidoAndCor: (tecidoId: string, corId: string) =>
       ipcRenderer.invoke('vinculos:deleteByTecidoAndCor', tecidoId, corId)
+  },
+  vendas: {
+    list: (search?: string) => ipcRenderer.invoke('vendas:list', search),
+    getById: (id: string) => ipcRenderer.invoke('vendas:getById', id),
+    create: (input: CreateVendaInput) =>
+      ipcRenderer.invoke('vendas:create', JSON.parse(JSON.stringify(input))),
+    delete: (id: string) => ipcRenderer.invoke('vendas:delete', id),
+    imprimirCupom: (vendaId: string, printerName?: string) =>
+      ipcRenderer.invoke('vendas:imprimirCupom', vendaId, printerName)
+  },
+  pedidos: {
+    list: (search?: string) => ipcRenderer.invoke('pedidos:list', search),
+    getById: (id: string) => ipcRenderer.invoke('pedidos:getById', id),
+    create: (input: CreatePedidoInput) =>
+      ipcRenderer.invoke('pedidos:create', JSON.parse(JSON.stringify(input))),
+    update: (id: string, input: UpdatePedidoInput) =>
+      ipcRenderer.invoke('pedidos:update', id, JSON.parse(JSON.stringify(input))),
+    delete: (id: string) => ipcRenderer.invoke('pedidos:delete', id),
+    aprovar: (id: string) => ipcRenderer.invoke('pedidos:aprovar', id),
+    gerarPdf: (id: string) => ipcRenderer.invoke('pedidos:gerarPdf', id),
+    compartilhar: (id: string) => ipcRenderer.invoke('pedidos:compartilhar', id)
   },
   settings: {
     get: (key: string): Promise<string | null> => ipcRenderer.invoke('settings:get', key),
