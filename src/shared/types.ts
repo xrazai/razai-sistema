@@ -82,12 +82,26 @@ export type SettingsApi = {
   getAll: () => Promise<Record<string, string>>
 }
 
+export type PrinterInfo = {
+  name: string
+  driverName?: string
+  portName?: string
+  isDefault?: boolean
+  status?: string
+}
+
+export type PrinterApi = {
+  list: () => Promise<PrinterInfo[]>
+  printTest: (printerName?: string) => Promise<{ ok: boolean; error?: string }>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
   tecidos: TecidosApi
   cores: CoresApi
   settings: SettingsApi
+  printer: PrinterApi
 }
 
 declare global {
