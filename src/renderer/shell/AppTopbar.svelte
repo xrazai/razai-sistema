@@ -18,6 +18,7 @@
     vendas: 'Vendas',
     pedidos: 'Pedidos',
     relatorios: 'Relatórios',
+    agentes: 'Agentes & Atendimento',
     tecidos: 'Tecidos',
     cores: 'Cores',
     vinculos: 'Vínculos',
@@ -26,6 +27,12 @@
   }
 
   let displayTitle = $derived.by(() => {
+    if (router.route === 'agentes') {
+      if (router.subRoute === 'novo') return 'Agentes / Novo Agente'
+      if (router.subRoute.startsWith('chat')) return 'Agentes / Central de Atendimento'
+      if (router.subRoute.startsWith('conhecimento')) return 'Agentes / Base de Conhecimento'
+      return 'Agentes & Atendimento'
+    }
     if (router.route === 'vendas') {
       if (router.subRoute === 'novo') return 'Vendas / Novo Lançamento'
       if (router.subRoute.startsWith('confirmacao')) return 'Vendas / Comprovante'

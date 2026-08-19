@@ -38,6 +38,12 @@
     onclick={() => onnavigate('relatorios')}
   />
   <NavItem
+    label="Agentes"
+    icon="agent"
+    active={route === 'agentes'}
+    onclick={() => onnavigate('agentes')}
+  />
+  <NavItem
     label="Tecidos"
     icon="fabric"
     active={route === 'tecidos'}
