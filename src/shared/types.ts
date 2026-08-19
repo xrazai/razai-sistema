@@ -82,6 +82,19 @@ export type SettingsApi = {
   getAll: () => Promise<Record<string, string>>
 }
 
+export type PrinterInfo = {
+  name: string
+  driverName?: string
+  portName?: string
+  isDefault?: boolean
+  status?: string
+}
+
+export type PrinterApi = {
+  list: () => Promise<PrinterInfo[]>
+  printTest: (printerName?: string) => Promise<{ ok: boolean; error?: string }>
+}
+
 export type VinculoRecord = {
   id: string
   tecidoId: string
@@ -109,6 +122,7 @@ export type VinculosApi = {
   delete: (id: string) => Promise<boolean>
   deleteByTecidoAndCor: (tecidoId: string, corId: string) => Promise<boolean>
 }
+}
 
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
@@ -117,6 +131,7 @@ export type RazaiApi = {
   cores: CoresApi
   vinculos: VinculosApi
   settings: SettingsApi
+  printer: PrinterApi
 }
 
 declare global {

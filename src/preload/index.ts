@@ -39,6 +39,10 @@ const api: RazaiApi = {
     get: (key: string): Promise<string | null> => ipcRenderer.invoke('settings:get', key),
     set: (key: string, value: string): Promise<boolean> => ipcRenderer.invoke('settings:set', key, value),
     getAll: (): Promise<Record<string, string>> => ipcRenderer.invoke('settings:getAll')
+  },
+  printer: {
+    list: () => ipcRenderer.invoke('printer:list'),
+    printTest: (printerName?: string) => ipcRenderer.invoke('printer:printTest', printerName)
   }
 }
 
