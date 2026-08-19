@@ -17,6 +17,7 @@
     dashboard: 'Início',
     vendas: 'Vendas',
     pedidos: 'Pedidos',
+    relatorios: 'Relatórios',
     tecidos: 'Tecidos',
     cores: 'Cores',
     vinculos: 'Vínculos',
@@ -34,6 +35,10 @@
       if (router.subRoute === 'novo') return 'Pedidos / Novo Lançamento'
       if (router.subRoute) return 'Pedidos / Detalhes'
       return 'Pedidos'
+    }
+    if (router.route === 'relatorios') {
+      if (router.subRoute === 'vendas-tecido-cor') return 'Relatórios / Vendas por Tecido e Cor'
+      return 'Relatórios'
     }
     if (router.route === 'tecidos') {
       if (router.subRoute === 'cadastro') return 'Tecidos / Cadastro'

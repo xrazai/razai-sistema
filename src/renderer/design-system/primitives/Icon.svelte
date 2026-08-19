@@ -88,6 +88,12 @@
       <rect x="2.5" y="1.5" width="9" height="11" />
       <path d="M4.5 4.5 H9.5 M4.5 7.5 H9.5 M4.5 9.5 H7.5" />
     </svg>
+  {:else if name === 'reports' || name === 'chart'}
+    <svg viewBox="0 0 14 14">
+      <rect class="fill" x="2" y="7" width="2" height="5" />
+      <rect class="fill" x="6" y="3" width="2" height="9" />
+      <rect class="fill" x="10" y="5" width="2" height="7" />
+    </svg>
   {:else if name === 'search'}
     <svg viewBox="0 0 14 14">
       <circle cx="5.5" cy="5.5" r="3.5" />
