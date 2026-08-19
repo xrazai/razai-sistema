@@ -11,7 +11,7 @@
   type Props = {
     initialTecidoId?: string
     oncancel: () => void
-    onsave: (tecidoId: string, corIds: string[]) => Promise<void>
+    onsave: (tecidoId: string, corIds: string[]) => void | Promise<void>
   }
 
   let { initialTecidoId, oncancel, onsave }: Props = $props()
@@ -28,12 +28,12 @@
 
   let isLoading = $state(true)
   let isSaving = $state(false)
-  let errorMsg = $state<string | null>(null)
+  let erroMsg = $state<string | null>(null)
 
   // Carrega lista de tecidos e cores
   async function loadInitialData() {
     isLoading = true
-    errorMsg = null
+    erroMsg = null
     try {
       if (typeof window !== 'undefined' && window.razai) {
         const [tecList, corList] = await Promise.all([
@@ -53,7 +53,7 @@
       }
     } catch (err: any) {
       console.error('Erro ao carregar dados:', err)
-      errorMsg = err?.message || 'Falha ao carregar tecidos e cores.'
+      erroMsg = err?.message || 'Falha ao carregar tecidos e cores.'
     } finally {
       isLoading = false
     }
@@ -77,7 +77,7 @@
     loadInitialData()
   })
 
-  // Efeito ao trocar de tecido: limpa seleção e busca vínculos existentes do tecido selecionado
+  // Ao trocar de tecido: limpa seleção de cores e busca os vínculos existentes do tecido selecionado
   $effect(() => {
     const tId = selectedTecidoId
     if (tId) {
@@ -151,300 +151,311 @@
     selectedCorIds = new Set()
   }
 
-  async function handleSave() {
-    if (!selectedTecidoId || selectedCorIds.size === 0 || isSaving) return
+  async function handleSubmit() {
+    if (!selectedTecidoId) {
+      erroMsg = 'Selecione um tecido base na Seção 01.'
+      return
+    }
+
+    if (selectedCorIds.size === 0) {
+      erroMsg = 'Selecione ao menos uma cor na Seção 02 para criar o vínculo.'
+      return
+    }
+
+    erroMsg = ''
     isSaving = true
-    errorMsg = null
     try {
       await onsave(selectedTecidoId, Array.from(selectedCorIds))
     } catch (err: any) {
       console.error('Erro ao salvar vínculos:', err)
-      errorMsg = err?.message || 'Falha ao salvar vínculos.'
+      erroMsg = err?.message || 'Falha ao salvar vínculos.'
     } finally {
       isSaving = false
     }
   }
 
   let saveButtonLabel = $derived.by(() => {
-    if (isSaving) return 'Salvando vínculos...'
+    if (isSaving) return 'Salvando...'
     const count = selectedCorIds.size
-    if (count <= 1) return 'Criar vínculo'
-    return `Criar vínculos (${count})`
+    if (count <= 1) return 'Salvar Vínculo'
+    return `Salvar Vínculos (${count})`
   })
 </script>
 
 <div class="cadastro-page">
-  <!-- Container rolável principal com as 2 seções -->
-  <div class="sections-container">
-    <!-- SEÇÃO 1: SELEÇÃO DO TECIDO BASE -->
-    <section class="section">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="step-num">1</span>
-          <h2 class="section-title">SELECIONE O TECIDO BASE</h2>
-          <span class="selection-rule">(SELEÇÃO ÚNICA)</span>
+  <div class="content-scroll">
+    <div class="form-wrapper">
+      <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <div class="grid-form">
+          <!-- SEÇÃO 01: SELEÇÃO DO TECIDO BASE -->
+          <div class="section-row">
+            <header class="section-head">
+              <span>01. Seleção do Tecido Base</span>
+              {#if erroMsg && !selectedTecidoId}
+                <Badge text={erroMsg} tone="danger" />
+              {:else}
+                <span class="head-rule">Seleção única • Artigo base da matriz</span>
+              {/if}
+            </header>
+
+            <div class="section-toolbar">
+              <div class="search-box">
+                <Icon name="search" size="sm" />
+                <input
+                  type="text"
+                  class="search-input"
+                  bind:value={tecidoSearch}
+                  placeholder="Buscar tecido por SKU, nome ou composição..."
+                />
+                {#if tecidoSearch}
+                  <button class="clear-btn" onclick={() => (tecidoSearch = '')} aria-label="Limpar busca">
+                    ✕
+                  </button>
+                {/if}
+              </div>
+
+              <div class="toolbar-meta">
+                {#if selectedTecido}
+                  <Badge text={`Tecido selecionado: ${selectedTecido.codigo}`} tone="ok" />
+                {/if}
+                <Badge
+                  text={`${filteredTecidos.length} ${filteredTecidos.length === 1 ? 'tecido disponível' : 'tecidos disponíveis'}`}
+                  tone="neutral"
+                />
+              </div>
+            </div>
+
+            <div class="field-grid-cell">
+              {#if filteredTecidos.length === 0}
+                <div class="empty-hint">
+                  <span>Nenhum tecido encontrado para "{tecidoSearch}".</span>
+                </div>
+              {:else}
+                <div class="tiles-grid">
+                  {#each filteredTecidos as tecido (tecido.id)}
+                    <TecidoTile
+                      {tecido}
+                      selected={selectedTecidoId === tecido.id}
+                      onclick={() => handleSelectTecido(tecido.id)}
+                    />
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          </div>
+
+          <!-- SEÇÃO 02: SELEÇÃO DAS CORES DA CARTELA -->
+          <div class="section-row">
+            <header class="section-head">
+              <span>02. Seleção das Cores da Cartela</span>
+              {#if erroMsg && selectedTecidoId && selectedCorIds.size === 0}
+                <Badge text={erroMsg} tone="danger" />
+              {:else}
+                <span class="head-rule">Seleção múltipla • Ordem alfabética</span>
+              {/if}
+            </header>
+
+            <div class="section-toolbar">
+              <div class="search-box">
+                <Icon name="search" size="sm" />
+                <input
+                  type="text"
+                  class="search-input"
+                  bind:value={corSearch}
+                  placeholder="Buscar cor por SKU, nome ou HEX..."
+                  disabled={!selectedTecidoId}
+                />
+                {#if corSearch}
+                  <button class="clear-btn" onclick={() => (corSearch = '')} aria-label="Limpar busca">
+                    ✕
+                  </button>
+                {/if}
+              </div>
+
+              <div class="toolbar-meta">
+                {#if selectedTecidoId && availableCores.length > 0}
+                  <button
+                    type="button"
+                    class="tool-btn"
+                    onclick={handleSelectAllAvailable}
+                  >
+                    Marcar Disponíveis ({availableCores.length})
+                  </button>
+                {/if}
+
+                {#if selectedCorIds.size > 0}
+                  <button
+                    type="button"
+                    class="tool-btn"
+                    onclick={handleClearCorSelection}
+                  >
+                    Limpar Seleção
+                  </button>
+                {/if}
+
+                <Badge
+                  text={`${selectedCorIds.size} selecionadas`}
+                  tone={selectedCorIds.size > 0 ? 'ok' : 'neutral'}
+                />
+              </div>
+            </div>
+
+            <div class="field-grid-cell">
+              {#if !selectedTecidoId}
+                <div class="empty-hint">
+                  <span>Selecione um tecido base na Seção 01 para liberar a cartela de cores.</span>
+                </div>
+              {:else if filteredCores.length === 0}
+                <div class="empty-hint">
+                  <span>Nenhuma cor encontrada para "{corSearch}".</span>
+                </div>
+              {:else}
+                <div class="tiles-grid">
+                  {#each filteredCores as cor (cor.id)}
+                    <CorTile
+                      {cor}
+                      selected={selectedCorIds.has(cor.id)}
+                      alreadyLinked={existingCorIdsSet.has(cor.id)}
+                      onclick={() => toggleCor(cor.id)}
+                    />
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          </div>
         </div>
+      </form>
 
-        <div class="section-tools">
-          <div class="mini-search">
-            <Icon name="search" size="sm" />
-            <input
-              type="text"
-              class="search-input"
-              bind:value={tecidoSearch}
-              placeholder="Buscar tecido por nome ou SKU..."
-            />
-            {#if tecidoSearch}
-              <button class="clear-btn" onclick={() => (tecidoSearch = '')} aria-label="Limpar busca">
-                ✕
-              </button>
-            {/if}
-          </div>
-          <Badge
-            text={`${filteredTecidos.length} ${filteredTecidos.length === 1 ? 'tecido' : 'tecidos'}`}
-            tone="neutral"
-          />
-        </div>
-      </div>
-
-      <div class="grid-area">
-        {#if filteredTecidos.length === 0}
-          <div class="empty-hint">
-            <span>Nenhum tecido encontrado para "{tecidoSearch}".</span>
-          </div>
-        {:else}
-          <div class="tiles-grid">
-            {#each filteredTecidos as tecido (tecido.id)}
-              <TecidoTile
-                {tecido}
-                selected={selectedTecidoId === tecido.id}
-                onclick={() => handleSelectTecido(tecido.id)}
-              />
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </section>
-
-    <!-- SEÇÃO 2: SELEÇÃO DAS CORES DA CARTELA -->
-    <section class="section">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="step-num">2</span>
-          <h2 class="section-title">SELECIONE AS CORES DA CARTELA</h2>
-          <span class="selection-rule">(SELEÇÃO MÚLTIPLA • ORDEM ALFABÉTICA)</span>
-        </div>
-
-        <div class="section-tools">
-          <div class="mini-search">
-            <Icon name="search" size="sm" />
-            <input
-              type="text"
-              class="search-input"
-              bind:value={corSearch}
-              placeholder="Buscar cor por nome, SKU ou HEX..."
-              disabled={!selectedTecidoId}
-            />
-            {#if corSearch}
-              <button class="clear-btn" onclick={() => (corSearch = '')} aria-label="Limpar busca">
-                ✕
-              </button>
-            {/if}
-          </div>
-
-          {#if selectedTecidoId && availableCores.length > 0}
-            <button
-              type="button"
-              class="tool-btn"
-              onclick={handleSelectAllAvailable}
-            >
-              Marcar Disponíveis ({availableCores.length})
-            </button>
+      <!-- BARRA DE RODAPÉ COM AÇÕES EM LARGURA TOTAL -->
+      <footer class="form-footer">
+        <div class="footer-summary">
+          {#if !selectedTecido}
+            <span class="footer-hint">Selecione um tecido base para começar</span>
+          {:else if selectedCorIds.size === 0}
+            <span class="footer-info">
+              Tecido: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong> • Nenhuma nova cor selecionada
+            </span>
+          {:else}
+            <span class="footer-info">
+              Tecido: <strong>{selectedTecido.codigo}</strong> •
+              <strong>{selectedCorIds.size} {selectedCorIds.size === 1 ? 'cor selecionada' : 'cores selecionadas'}</strong>
+              → {selectedCorIds.size} {selectedCorIds.size === 1 ? 'novo produto vendável' : 'novos produtos vendáveis'}
+            </span>
           {/if}
-
-          {#if selectedCorIds.size > 0}
-            <button
-              type="button"
-              class="tool-btn"
-              onclick={handleClearCorSelection}
-            >
-              Limpar Seleção
-            </button>
-          {/if}
-
-          <Badge
-            text={`${selectedCorIds.size} selecionadas`}
-            tone={selectedCorIds.size > 0 ? 'ok' : 'neutral'}
-          />
         </div>
-      </div>
 
-      <div class="grid-area">
-        {#if !selectedTecidoId}
-          <div class="empty-hint">
-            <span>Selecione um tecido base na Seção 1 para liberar a cartela de cores.</span>
-          </div>
-        {:else if filteredCores.length === 0}
-          <div class="empty-hint">
-            <span>Nenhuma cor encontrada para "{corSearch}".</span>
-          </div>
-        {:else}
-          <div class="tiles-grid">
-            {#each filteredCores as cor (cor.id)}
-              <CorTile
-                {cor}
-                selected={selectedCorIds.has(cor.id)}
-                alreadyLinked={existingCorIdsSet.has(cor.id)}
-                onclick={() => toggleCor(cor.id)}
-              />
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </section>
+        <div class="footer-actions">
+          <Button variant="ghost" onclick={oncancel} disabled={isSaving}>
+            Cancelar
+          </Button>
+
+          <Button
+            variant="primary"
+            onclick={handleSubmit}
+            disabled={!selectedTecidoId || selectedCorIds.size === 0 || isSaving}
+          >
+            <span>{saveButtonLabel}</span>
+          </Button>
+        </div>
+      </footer>
+    </div>
   </div>
-
-  <!-- RODAPÉ MODULAR FIXO (40PX) -->
-  <footer class="footer">
-    <div class="footer-summary">
-      {#if errorMsg}
-        <Badge text={errorMsg} tone="danger" />
-      {:else if !selectedTecido}
-        <span class="footer-hint">Selecione um tecido base para começar</span>
-      {:else if selectedCorIds.size === 0}
-        <span class="footer-info">
-          Tecido: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong> • Nenhuma nova cor selecionada
-        </span>
-      {:else}
-        <span class="footer-info">
-          Tecido: <strong>{selectedTecido.codigo}</strong> •
-          <strong>{selectedCorIds.size} {selectedCorIds.size === 1 ? 'cor selecionada' : 'cores selecionadas'}</strong>
-          → {selectedCorIds.size} {selectedCorIds.size === 1 ? 'novo produto vendável' : 'novos produtos vendáveis'}
-        </span>
-      {/if}
-    </div>
-
-    <div class="footer-actions">
-      <Button variant="ghost" size="sm" onclick={oncancel} disabled={isSaving}>
-        <span>Cancelar</span>
-      </Button>
-
-      <Button
-        variant="primary"
-        size="sm"
-        onclick={handleSave}
-        disabled={!selectedTecidoId || selectedCorIds.size === 0 || isSaving}
-      >
-        <Icon name="link" size="sm" />
-        <span>{saveButtonLabel}</span>
-      </Button>
-    </div>
-  </footer>
 </div>
 
 <style>
   .cadastro-page {
-    display: flex;
-    flex-direction: column;
     height: 100%;
     min-height: 0;
+    display: grid;
     width: 100%;
-    background: var(--color-bg);
     line-height: 100%;
+  }
+
+  .content-scroll {
+    height: 100%;
+    overflow-y: auto;
+    background: var(--color-bg);
+    width: 100%;
+  }
+
+  .form-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     box-sizing: border-box;
   }
 
-  .sections-container {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
+  .grid-form {
     display: flex;
     flex-direction: column;
     width: 100%;
   }
 
-  .section {
+  .section-row {
     display: flex;
     flex-direction: column;
     width: 100%;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    min-height: 40px;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg-elevated);
     box-shadow: inset 0 -1px 0 0 var(--color-border);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-header);
+    text-transform: uppercase;
+    color: var(--color-fg-dim);
+    font-family: var(--font-mono);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
-  .section-header {
+  .head-rule {
+    font-size: var(--text-xs);
+    color: var(--color-fg-dim);
+    letter-spacing: var(--tracking-tight);
+    text-transform: none;
+  }
+
+  .section-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-4);
     height: 40px;
     min-height: 40px;
-    padding: 0 var(--space-4);
+    padding: 0 var(--space-4) 0 0;
     background: var(--color-bg-sunken);
     box-shadow: inset 0 -1px 0 0 var(--color-border);
+    width: 100%;
     box-sizing: border-box;
     line-height: 100%;
   }
 
-  .section-title-group {
+  .search-box {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    line-height: 100%;
-  }
-
-  .step-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    background: var(--color-accent);
-    color: var(--color-bg);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 100%;
-  }
-
-  .section-title {
-    font-size: var(--text-xs);
-    font-weight: 700;
-    letter-spacing: var(--tracking-header);
-    color: var(--color-fg);
-    margin: 0;
-    line-height: 100%;
-  }
-
-  .selection-rule {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--color-fg-dim);
-    letter-spacing: var(--tracking-label);
-    line-height: 100%;
-  }
-
-  .section-tools {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    line-height: 100%;
-  }
-
-  .mini-search {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    width: 260px;
-    height: 28px;
-    padding: 0 var(--space-2);
+    flex: 1;
+    max-width: 440px;
+    height: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    box-shadow: inset -1px 0 0 0 var(--color-border);
     background: var(--color-bg);
-    box-shadow: inset 0 0 0 1px var(--color-border);
     color: var(--color-fg-muted);
     box-sizing: border-box;
     line-height: 100%;
+    transition: background var(--motion-fast), box-shadow var(--motion-fast);
   }
 
-  .mini-search:focus-within {
-    box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  .search-box:focus-within {
+    box-shadow: inset -1px 0 0 0 var(--color-border-strong);
     background: var(--color-bg-elevated);
     color: var(--color-fg);
   }
@@ -469,14 +480,21 @@
     border: none;
     background: transparent;
     color: var(--color-fg-dim);
-    font-size: 10px;
+    font-size: var(--text-xs);
     line-height: 100%;
+    padding: var(--space-1);
     cursor: pointer;
-    padding: 2px;
   }
 
   .clear-btn:hover {
     color: var(--color-fg);
+  }
+
+  .toolbar-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    line-height: 100%;
   }
 
   .tool-btn {
@@ -499,16 +517,19 @@
     box-shadow: inset 0 0 0 1px var(--color-border-strong);
   }
 
-  .grid-area {
-    padding: var(--space-3) var(--space-4);
+  .field-grid-cell {
+    padding: var(--space-3) var(--space-4) var(--space-4) var(--space-4);
     background: var(--color-bg);
-    min-height: 140px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
   }
 
   .tiles-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: var(--space-2);
+    width: 100%;
   }
 
   .empty-hint {
@@ -524,16 +545,17 @@
     text-transform: uppercase;
   }
 
-  .footer {
+  .form-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    height: 40px;
-    min-height: 40px;
-    padding: 0 var(--space-4);
-    box-shadow: inset 0 1px 0 0 var(--color-border);
+    height: 80px;
+    min-height: 56px;
+    padding: var(--space-3) var(--space-4);
     background: var(--color-bg-elevated);
+    box-shadow: inset 0 1px 0 0 var(--color-border);
+    width: 100%;
     box-sizing: border-box;
     line-height: 100%;
   }
@@ -566,7 +588,7 @@
   .footer-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     line-height: 100%;
   }
 </style>
