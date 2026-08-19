@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Fontes técnicas locais IBM Plex Mono e IBM Plex Sans em WOFF2 sem dependência externa (Task 6)
+
 ## 2026-08-19 — Helper de share Windows sem janela Fechar
 
 ## 2026-08-19 — PDF de pedido via Web Share nativo com fallback no helper Windows

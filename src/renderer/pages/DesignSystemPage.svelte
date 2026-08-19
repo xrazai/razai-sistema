@@ -124,13 +124,14 @@
               </div>
             </Cell>
             <Cell>
-              <Label text="Escala Tipográfica (IBM Plex Mono)" />
+              <Label text="Escala Tipográfica (IBM Plex Mono / Sans)" />
               <div class="type-scale">
                 <div class="type-item t-xl">Text XL (18px) — TECIDOS / CATÁLOGO</div>
                 <div class="type-item t-lg">Text LG (15px) — SKU: TRAL-01</div>
                 <div class="type-item t-md">Text MD (13px) — Títulos de Painéis</div>
                 <div class="type-item t-sm">Text SM (12px) — Dados de Células e Botões</div>
                 <div class="type-item t-xs">Text XS (11px) — LABELS, STATUS E BADGES</div>
+                <div class="type-item t-sm font-sans">Sans (12px) — Texto corrido e descrições com IBM Plex Sans</div>
               </div>
             </Cell>
             <Cell>
@@ -726,6 +727,7 @@
   .t-md { font-size: var(--text-md); }
   .t-sm { font-size: var(--text-sm); }
   .t-xs { font-size: var(--text-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-fg-muted); }
+  .font-sans { font-family: var(--font-sans); }
 
   .space-row {
     display: flex;
