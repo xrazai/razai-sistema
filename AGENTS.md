@@ -91,7 +91,7 @@ Uma task só está **fechada** quando:
 2. **Iniciar**: atualizar `main`, criar branch `task/<N>-<slug>` a partir de `main` (ou da branch anterior se stack) e mover issue para `In progress`.
 3. **Desenvolver e validar**: implementar o escopo focado da task, atualizar `CHANGELOG.md` na própria branch/stack e validar localmente (`npm run typecheck` e `npm run build`).
 4. **Submeter**: abrir PR via GitHub CLI (`gh pr create` ou `gh stack submit --auto --open`) **somente quando o usuário pedir explicitamente**, mover para `In review`.
-5. **Concluir**: após o merge, fechar issue (ou mover para `Done`), apagar branch local/remota e atualizar `main`.
+5. **Concluir e Limpeza Automática Pós-Merge**: imediatamente após o PR ser mergeado, o agente tem autorização total para trocar para a `main`, atualizar (`git pull --ff-only`), apagar a branch local (`git branch -d`) e fechar/mover a issue no board **sem necessidade de pedir confirmação no chat**.
 6. Se gerou UI genérica nova: atualizar `DesignSystemPage.svelte` antes de considerar completa.
 
 ### Execução Sequencial em Lote
@@ -216,12 +216,19 @@ Antes de submeter **qualquer** PR (seja normal ou stack), execute a validação 
 - **CI rápida**: checks limitados a lint, typecheck e testes. Não rodar build completo nem gerar empacotamento Electron na CI de PR comum.
 - **Correção de falhas**: inspecionar → corrigir localmente → validar → push no mesmo PR (ou `gh stack submit`/`gh stack sync` para stacks). Não abandone o PR para abrir outro.
 
-### 9. Merge
+### 9. Merge & Limpeza Pós-Merge Automática
 
 - Merge apenas com todos os checks de CI verdes.
 - **Squash and Merge** é o padrão para PRs normais.
 - Para stacks, usar merge bottom-up via `gh stack merge`.
-- Após merge: fechar issue se aplicável, deletar branch remota/local e atualizar `main`.
+- **Limpeza Automática Sem Pedido de Confirmação**: Assim que o merge for concluído, o agente executa imediatamente a limpeza local e sincronização da `main`:
+  ```powershell
+  git checkout main
+  git pull --ff-only
+  git branch -d <nome-da-branch>
+  ```
+  *(A branch remota já é deletada automaticamente pelo GitHub).*
+- Fechar issue associada no GitHub e mover card para `Done` no board.
 
 ### 10. Merge Queue
 
