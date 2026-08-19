@@ -88,7 +88,7 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 - `Cell.svelte`: Célula retangular estrutural com bordas ou fundo configurável.
 - `Divider.svelte`: Divisor horizontal ou vertical de 1px.
 - `Label.svelte`: Rótulo de campo com indicador opcional de obrigatoriedade (`required`).
-- `Icon.svelte`: Ícones vetoriais SVG autorais, traço de 1px com `crispEdges`. Ícones: `grid`, `dash`, `settings`, `system`, `chevron`, `chevron-left`, `arrow-left`, `check`, `empty`, `fabric`, `palette`, `link`, `plus`, `search`.
+- `Icon.svelte`: Ícones vetoriais SVG autorais, traço de 1px com `crispEdges`. Ícones: `grid`, `dash`, `settings`, `system`, `chevron`, `chevron-left`, `arrow-left`, `check`, `empty`, `fabric`, `palette`, `link`, `plus`, `copy`, `search`.
 - `Surface.svelte`: Compartimento de fundo elevado ou rebaixado.
 
 ### 3.2 Controls (`design-system/controls/`)

@@ -11,6 +11,7 @@ O módulo é estruturado em três visões principais integradas ao roteador reat
 1. **Listagem / Paleta (`CoresPage.svelte` - rota `#cores`)**:
    - Cabeçalho integrado na **Topbar Unificada** com o botão **"+ Cadastrar Cor"** e status do banco.
    - Amostra visual de cor (swatch) renderizada em cada linha da tabela.
+   - Célula de HEX com **botão de cópia rápida** e feedback temporário visual (`COPIADO` / checkmark).
    - Busca em tempo real (insensível a maiúsculas e acentos) por nome, código HEX ou valores LAB.
    - Tabela de alta densidade (`Amostra`, `Nome da Cor`, `HEX`, `LAB (L / A / B)`, `Atualizado em`).
    - Clique na linha para abrir a tela de detalhes da cor.

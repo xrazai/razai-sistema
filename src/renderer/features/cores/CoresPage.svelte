@@ -11,7 +11,7 @@
   const columns: Column[] = [
     { key: 'swatch', label: 'Amostra', width: '70px', align: 'center' },
     { key: 'nome', label: 'Nome da Cor' },
-    { key: 'hex', label: 'HEX', width: '130px' },
+    { key: 'hex', label: 'HEX', width: '160px' },
     { key: 'lab', label: 'LAB (L / A / B)', width: '220px' },
     { key: 'updatedAt', label: 'Atualizado em', width: '140px' }
   ]
@@ -30,6 +30,24 @@
   let cores = $state<CorRecord[]>([])
   let isLoading = $state(true)
   let errorMsg = $state<string | null>(null)
+  let copiedId = $state<string | null>(null)
+  let copyTimeout: ReturnType<typeof setTimeout> | null = null
+
+  async function handleCopyHex(e: MouseEvent, id: string, hexValue: string) {
+    e.stopPropagation()
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(hexValue)
+      }
+      copiedId = id
+      if (copyTimeout) clearTimeout(copyTimeout)
+      copyTimeout = setTimeout(() => {
+        copiedId = null
+      }, 1500)
+    } catch (err) {
+      console.error('Erro ao copiar HEX:', err)
+    }
+  }
 
   $effect(() => {
     const term = searchTerm
@@ -247,7 +265,24 @@
                     <div class="table-swatch" style:background-color={row.hex}></div>
                   </div>
                 {:else if column.key === 'hex'}
-                  <span class="code">{value}</span>
+                  <div class="hex-cell">
+                    <span class="code">{value}</span>
+                    <button
+                      type="button"
+                      class="copy-btn"
+                      class:copied={copiedId === row.id}
+                      onclick={(e) => handleCopyHex(e, row.id, value)}
+                      title={copiedId === row.id ? 'Código copiado!' : `Copiar ${value}`}
+                      aria-label={`Copiar código ${value}`}
+                    >
+                      {#if copiedId === row.id}
+                        <Icon name="check" size="sm" />
+                        <span class="copy-text">Copiado</span>
+                      {:else}
+                        <Icon name="copy" size="sm" />
+                      {/if}
+                    </button>
+                  </div>
                 {:else if column.key === 'lab'}
                   <span class="lab-value">{value}</span>
                 {:else if column.key === 'nome'}
@@ -399,6 +434,53 @@
     height: 20px;
     border: var(--border-width) solid var(--color-border-strong);
     box-sizing: border-box;
+  }
+
+  .hex-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 100%;
+    line-height: 100%;
+  }
+
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 24px;
+    padding: 0 var(--space-1);
+    background: var(--color-bg-elevated);
+    border: var(--border-width) solid var(--color-border);
+    color: var(--color-fg-muted);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    line-height: 100%;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast);
+  }
+
+  .copy-btn:hover {
+    color: var(--color-fg);
+    border-color: var(--color-accent);
+    background: var(--color-bg);
+  }
+
+  .copy-btn.copied {
+    color: var(--color-ok);
+    border-color: var(--color-ok);
+    background: var(--color-bg-sunken);
+    padding: 0 var(--space-2);
+  }
+
+  .copy-text {
+    font-size: 10px;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    line-height: 100%;
   }
 
   .code {
