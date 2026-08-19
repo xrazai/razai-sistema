@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Criação dos módulos Vendas e Pedidos com tela de estado vazio e integração na navegação
+
 ## 2026-08-19 — Módulo de vínculos com grid de cards de tecidos, cartela de cores em lote e geração automática de SKU composto
 
 ## 2026-08-19 — Integração e homologação de impressão térmica ESC/POS 80mm (Gertec G250W), builder RAW, painel em Settings e especificações de layout

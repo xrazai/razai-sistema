@@ -1,8 +1,7 @@
 <script lang="ts">
   import Sidebar from '../design-system/navigation/Sidebar.svelte'
   import NavItem from '../design-system/navigation/NavItem.svelte'
-
-  type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
+  import type { Route } from './router.svelte'
 
   type Props = {
     route: Route
@@ -19,6 +18,18 @@
     icon="dash"
     active={route === 'dashboard'}
     onclick={() => onnavigate('dashboard')}
+  />
+  <NavItem
+    label="Vendas"
+    icon="cart"
+    active={route === 'vendas'}
+    onclick={() => onnavigate('vendas')}
+  />
+  <NavItem
+    label="Pedidos"
+    icon="orders"
+    active={route === 'pedidos'}
+    onclick={() => onnavigate('pedidos')}
   />
   <NavItem
     label="Tecidos"
