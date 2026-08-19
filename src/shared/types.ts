@@ -122,7 +122,6 @@ export type VinculosApi = {
   delete: (id: string) => Promise<boolean>
   deleteByTecidoAndCor: (tecidoId: string, corId: string) => Promise<boolean>
 }
-}
 
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
