@@ -57,7 +57,9 @@ const api: RazaiApi = {
     delete: (id: string) => ipcRenderer.invoke('pedidos:delete', id),
     aprovar: (id: string) => ipcRenderer.invoke('pedidos:aprovar', id),
     gerarPdf: (id: string) => ipcRenderer.invoke('pedidos:gerarPdf', id),
-    compartilhar: (id: string) => ipcRenderer.invoke('pedidos:compartilhar', id)
+    compartilhar: (id: string) => ipcRenderer.invoke('pedidos:compartilhar', id),
+    abrirShareNativo: (filePath: string, title: string) =>
+      ipcRenderer.invoke('pedidos:abrirShareNativo', filePath, title)
   },
   settings: {
     get: (key: string): Promise<string | null> => ipcRenderer.invoke('settings:get', key),

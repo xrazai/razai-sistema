@@ -211,6 +211,15 @@ export type UpdatePedidoInput = {
   itens?: ItemLancamentoInput[]
 }
 
+export type PedidoPdfResult = {
+  ok: boolean
+  filePath?: string
+  fileName?: string
+  title?: string
+  data?: Uint8Array
+  error?: string
+}
+
 export type PedidosApi = {
   list: (search?: string) => Promise<PedidoRecord[]>
   getById: (id: string) => Promise<PedidoRecord | null>
@@ -218,8 +227,9 @@ export type PedidosApi = {
   update: (id: string, input: UpdatePedidoInput) => Promise<PedidoRecord>
   delete: (id: string) => Promise<boolean>
   aprovar: (id: string) => Promise<{ pedido: PedidoRecord; venda: VendaRecord }>
-  gerarPdf: (id: string) => Promise<{ ok: boolean; filePath?: string; error?: string }>
-  compartilhar: (id: string) => Promise<{ ok: boolean; filePath?: string; error?: string }>
+  gerarPdf: (id: string) => Promise<PedidoPdfResult>
+  compartilhar: (id: string) => Promise<PedidoPdfResult>
+  abrirShareNativo: (filePath: string, title: string) => Promise<PedidoPdfResult>
 }
 
 export type RazaiApi = {

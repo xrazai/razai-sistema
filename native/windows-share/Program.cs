@@ -2,123 +2,199 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.Storage;
 using WinRT;
 
-namespace Razai.WindowsShare;
-
-public class Program
+namespace Razai.WindowsShare
 {
-    [ComImport]
-    [Guid("3A3DCD6C-3EAB-43DC-BCDE-45671CE800C8")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IDataTransferManagerInterop
+    public class Program
     {
-        [PreserveSig]
-        int GetForWindow([In] IntPtr appWindow, [In] ref Guid riid, out IntPtr ppv);
-
-        [PreserveSig]
-        int ShowShareUIForWindow([In] IntPtr appWindow);
-    }
-
-    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
-    private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
-
-    [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
-    private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
-
-    private static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
-    {
-        if (IntPtr.Size == 8)
-            return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
-        return new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
-    }
-
-    private const int GWLP_HWNDPARENT = -8;
-
-    [DllImport("combase.dll", CharSet = CharSet.Unicode)]
-    private static extern int RoGetActivationFactory(
-        IntPtr activatableClassId,
-        [In] ref Guid iid,
-        out IntPtr factory
-    );
-
-    [DllImport("combase.dll", CharSet = CharSet.Unicode)]
-    private static extern int WindowsCreateString(
-        string sourceString,
-        int length,
-        out IntPtr hstring
-    );
-
-    [DllImport("combase.dll")]
-    private static extern int WindowsDeleteString(IntPtr hstring);
-
-    private static readonly Guid IInspectableGuid = new Guid("AF86E2E0-B12D-4C6A-9C5A-D7AA65101E90");
-    private static readonly Guid IDataTransferManagerInteropGuid = new Guid("3A3DCD6C-3EAB-43DC-BCDE-45671CE800C8");
-
-    [STAThread]
-    public static int Main(string[] args)
-    {
-        string? filePath = null;
-        string title = "Compartilhar Pedido";
-        IntPtr parentHwnd = IntPtr.Zero;
-
-        for (int i = 0; i < args.Length; i++)
+        [ComImport]
+        [Guid("3A3DCD6C-3EAB-43DC-BCDE-45671CE800C8")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        public interface IDataTransferManagerInterop
         {
-            if ((args[i] == "--file" || args[i] == "-f") && i + 1 < args.Length)
+            [PreserveSig]
+            int GetForWindow([In] IntPtr appWindow, [In] ref Guid riid, out IntPtr ppv);
+
+            [PreserveSig]
+            int ShowShareUIForWindow([In] IntPtr appWindow);
+        }
+
+        [DllImport("combase.dll", CharSet = CharSet.Unicode)]
+        private static extern int RoGetActivationFactory(
+            IntPtr activatableClassId,
+            [In] ref Guid iid,
+            out IntPtr factory
+        );
+
+        [DllImport("combase.dll", CharSet = CharSet.Unicode)]
+        private static extern int WindowsCreateString(
+            string sourceString,
+            int length,
+            out IntPtr hstring
+        );
+
+        [DllImport("combase.dll")]
+        private static extern int WindowsDeleteString(IntPtr hstring);
+
+        private static readonly Guid IInspectableGuid = new Guid("AF86E2E0-B12D-4C6A-9C5A-D7AA65101E90");
+        private static readonly Guid IDataTransferManagerInteropGuid = new Guid("3A3DCD6C-3EAB-43DC-BCDE-45671CE800C8");
+
+        [STAThread]
+        public static int Main(string[] args)
+        {
+            string? filePath = null;
+            string title = "Compartilhar Pedido";
+
+            for (int i = 0; i < args.Length; i++)
             {
-                filePath = args[++i];
-            }
-            else if ((args[i] == "--title" || args[i] == "-t") && i + 1 < args.Length)
-            {
-                title = args[++i];
-            }
-            else if ((args[i] == "--hwnd" || args[i] == "-h") && i + 1 < args.Length)
-            {
-                if (long.TryParse(args[++i], out long parsedHwnd))
+                if ((args[i] == "--file" || args[i] == "-f") && i + 1 < args.Length)
                 {
-                    parentHwnd = new IntPtr(parsedHwnd);
+                    filePath = args[++i];
+                }
+                else if ((args[i] == "--title" || args[i] == "-t") && i + 1 < args.Length)
+                {
+                    title = args[++i];
                 }
             }
-        }
 
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            Console.Error.WriteLine("Erro: Caminho do arquivo não fornecido (--file <caminho>)");
-            return 1;
-        }
-
-        string fullPath = Path.GetFullPath(filePath);
-        if (!File.Exists(fullPath))
-        {
-            Console.Error.WriteLine($"Erro: Arquivo não encontrado: {fullPath}");
-            return 2;
-        }
-
-        try
-        {
-            // 1. Cria formulário host transparente no thread STA atual
-            using Form hostForm = new Form
+            if (string.IsNullOrWhiteSpace(filePath))
             {
-                Opacity = 0,
-                ShowInTaskbar = false,
-                FormBorderStyle = FormBorderStyle.None,
-                Size = new System.Drawing.Size(1, 1),
-                StartPosition = FormStartPosition.Manual,
-                Location = new System.Drawing.Point(-2000, -2000)
-            };
-
-            IntPtr hostHwnd = hostForm.Handle;
-
-            if (parentHwnd != IntPtr.Zero)
-            {
-                SetWindowLongPtr(hostHwnd, GWLP_HWNDPARENT, parentHwnd);
+                Console.Error.WriteLine("Erro: Caminho do arquivo não fornecido (--file <caminho>)");
+                return 1;
             }
 
-            // 2. Obtém factory COM IDataTransferManagerInterop
+            string fullPath = Path.GetFullPath(filePath);
+            if (!File.Exists(fullPath))
+            {
+                Console.Error.WriteLine($"Erro: Arquivo não encontrado: {fullPath}");
+                return 2;
+            }
+
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+
+                StorageFile file = WaitWinRt(StorageFile.GetFileFromPathAsync(fullPath));
+
+                using Form hostForm = CreateHostForm();
+                IntPtr hostHwnd = hostForm.Handle;
+
+                IDataTransferManagerInterop interop = GetInteropFactory();
+
+                Guid dtmGuid = IInspectableGuid;
+                int hr = interop.GetForWindow(hostHwnd, ref dtmGuid, out IntPtr dtmPtr);
+                if (hr != 0 || dtmPtr == IntPtr.Zero)
+                {
+                    throw new InvalidOperationException($"GetForWindow falhou com HRESULT 0x{hr:X8}");
+                }
+
+                DataTransferManager dtm = MarshalInterface<DataTransferManager>.FromAbi(dtmPtr);
+                Marshal.Release(dtmPtr);
+
+                dtm.DataRequested += (_, e) =>
+                {
+                    DataRequestDeferral deferral = e.Request.GetDeferral();
+                    try
+                    {
+                        DataPackage data = e.Request.Data;
+                        data.Properties.Title = title;
+                        data.Properties.Description = Path.GetFileName(fullPath);
+                        data.Properties.FileTypes.Clear();
+                        data.Properties.FileTypes.Add(".pdf");
+                        data.RequestedOperation = DataPackageOperation.Copy;
+                        data.SetStorageItems(new IStorageItem[] { file }, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"[WindowsShare] Erro em DataRequested: {ex}");
+                    }
+                    finally
+                    {
+                        deferral.Complete();
+                    }
+                };
+
+                System.Windows.Forms.Timer? closeTimer = null;
+                void scheduleClose(int delayMs)
+                {
+                    if (hostForm.IsDisposed) return;
+                    closeTimer?.Stop();
+                    closeTimer?.Dispose();
+                    closeTimer = new System.Windows.Forms.Timer { Interval = delayMs };
+                    closeTimer.Tick += (_, _) =>
+                    {
+                        closeTimer?.Stop();
+                        if (!hostForm.IsDisposed) hostForm.Close();
+                    };
+                    closeTimer.Start();
+                }
+
+                dtm.TargetApplicationChosen += (_, _) => scheduleClose(15000);
+
+                bool shareShown = false;
+                int shareHr = 0;
+                hostForm.Shown += (_, _) =>
+                {
+                    if (shareShown) return;
+                    shareShown = true;
+
+                    shareHr = interop.ShowShareUIForWindow(hostHwnd);
+                    if (shareHr != 0)
+                    {
+                        Console.Error.WriteLine($"ShowShareUIForWindow falhou com HRESULT 0x{shareHr:X8}");
+                        hostForm.DialogResult = DialogResult.Abort;
+                        hostForm.Close();
+                        return;
+                    }
+
+                    scheduleClose(90000);
+                };
+
+                Application.Run(hostForm);
+                closeTimer?.Dispose();
+
+                if (shareHr != 0)
+                {
+                    return 3;
+                }
+
+                GC.KeepAlive(dtm);
+                GC.KeepAlive(interop);
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[WindowsShare] Exceção completa:\n{ex}");
+                return 3;
+            }
+        }
+
+        private static Form CreateHostForm()
+        {
+            System.Drawing.Color chroma = System.Drawing.Color.FromArgb(255, 1, 0, 1);
+            return new Form
+            {
+                Text = string.Empty,
+                FormBorderStyle = FormBorderStyle.None,
+                StartPosition = FormStartPosition.CenterScreen,
+                ShowInTaskbar = false,
+                ControlBox = false,
+                TopMost = false,
+                ClientSize = new System.Drawing.Size(8, 8),
+                BackColor = chroma,
+                TransparencyKey = chroma,
+                Opacity = 1
+            };
+        }
+
+        private static IDataTransferManagerInterop GetInteropFactory()
+        {
             const string className = "Windows.ApplicationModel.DataTransfer.DataTransferManager";
             int hr = WindowsCreateString(className, className.Length, out IntPtr hstring);
             if (hr != 0 || hstring == IntPtr.Zero)
@@ -137,75 +213,27 @@ public class Program
 
             IDataTransferManagerInterop interop = (IDataTransferManagerInterop)Marshal.GetObjectForIUnknown(factoryPtr);
             Marshal.Release(factoryPtr);
-
-            // 3. Obtém o DataTransferManager (IInspectable) para o host HWND
-            Guid dtmGuid = IInspectableGuid;
-            hr = interop.GetForWindow(hostHwnd, ref dtmGuid, out IntPtr dtmPtr);
-            if (hr != 0 || dtmPtr == IntPtr.Zero)
-            {
-                throw new InvalidOperationException($"GetForWindow falhou com HRESULT 0x{hr:X8}");
-            }
-
-            DataTransferManager dtm = MarshalInterface<DataTransferManager>.FromAbi(dtmPtr);
-            Marshal.Release(dtmPtr);
-
-            bool dataAttached = false;
-
-            dtm.DataRequested += async (sender, e) =>
-            {
-                DataRequestDeferral deferral = e.Request.GetDeferral();
-                try
-                {
-                    e.Request.Data.Properties.Title = title;
-                    e.Request.Data.Properties.Description = Path.GetFileName(fullPath);
-                    StorageFile file = await StorageFile.GetFileFromPathAsync(fullPath);
-                    e.Request.Data.SetStorageItems(new StorageFile[] { file });
-                    dataAttached = true;
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"[WindowsShare] Erro em DataRequested: {ex}");
-                }
-                finally
-                {
-                    deferral.Complete();
-                }
-            };
-
-            // 4. Exibe a interface nativa do Windows Share Sheet
-            hr = interop.ShowShareUIForWindow(hostHwnd);
-            if (hr != 0)
-            {
-                throw new InvalidOperationException($"ShowShareUIForWindow falhou com HRESULT 0x{hr:X8}");
-            }
-
-            Console.WriteLine("OK");
-
-            // Processa mensagens por um breve período para que o Windows Share Sheet receba o DataPackage
-            DateTime timeout = DateTime.Now.AddSeconds(4);
-            while (DateTime.Now < timeout)
-            {
-                Application.DoEvents();
-                Thread.Sleep(50);
-                if (dataAttached)
-                {
-                    // Deixa o loop rodar mais 1 segundo para garantir entrega ao componente do sistema
-                    DateTime postAttach = DateTime.Now.AddSeconds(1);
-                    while (DateTime.Now < postAttach)
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(50);
-                    }
-                    break;
-                }
-            }
-
-            return 0;
+            return interop;
         }
-        catch (Exception ex)
+
+        private static T WaitWinRt<T>(IAsyncOperation<T> operation)
         {
-            Console.Error.WriteLine($"[WindowsShare] Exceção completa:\n{ex}");
-            return 3;
+            if (operation.Status == AsyncStatus.Started)
+            {
+                using ManualResetEvent done = new ManualResetEvent(false);
+                operation.Completed = (_, _) => done.Set();
+                while (!done.WaitOne(20))
+                {
+                    Application.DoEvents();
+                }
+            }
+
+            if (operation.Status != AsyncStatus.Completed)
+            {
+                throw new InvalidOperationException($"Operação WinRT falhou: {operation.Status}");
+            }
+
+            return operation.GetResults();
         }
     }
 }
