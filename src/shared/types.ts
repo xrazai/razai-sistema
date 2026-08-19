@@ -419,6 +419,124 @@ export type UpdaterApi = {
   onStatusChange: (callback: (info: UpdateInfo) => void) => () => void
 }
 
+export type AgenteCanal = 'shopee' | 'whatsapp' | 'manual'
+export type AgenteTipoConexao = 'web_session' | 'rest_api'
+export type AgenteModoOperacao = 'copiloto' | 'autonomo' | 'pausado'
+export type AgenteConhecimentoTipo = 'faq' | 'politica' | 'manual_produto' | 'texto_livre'
+export type AgenteConversaStatus = 'aguardando_aprovacao' | 'respondido' | 'arquivado'
+export type AgenteMensagemRemetente = 'cliente' | 'agente_sugestao' | 'agente_enviado' | 'operador'
+export type AgenteMensagemStatus = 'pendente' | 'aprovado' | 'enviado' | 'rejeitado'
+
+export type AgenteRecord = {
+  id: string
+  nome: string
+  descricao: string | null
+  canal: AgenteCanal
+  tipoConexao: AgenteTipoConexao
+  modoOperacao: AgenteModoOperacao
+  promptSistema: string
+  configJson: string
+  ativo: boolean
+  conhecimentosCount?: number
+  conversasAtivasCount?: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type CreateAgenteInput = {
+  id?: string
+  nome: string
+  descricao?: string | null
+  canal?: AgenteCanal
+  tipoConexao?: AgenteTipoConexao
+  modoOperacao?: AgenteModoOperacao
+  promptSistema?: string
+  configJson?: string
+  ativo?: boolean
+}
+
+export type UpdateAgenteInput = Partial<CreateAgenteInput>
+
+export type AgenteConhecimentoRecord = {
+  id: string
+  agenteId: string
+  tipo: AgenteConhecimentoTipo
+  titulo: string
+  conteudo: string
+  ativo: boolean
+  ordem: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type CreateAgenteConhecimentoInput = {
+  agenteId: string
+  tipo: AgenteConhecimentoTipo
+  titulo: string
+  conteudo: string
+  ativo?: boolean
+  ordem?: number
+}
+
+export type UpdateAgenteConhecimentoInput = Partial<CreateAgenteConhecimentoInput>
+
+export type AgenteConversaRecord = {
+  id: string
+  agenteId: string
+  clienteId: string | null
+  clienteNome: string
+  canal: AgenteCanal
+  status: AgenteConversaStatus
+  ultimaMensagemTexto: string | null
+  ultimaMensagemAt: string
+  createdAt: string
+  updatedAt: string
+  mensagens?: AgenteMensagemRecord[]
+}
+
+export type AgenteMensagemRecord = {
+  id: string
+  conversaId: string
+  remetente: AgenteMensagemRemetente
+  texto: string
+  status: AgenteMensagemStatus
+  confianca: number | null
+  createdAt: string
+}
+
+export type CreateAgenteMensagemInput = {
+  conversaId: string
+  remetente: AgenteMensagemRemetente
+  texto: string
+  status?: AgenteMensagemStatus
+  confianca?: number | null
+}
+
+export type AgenteGerarRespostaResult = {
+  resposta: string
+  confianca: number
+  fontes: string[]
+}
+
+export type AgentesApi = {
+  list: () => Promise<AgenteRecord[]>
+  getById: (id: string) => Promise<AgenteRecord | null>
+  create: (input: CreateAgenteInput) => Promise<AgenteRecord>
+  update: (id: string, input: UpdateAgenteInput) => Promise<AgenteRecord>
+  delete: (id: string) => Promise<boolean>
+  listConhecimentos: (agenteId: string) => Promise<AgenteConhecimentoRecord[]>
+  createConhecimento: (input: CreateAgenteConhecimentoInput) => Promise<AgenteConhecimentoRecord>
+  updateConhecimento: (id: string, input: UpdateAgenteConhecimentoInput) => Promise<AgenteConhecimentoRecord>
+  deleteConhecimento: (id: string) => Promise<boolean>
+  listConversas: (agenteId: string, status?: AgenteConversaStatus) => Promise<AgenteConversaRecord[]>
+  getConversa: (conversaId: string) => Promise<AgenteConversaRecord | null>
+  listMensagens: (conversaId: string) => Promise<AgenteMensagemRecord[]>
+  enviarMensagem: (conversaId: string, texto: string) => Promise<AgenteMensagemRecord>
+  aprovarSugestao: (mensagemId: string, textoEditado?: string) => Promise<AgenteMensagemRecord>
+  rejeitarSugestao: (mensagemId: string) => Promise<boolean>
+  gerarRespostaIa: (agenteId: string, pergunta: string, conversaId?: string) => Promise<AgenteGerarRespostaResult>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
@@ -433,6 +551,7 @@ export type RazaiApi = {
   diagnostics: DiagnosticsApi
   updater: UpdaterApi
   relatorios: RelatoriosApi
+  agentes: AgentesApi
 }
 
 declare global {

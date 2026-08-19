@@ -13,7 +13,12 @@ import type {
   CreatePedidoInput,
   UpdatePedidoInput,
   RelatorioFiltroInput,
-  PrevisibilidadeFiltroInput
+  PrevisibilidadeFiltroInput,
+  CreateAgenteInput,
+  UpdateAgenteInput,
+  CreateAgenteConhecimentoInput,
+  UpdateAgenteConhecimentoInput,
+  AgenteConversaStatus
 } from '../shared/types'
 
 const api: RazaiApi = {
@@ -103,6 +108,37 @@ const api: RazaiApi = {
       ipcRenderer.invoke('relatorios:getVendasPorTecidoCor', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined),
     getPrevisibilidadeEstoque: (filtro?: PrevisibilidadeFiltroInput) =>
       ipcRenderer.invoke('relatorios:getPrevisibilidadeEstoque', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined)
+  },
+  agentes: {
+    list: () => ipcRenderer.invoke('agentes:list'),
+    getById: (id: string) => ipcRenderer.invoke('agentes:getById', id),
+    create: (input: CreateAgenteInput) =>
+      ipcRenderer.invoke('agentes:create', JSON.parse(JSON.stringify(input))),
+    update: (id: string, input: UpdateAgenteInput) =>
+      ipcRenderer.invoke('agentes:update', id, JSON.parse(JSON.stringify(input))),
+    delete: (id: string) => ipcRenderer.invoke('agentes:delete', id),
+    listConhecimentos: (agenteId: string) =>
+      ipcRenderer.invoke('agentes:conhecimento:list', agenteId),
+    createConhecimento: (input: CreateAgenteConhecimentoInput) =>
+      ipcRenderer.invoke('agentes:conhecimento:create', JSON.parse(JSON.stringify(input))),
+    updateConhecimento: (id: string, input: UpdateAgenteConhecimentoInput) =>
+      ipcRenderer.invoke('agentes:conhecimento:update', id, JSON.parse(JSON.stringify(input))),
+    deleteConhecimento: (id: string) =>
+      ipcRenderer.invoke('agentes:conhecimento:delete', id),
+    listConversas: (agenteId: string, status?: AgenteConversaStatus) =>
+      ipcRenderer.invoke('agentes:conversas:list', agenteId, status),
+    getConversa: (conversaId: string) =>
+      ipcRenderer.invoke('agentes:conversas:get', conversaId),
+    listMensagens: (conversaId: string) =>
+      ipcRenderer.invoke('agentes:mensagens:list', conversaId),
+    enviarMensagem: (conversaId: string, texto: string) =>
+      ipcRenderer.invoke('agentes:mensagens:enviar', conversaId, texto),
+    aprovarSugestao: (mensagemId: string, textoEditado?: string) =>
+      ipcRenderer.invoke('agentes:mensagens:aprovar', mensagemId, textoEditado),
+    rejeitarSugestao: (mensagemId: string) =>
+      ipcRenderer.invoke('agentes:mensagens:rejeitar', mensagemId),
+    gerarRespostaIa: (agenteId: string, pergunta: string, conversaId?: string) =>
+      ipcRenderer.invoke('agentes:gerarRespostaIa', agenteId, pergunta, conversaId)
   }
 }
 

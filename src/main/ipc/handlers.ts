@@ -11,6 +11,7 @@ import { PrinterService } from '../services/printer/printer.service'
 import { exportTecidosCsv, exportCoresCsv, exportDatabase } from '../services/backup.service'
 import { DiagnosticsService } from '../services/diagnostics.service'
 import { RelatoriosService } from '../services/relatorios.service'
+import { AgentesService } from '../services/agent/agentes.service'
 import { checkForUpdates, quitAndInstall, getUpdateStatus } from '../updater'
 import { logger } from '../logger'
 import type {
@@ -25,7 +26,12 @@ import type {
   CreatePedidoInput,
   UpdatePedidoInput,
   RelatorioFiltroInput,
-  PrevisibilidadeFiltroInput
+  PrevisibilidadeFiltroInput,
+  CreateAgenteInput,
+  UpdateAgenteInput,
+  CreateAgenteConhecimentoInput,
+  UpdateAgenteConhecimentoInput,
+  AgenteConversaStatus
 } from '../../shared/types'
 
 export function registerIpcHandlers(): void {
@@ -272,5 +278,75 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('updater:getStatus', async () => {
     return getUpdateStatus()
+  })
+
+  // Handlers para Módulo de Agentes e Atendimento
+  ipcMain.handle('agentes:list', async () => {
+    return AgentesService.list()
+  })
+
+  ipcMain.handle('agentes:getById', async (_event, id: string) => {
+    return AgentesService.getById(id)
+  })
+
+  ipcMain.handle('agentes:create', async (_event, input: CreateAgenteInput) => {
+    return AgentesService.create(input)
+  })
+
+  ipcMain.handle('agentes:update', async (_event, id: string, input: UpdateAgenteInput) => {
+    return AgentesService.update(id, input)
+  })
+
+  ipcMain.handle('agentes:delete', async (_event, id: string) => {
+    return AgentesService.delete(id)
+  })
+
+  ipcMain.handle('agentes:conhecimento:list', async (_event, agenteId: string) => {
+    return AgentesService.listConhecimentos(agenteId)
+  })
+
+  ipcMain.handle('agentes:conhecimento:create', async (_event, input: CreateAgenteConhecimentoInput) => {
+    return AgentesService.createConhecimento(input)
+  })
+
+  ipcMain.handle('agentes:conhecimento:update', async (_event, id: string, input: UpdateAgenteConhecimentoInput) => {
+    return AgentesService.updateConhecimento(id, input)
+  })
+
+  ipcMain.handle('agentes:conhecimento:delete', async (_event, id: string) => {
+    return AgentesService.deleteConhecimento(id)
+  })
+
+  ipcMain.handle('agentes:conversas:list', async (_event, agenteId: string, status?: AgenteConversaStatus) => {
+    return AgentesService.listConversas(agenteId, status)
+  })
+
+  ipcMain.handle('agentes:conversas:get', async (_event, conversaId: string) => {
+    return AgentesService.getConversa(conversaId)
+  })
+
+  ipcMain.handle('agentes:mensagens:list', async (_event, conversaId: string) => {
+    return AgentesService.listMensagens(conversaId)
+  })
+
+  ipcMain.handle('agentes:mensagens:enviar', async (_event, conversaId: string, texto: string) => {
+    return AgentesService.enviarMensagem(conversaId, texto)
+  })
+
+  ipcMain.handle('agentes:mensagens:aprovar', async (_event, mensagemId: string, textoEditado?: string) => {
+    return AgentesService.aprovarSugestao(mensagemId, textoEditado)
+  })
+
+  ipcMain.handle('agentes:mensagens:rejeitar', async (_event, mensagemId: string) => {
+    return AgentesService.rejeitarSugestao(mensagemId)
+  })
+
+  ipcMain.handle('agentes:gerarRespostaIa', async (_event, agenteId: string, pergunta: string, conversaId?: string) => {
+    // Por enquanto retorna stub ou delega para o servico
+    return {
+      resposta: 'Resposta simulada do agente',
+      confianca: 1,
+      fontes: []
+    }
   })
 }
