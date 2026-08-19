@@ -1,7 +1,7 @@
 import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, existsSync, readFileSync, unlinkSync } from 'node:fs'
 
 test.describe('QA E2E — Módulo de Pedidos', () => {
   let app: ElectronApplication
@@ -91,5 +91,35 @@ test.describe('QA E2E — Módulo de Pedidos', () => {
 
     await expect(page.getByText(/Pedido aprovado com sucesso/i)).toBeVisible()
     await expect(page.getByText('APROVADO')).toBeVisible()
+  })
+
+  test('Flow 3: Geração física de PDF A4 em disco via Electron e validação de cabeçalho binário', async () => {
+    // Solicita a geração do PDF do pedido criado via IPC
+    const result = await page.evaluate(async () => {
+      const list = await window.razai.pedidos.list()
+      if (list.length === 0) throw new Error('Nenhum pedido encontrado para teste de PDF')
+      return window.razai.pedidos.gerarPdf(list[0].id)
+    })
+
+    expect(result.ok).toBe(true)
+    expect(result.filePath).toBeTruthy()
+
+    const pdfPath = result.filePath!
+    expect(existsSync(pdfPath)).toBe(true)
+
+    // Lê os bytes do arquivo gerado para verificar integridade do PDF
+    const buffer = readFileSync(pdfPath)
+    expect(buffer.length).toBeGreaterThan(1000)
+
+    // Cabeçalho canônico de arquivo PDF (%PDF-)
+    const header = buffer.subarray(0, 5).toString('ascii')
+    expect(header).toBe('%PDF-')
+
+    // Limpeza do arquivo temporário de teste
+    try {
+      unlinkSync(pdfPath)
+    } catch {
+      // Ignora erro de limpeza
+    }
   })
 })
