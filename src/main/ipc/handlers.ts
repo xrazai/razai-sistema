@@ -10,6 +10,7 @@ import { SettingsService } from '../services/settings.service'
 import { PrinterService } from '../services/printer/printer.service'
 import { exportTecidosCsv, exportCoresCsv, exportDatabase } from '../services/backup.service'
 import { DiagnosticsService } from '../services/diagnostics.service'
+import { RelatoriosService } from '../services/relatorios.service'
 import { checkForUpdates, quitAndInstall, getUpdateStatus } from '../updater'
 import { logger } from '../logger'
 import type {
@@ -20,7 +21,8 @@ import type {
   CreateVinculosInput,
   CreateVendaInput,
   CreatePedidoInput,
-  UpdatePedidoInput
+  UpdatePedidoInput,
+  RelatorioFiltroInput
 } from '../../shared/types'
 
 export function registerIpcHandlers(): void {
@@ -237,6 +239,19 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('diagnostics:getMetrics', async () => {
     return DiagnosticsService.getMetrics()
+  })
+
+  // Handlers para Relatórios e Inteligência de Vendas
+  ipcMain.handle('relatorios:getKpis', async (_event, filtro?: RelatorioFiltroInput) => {
+    return RelatoriosService.getKpis(filtro)
+  })
+
+  ipcMain.handle('relatorios:getVendasUltimos7Dias', async () => {
+    return RelatoriosService.getVendasUltimos7Dias()
+  })
+
+  ipcMain.handle('relatorios:getVendasPorTecidoCor', async (_event, filtro?: RelatorioFiltroInput) => {
+    return RelatoriosService.getVendasPorTecidoCor(filtro)
   })
 
   // Handlers para Atualizações Automáticas (electron-updater)

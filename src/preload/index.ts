@@ -11,7 +11,8 @@ import type {
   CreateVinculosInput,
   CreateVendaInput,
   CreatePedidoInput,
-  UpdatePedidoInput
+  UpdatePedidoInput,
+  RelatorioFiltroInput
 } from '../shared/types'
 
 const api: RazaiApi = {
@@ -92,6 +93,13 @@ const api: RazaiApi = {
         ipcRenderer.removeListener('updater:status-changed', listener)
       }
     }
+  },
+  relatorios: {
+    getKpis: (filtro?: RelatorioFiltroInput) =>
+      ipcRenderer.invoke('relatorios:getKpis', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined),
+    getVendasUltimos7Dias: () => ipcRenderer.invoke('relatorios:getVendasUltimos7Dias'),
+    getVendasPorTecidoCor: (filtro?: RelatorioFiltroInput) =>
+      ipcRenderer.invoke('relatorios:getVendasPorTecidoCor', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined)
   }
 }
 

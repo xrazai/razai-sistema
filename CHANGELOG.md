@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Serviço Main, handlers IPC e tipagens no Preload para Relatórios de Vendas (Task 25)
+
 ## 2026-08-19 — Validação de autoupdate ponta a ponta e release v0.2.2
 
 ## 2026-08-19 — Mecanismo de autoupdate com electron-updater apontando para GitHub releases e painel em Settings (Task 17)
