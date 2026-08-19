@@ -20,18 +20,18 @@ type DbVinculoRow = {
 
 function mapRowToRecord(row: DbVinculoRow): VinculoRecord {
   return {
-    id: row.id,
-    tecidoId: row.tecido_id,
-    corId: row.cor_id,
-    sku: row.sku,
-    tecidoNome: row.tecido_nome,
-    tecidoCodigo: row.tecido_codigo,
-    corNome: row.cor_nome,
-    corCodigo: row.cor_codigo,
-    corHex: row.cor_hex,
-    corLab: row.cor_lab,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
+    id: String(row.id),
+    tecidoId: String(row.tecido_id),
+    corId: String(row.cor_id),
+    sku: String(row.sku),
+    tecidoNome: String(row.tecido_nome),
+    tecidoCodigo: String(row.tecido_codigo),
+    corNome: String(row.cor_nome),
+    corCodigo: String(row.cor_codigo),
+    corHex: String(row.cor_hex),
+    corLab: String(row.cor_lab),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at)
   }
 }
 
@@ -123,29 +123,33 @@ export class VinculosService {
       throw new Error('Selecione pelo menos uma cor para criar o vínculo.')
     }
 
+    const targetTecidoId = String(tecidoId).trim()
+
     const tecido = db
       .prepare('SELECT id, codigo, nome FROM tecidos WHERE id = ?')
-      .get(tecidoId) as { id: string; codigo: string; nome: string } | undefined
+      .get(targetTecidoId) as { id: string | number; codigo: string; nome: string } | undefined
 
     if (!tecido) {
-      throw new Error(`Tecido com id=${tecidoId} não encontrado.`)
+      throw new Error(`Tecido com id=${targetTecidoId} não encontrado.`)
     }
 
     const createdRecords: VinculoRecord[] = []
     const now = new Date().toISOString()
 
     const insertStmt = db.prepare(`
-      INSERT INTO vinculos (id, tecido_id, cor_id, sku, created_at, updated_at)
+      INSERT OR IGNORE INTO vinculos (id, tecido_id, cor_id, sku, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?)
     `)
 
     // Executa em transação para garantir atomicidade
     const transaction = db.transaction(() => {
-      for (const corId of corIds) {
+      for (const rawCorId of corIds) {
+        const targetCorId = String(rawCorId).trim()
+
         // Verifica se a cor existe
         const cor = db
           .prepare('SELECT id, codigo, nome FROM cores WHERE id = ?')
-          .get(corId) as { id: string; codigo: string; nome: string } | undefined
+          .get(targetCorId) as { id: string | number; codigo?: string | null; nome: string } | undefined
 
         if (!cor) {
           continue
@@ -153,8 +157,8 @@ export class VinculosService {
 
         // Verifica se o vínculo já existe
         const existing = db
-          .prepare('SELECT id FROM vinculos WHERE tecido_id = ? AND cor_id = ?')
-          .get(tecidoId, corId) as { id: string } | undefined
+          .prepare('SELECT id FROM vinculos WHERE CAST(tecido_id AS TEXT) = ? AND CAST(cor_id AS TEXT) = ?')
+          .get(targetTecidoId, targetCorId) as { id: string } | undefined
 
         if (existing) {
           const rec = this.getById(existing.id)
@@ -163,9 +167,10 @@ export class VinculosService {
         }
 
         const id = randomUUID()
-        const sku = generateVinculoSku(tecido.codigo, cor.codigo)
+        const corSku = cor.codigo || generateCorSku(cor.nome)
+        const sku = generateVinculoSku(tecido.codigo, corSku)
 
-        insertStmt.run(id, tecidoId, corId, sku, now, now)
+        insertStmt.run(id, targetTecidoId, targetCorId, sku, now, now)
         const rec = this.getById(id)
         if (rec) {
           createdRecords.push(rec)
