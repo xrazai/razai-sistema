@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import { getDb } from '../database/db'
 import { TecidosService } from '../services/tecidos.service'
 import { CoresService } from '../services/cores.service'
+import { SettingsService } from '../services/settings.service'
 import type {
   AppInfo,
   DbHealth,
@@ -78,5 +79,22 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('cores:delete', (_event, id: string) => {
     return CoresService.delete(id)
+  })
+
+  // Handlers para Preferências e Configurações (app_meta)
+  ipcMain.handle('settings:get', (_event, key: string) => {
+    return SettingsService.get(key)
+  })
+
+  ipcMain.handle('settings:set', (_event, key: string, value: string) => {
+    return SettingsService.set(key, value)
+  })
+
+  ipcMain.handle('settings:getAll', () => {
+    return SettingsService.getAll()
+  })
+
+  ipcMain.handle('settings:delete', (_event, key: string) => {
+    return SettingsService.delete(key)
   })
 }
