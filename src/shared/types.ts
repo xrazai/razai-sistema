@@ -82,11 +82,40 @@ export type SettingsApi = {
   getAll: () => Promise<Record<string, string>>
 }
 
+export type VinculoRecord = {
+  id: string
+  tecidoId: string
+  corId: string
+  sku: string
+  tecidoNome: string
+  tecidoCodigo: string
+  corNome: string
+  corCodigo: string
+  corHex: string
+  corLab: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type CreateVinculosInput = {
+  tecidoId: string
+  corIds: string[]
+}
+
+export type VinculosApi = {
+  list: (search?: string) => Promise<VinculoRecord[]>
+  listByTecido: (tecidoId: string) => Promise<VinculoRecord[]>
+  createBatch: (input: CreateVinculosInput) => Promise<VinculoRecord[]>
+  delete: (id: string) => Promise<boolean>
+  deleteByTecidoAndCor: (tecidoId: string, corId: string) => Promise<boolean>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
   tecidos: TecidosApi
   cores: CoresApi
+  vinculos: VinculosApi
   settings: SettingsApi
 }
 

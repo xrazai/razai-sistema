@@ -35,6 +35,11 @@
       if (router.subRoute) return 'Cores / Detalhes'
       return 'Cores'
     }
+    if (router.route === 'vinculos') {
+      if (router.subRoute === 'cadastro') return 'Vínculos / Cadastro'
+      if (router.subRoute) return 'Vínculos / Detalhes'
+      return 'Vínculos'
+    }
     return titles[route] || 'Razai Sistema'
   })
 
@@ -97,6 +102,16 @@
       </Button>
     {:else if router.route === 'cores' && router.subRoute}
       <Button variant="ghost" size="sm" onclick={() => router.navigate('cores')}>
+        <Icon name="arrow-left" size="sm" />
+        <span>Voltar</span>
+      </Button>
+    {:else if router.route === 'vinculos' && !router.subRoute}
+      <Button variant="primary" size="sm" onclick={() => router.navigate('vinculos/cadastro')}>
+        <Icon name="plus" size="sm" />
+        <span>Cadastrar Vínculo</span>
+      </Button>
+    {:else if router.route === 'vinculos' && router.subRoute}
+      <Button variant="ghost" size="sm" onclick={() => router.navigate('vinculos')}>
         <Icon name="arrow-left" size="sm" />
         <span>Voltar</span>
       </Button>

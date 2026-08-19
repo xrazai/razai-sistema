@@ -322,16 +322,16 @@ export function getTecidoSkuCandidates(nome: string): string[] {
     }
   }
 
-  // Testa combinações completas AAAA..ZZZZ
-  for (let i = 0; i < letters.length; i++) {
-    for (let j = 0; j < letters.length; j++) {
-      for (let k = 0; k < letters.length; k++) {
-        for (let l = 0; l < letters.length; l++) {
-          addCandidate(letters[i] + letters[j] + letters[k] + letters[l])
-        }
-      }
-    }
-  }
-
   return candidates
+}
+
+/**
+ * Gera o SKU do produto consolidado / vínculo a partir do SKU do tecido e SKU da cor:
+ * - Concatenação simples com hífen: <SKU_TECIDO>-<SKU_COR>
+ * - Exemplo: "TRAL" + "AZULMARI" -> "TRAL-AZULMARI"
+ */
+export function generateVinculoSku(tecidoCodigo: string, corCodigo: string): string {
+  const t = (tecidoCodigo || '').replace(/[^a-zA-Z0-9]/g, '').trim().toUpperCase()
+  const c = (corCodigo || '').replace(/[^a-zA-Z0-9]/g, '').trim().toUpperCase()
+  return `${t || 'XXXX'}-${c || 'XXXXXXXX'}`
 }
