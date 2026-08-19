@@ -24,12 +24,15 @@
     display: grid;
     min-height: 0;
     border: var(--border-width) solid var(--color-border);
+    box-sizing: border-box;
+    line-height: 100%;
   }
 
   .pane {
     min-width: 0;
     min-height: 0;
     border-right: var(--border-width) solid var(--color-border);
+    box-sizing: border-box;
   }
 
   .pane:last-child {

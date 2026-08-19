@@ -67,13 +67,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 140px;
+    min-height: 160px;
     padding: var(--space-5) var(--space-4);
     border: var(--border-width) dashed var(--color-border-strong);
     background: var(--color-bg);
     text-align: center;
     box-sizing: border-box;
     width: 100%;
+    line-height: 100%;
   }
 
   .empty[data-tone='danger'] {
@@ -120,7 +121,7 @@
     color: var(--color-fg-muted);
     font-family: var(--font-mono);
     max-width: 440px;
-    line-height: var(--leading-normal);
+    line-height: 100%;
   }
 
   .extra-content {

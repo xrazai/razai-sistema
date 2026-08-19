@@ -27,8 +27,12 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
+    height: 24px;
+    min-height: 24px;
     cursor: pointer;
     font-size: var(--text-sm);
+    line-height: 100%;
+    box-sizing: border-box;
   }
 
   .toggle.disabled {
@@ -75,5 +79,6 @@
     text-transform: uppercase;
     font-size: var(--text-xs);
     color: var(--color-fg-muted);
+    line-height: 100%;
   }
 </style>

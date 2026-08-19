@@ -87,12 +87,14 @@
     font-size: var(--text-md);
     color: var(--color-fg);
     font-family: var(--font-mono);
+    line-height: 100%;
   }
 
   .caption {
     font-size: var(--text-xs);
     color: var(--color-fg-muted);
     font-family: var(--font-mono);
+    line-height: 100%;
   }
 
   .error-box {
