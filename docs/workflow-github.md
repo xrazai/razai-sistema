@@ -271,7 +271,67 @@ Quando for solicitada a execução de um conjunto de tarefas sequenciais da colu
 
 ---
 
-## 7. Tabela de Comandos Frequentes (Cheat Sheet)
+## 7. Fluxo D: Releases e Publicação de Atualizações (Autoupdate)
+
+Releases oficiais são publicadas exclusivamente a partir da branch `main` após a conclusão e merge de todas as tasks pendentes.
+
+```mermaid
+flowchart LR
+    A[Tasks mergeadas na main] --> B[Bump de versão no package.json]
+    B --> C[PR de Release + CI verde + Merge]
+    C --> D[Compilação do instalador: npm run build:win]
+    D --> E[gh release create vX.Y.Z com latest.yml e .blockmap]
+    E --> F[App instalado detecta e atualiza via electron-updater]
+```
+
+### Passo a Passo de uma Release:
+
+1. **Garantir que a `main` local está sincronizada**:
+   ```powershell
+   git checkout main
+   git pull --rebase origin main
+   ```
+
+2. **Criar branch de bump de versão**:
+   ```powershell
+   git checkout -b chore/release-v<X.Y.Z>
+   ```
+   - Atualizar a chave `"version": "<X.Y.Z>"` no `package.json`.
+   - Executar `npm install` para sincronizar o `package-lock.json`.
+   - Adicionar nota de versão no topo do `CHANGELOG.md`.
+
+3. **Submeter PR do Bump e Mergear**:
+   ```powershell
+   git add .
+   git commit -m "Bump version to <X.Y.Z>"
+   git push -u origin HEAD
+   gh pr create --title "Release v<X.Y.Z>" --body "Prepara release v<X.Y.Z>" --base main
+   gh pr checks <pr-number> --watch
+   gh pr merge <pr-number> --squash --delete-branch
+   ```
+
+4. **Sincronizar a `main` e Gerar os Instaladores**:
+   ```powershell
+   git checkout main
+   git pull --rebase origin main
+   npm run build:win
+   ```
+   *Gera na pasta `dist/`: `Razai-Sistema-Setup-<X.Y.Z>-x64.exe`, `Razai-Sistema-Setup-<X.Y.Z>-x64.exe.blockmap`, `latest.yml` e `Razai-Sistema-Portable-<X.Y.Z>.exe`.*
+
+5. **Publicar a Release no GitHub**:
+   ```powershell
+   gh release create v<X.Y.Z> "dist/latest.yml" "dist/Razai-Sistema-Setup-<X.Y.Z>-x64.exe" "dist/Razai-Sistema-Setup-<X.Y.Z>-x64.exe.blockmap" "dist/Razai-Sistema-Portable-<X.Y.Z>.exe" --title "Razai Sistema v<X.Y.Z>" --notes "## Razai Sistema — Release v<X.Y.Z>..."
+   ```
+
+6. **Validação do Autoupdater**:
+   - Abrir a aplicação já instalada em versão anterior.
+   - Acessar `Settings` → aba `Geral & UI` → bloco `Atualizações do Sistema`.
+   - Clicar em `Verificar Atualizações` (ou aguardar a checagem automática de 5s no startup).
+   - Acompanhar o download diferencial e clicar em `Reiniciar e Instalar`.
+
+---
+
+## 8. Tabela de Comandos Frequentes (Cheat Sheet)
 
 | Ação | Comando |
 |---|---|
@@ -289,7 +349,7 @@ Quando for solicitada a execução de um conjunto de tarefas sequenciais da colu
 
 ---
 
-## 8. Tratamento de Erros e Armadilhas Comuns
+## 9. Tratamento de Erros e Armadilhas Comuns
 
 ### 1. "Required status check 'Typecheck & Lint' is expected" no `gh stack merge`
 - **Causa:** O workflow de CI (`ci.yml`) estava filtrando `branches: [main]` no gatilho `pull_request`, impedindo a execução do check em PRs direcionados a branches intermediárias.
@@ -299,6 +359,14 @@ Quando for solicitada a execução de um conjunto de tarefas sequenciais da colu
 - **Causa:** Abrir um PR separado exclusivamente para alterar `CHANGELOG.md` ou documentação.
 - **Solução:** O `CHANGELOG.md` deve ser editado e commitado **dentro da branch da própria task**, subindo junto com o PR de código.
 
-### 3. Travar em editores interativos no terminal
-- **Causa:** Comandos como `gh stack submit` sem flags abrem um editor TUI interativo.
-- **Solução:** Usar sempre `gh stack submit --auto --open` para automação limpa e scripts.
+### 4. HTTP 404 no download de atualizações via `electron-updater`
+- **Causa:** O nome do arquivo gerado continha espaços (ex.: `Razai Sistema-Setup-0.2.2-x64.exe`), e o GitHub converteu espaços em pontos (`Razai.Sistema-...`), enquanto o `latest.yml` apontava para nomes com hífen.
+- **Solução:** O `artifactName` no `electron-builder.yml` deve usar explicitamente hífens (`Razai-Sistema-Setup-${version}-${arch}.${ext}`).
+
+### 5. SyntaxError `Named export 'autoUpdater' not found` em produção
+- **Causa:** O projeto utiliza ESM nativo (`"type": "module"`), mas o `electron-updater` é empacotado em CommonJS (CJS) com exports dinâmicos.
+- **Solução:** Importar o pacote CJS como default e resolver `autoUpdater` de forma resiliente:
+  ```ts
+  import electronUpdaterPkg from 'electron-updater'
+  const autoUpdater = (electronUpdaterPkg as any)?.autoUpdater || (electronUpdaterPkg as any)?.default?.autoUpdater || electronUpdaterPkg
+  ```
