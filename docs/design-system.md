@@ -73,8 +73,12 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 > Exemplo: Célula de formulário composta (`.field-cell`):
 > $$\text{Padding Top }(12\text{px}) + \text{Label }(16\text{px}) + \text{Margin }(4\text{px}) + \text{Input }(32\text{px}) + \text{Padding Bottom }(16\text{px}) = 80\text{px}\quad(10 \times 8\text{px})$$
 >
-> ### 5. Fechamento e Delimitação Geométrica
-> Todo compartimento da grade é fechado: a última linha de qualquer tabela preserva sua borda inferior de 1px (`border-bottom: 1px solid var(--color-border)`), demarcando o limite da célula contra o espaço vazio.
+> ### 5. Modelo de Bordas Direcionais e Fechamento Geométrico (Zero Border Collision)
+> Para evitar colisão e acúmulo de bordas duplas de 2px entre elementos adjacentes:
+> - **Direcionalidade Rígida**: Cada célula desenha divisores apenas nas direções **inferior (`border-bottom: 1px`)** e **direita (`border-right: 1px`)**.
+> - **Zero Borda Oposta**: O elemento irmão imediatamente abaixo ou à direita nunca desenha borda oposta redundante (`border-top: none`), encostando na borda do elemento anterior.
+> - **Fechamento Final**: A última linha de tabelas e compartimentos preserva sua borda inferior de 1px (`border-bottom: 1px solid var(--color-border)`), delimitando claramente a célula contra o espaço vazio.
+> - **`box-sizing: border-box` Universal**: Toda a régua computada (conteúdo + padding + borda de 1px) está encapsulada dentro da altura declarada (ex: 40px), impedindo qualquer expansão ou desvio geométrico de 1px.
 
 ---
 
