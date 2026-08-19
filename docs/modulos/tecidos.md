@@ -99,4 +99,9 @@ Para o catálogo de tecidos, o identificador de SKU é padronizado em **4 caract
 | **Linho Puro Rústico** | `LI` (Linho) | `RU` (Rústico) | **`LIRU`** |
 | **Sarja Acetinada com Elastano** | `SA` (Sarja) | `EL` (Elastano) | **`SAEL`** |
 | **Viscose Sarjada** | `VI` (Viscose) | `SA` (Sarjada) | **`VISA`** |
-| **Jeans Denim Pesado** | `JE` (Jeans) | `PE` (Pesado) | **`JEPE`** |
+### 4.1 Resolução de Colisão (Sem Números)
+Caso o SKU base de 4 caracteres já exista no banco de dados para outro tecido:
+1. **Começando pela última parte do SKU**: o sistema mantém os caracteres da 1ª parte e busca novas combinações de 2 letras na última palavra (ex: `Tule Renda Alencon` -> base `TUAL`; em colisão com `Tule Rústico Algodão`, gera `TUAG` usando as letras de *Algodão*).
+2. Se houver palavras intermediárias, tenta pares de letras das palavras intermediárias.
+3. Tenta novas combinações da 1ª palavra combinadas com a última.
+4. Permutação alfabética pura (A-Z) garantindo unicidade estrita de 4 letras sem utilizar números.

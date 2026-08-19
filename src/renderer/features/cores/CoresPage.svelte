@@ -6,10 +6,12 @@
   import CoresCadastroPage from './CoresCadastroPage.svelte'
   import CoresDetalhesPage from './CoresDetalhesPage.svelte'
   import { router } from '../../shell/router.svelte'
+  import { generateCorSku } from '../../../shared/sku'
   import type { CorRecord, CreateCorInput, UpdateCorInput } from '../../../shared/types'
 
   const columns: Column[] = [
     { key: 'swatch', label: 'Amostra', width: '70px', align: 'center' },
+    { key: 'codigo', label: 'SKU', width: '130px' },
     { key: 'nome', label: 'Nome da Cor' },
     { key: 'hex', label: 'HEX', width: '130px' },
     { key: 'lab', label: 'LAB (L / A / B)', width: '220px' },
@@ -115,6 +117,7 @@
       } else {
         const localItem: CorRecord = {
           id: String(Date.now()),
+          codigo: generateCorSku(nova.nome),
           nome: nova.nome,
           hex: nova.hex,
           lab: nova.lab,
@@ -214,7 +217,7 @@
               type="text"
               class="search-input"
               bind:value={searchTerm}
-              placeholder="Buscar por nome, HEX ou LAB..."
+              placeholder="Buscar por SKU, nome, HEX ou LAB..."
             />
             {#if searchTerm}
               <button class="clear-btn" onclick={() => (searchTerm = '')} aria-label="Limpar busca">
@@ -264,6 +267,8 @@
                   <div class="swatch-cell">
                     <div class="table-swatch" style:background-color={row.hex}></div>
                   </div>
+                {:else if column.key === 'codigo'}
+                  <span class="sku-code">{value}</span>
                 {:else if column.key === 'hex'}
                   <div class="hex-cell">
                     <span class="code">{value}</span>
@@ -297,7 +302,7 @@
         <span class="footer-note">Clique em uma linha para abrir a tela de detalhes e editar o cadastro</span>
         {#if selectedCor}
           <span class="footer-selected">
-            Última selecionada: <strong>{selectedCor.hex} — {selectedCor.nome}</strong>
+            Última selecionada: <strong>{selectedCor.codigo} — {selectedCor.nome}</strong>
           </span>
         {/if}
       </footer>
@@ -465,6 +470,13 @@
     color: var(--color-ok);
     border-color: var(--color-ok);
     background: var(--color-bg-sunken);
+  }
+
+  .sku-code {
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: var(--tracking-header);
+    font-family: var(--font-mono);
   }
 
   .code {

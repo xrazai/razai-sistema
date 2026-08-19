@@ -1,10 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import { getDb } from '../database/db'
-import { normalizeUnaccent } from '../../shared/sku'
+import { normalizeUnaccent, validateCorNome, getCorSkuCandidates } from '../../shared/sku'
 import type { CorRecord, CreateCorInput, UpdateCorInput } from '../../shared/types'
 
 type DbCorRow = {
   id: string
+  codigo: string
   nome: string
   hex: string
   lab: string
@@ -15,6 +16,7 @@ type DbCorRow = {
 function mapRowToRecord(row: DbCorRow): CorRecord {
   return {
     id: row.id,
+    codigo: row.codigo,
     nome: row.nome,
     hex: row.hex,
     lab: row.lab,
@@ -32,8 +34,9 @@ export function formatHex(hex: string): string {
 }
 
 export function validateCorFields(nome: string, hex: string, lab: string) {
-  if (!nome || !nome.trim()) {
-    throw new Error('O campo "Nome da cor" é obrigatório.')
+  const nomeValidation = validateCorNome(nome)
+  if (!nomeValidation.valid) {
+    throw new Error(nomeValidation.error || 'Nome da cor inválido.')
   }
   const formattedHex = formatHex(hex)
   const hexRegex = /^#[0-9A-F]{6}$/
@@ -45,6 +48,23 @@ export function validateCorFields(nome: string, hex: string, lab: string) {
   }
 }
 
+export function getUniqueCorSku(nome: string, currentId?: string): string {
+  const db = getDb()
+  const candidates = getCorSkuCandidates(nome)
+
+  for (const candidate of candidates) {
+    const existing = db
+      .prepare('SELECT id FROM cores WHERE codigo = ?')
+      .get(candidate) as { id: string } | undefined
+
+    if (!existing || existing.id === currentId) {
+      return candidate
+    }
+  }
+
+  throw new Error(`Não foi possível gerar um SKU único para a cor "${nome}"`)
+}
+
 export class CoresService {
   static list(search?: string): CorRecord[] {
     const db = getDb()
@@ -54,12 +74,13 @@ export class CoresService {
       const rows = db
         .prepare(`
           SELECT * FROM cores
-          WHERE unaccent(nome) LIKE ?
+          WHERE unaccent(codigo) LIKE ?
+             OR unaccent(nome) LIKE ?
              OR unaccent(hex) LIKE ?
              OR unaccent(lab) LIKE ?
           ORDER BY nome COLLATE NOCASE ASC
         `)
-        .all(term, term, term) as DbCorRow[]
+        .all(term, term, term, term) as DbCorRow[]
 
       return rows.map(mapRowToRecord)
     }
@@ -86,12 +107,13 @@ export class CoresService {
     validateCorFields(nome, hex, lab)
 
     const id = randomUUID()
+    const codigo = getUniqueCorSku(nome)
     const now = new Date().toISOString()
 
     db.prepare(`
-      INSERT INTO cores (id, nome, hex, lab, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, nome, hex, lab, now, now)
+      INSERT INTO cores (id, codigo, nome, hex, lab, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(id, codigo, nome, hex, lab, now, now)
 
     const created = this.getById(id)
     if (!created) {
@@ -113,16 +135,18 @@ export class CoresService {
 
     validateCorFields(nome, hex, lab)
 
+    const codigo = nome !== existing.nome ? getUniqueCorSku(nome, id) : existing.codigo
     const now = new Date().toISOString()
 
     db.prepare(`
       UPDATE cores SET
+        codigo = ?,
         nome = ?,
         hex = ?,
         lab = ?,
         updated_at = ?
       WHERE id = ?
-    `).run(nome, hex, lab, now, id)
+    `).run(codigo, nome, hex, lab, now, id)
 
     const updated = this.getById(id)
     if (!updated) {

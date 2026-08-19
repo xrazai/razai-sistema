@@ -5,6 +5,7 @@ import { normalizeUnaccent } from '../../src/shared/sku'
 
 type MockCorRow = {
   id: string
+  codigo: string
   nome: string
   hex: string
   lab: string
@@ -19,6 +20,7 @@ function resetMockDb() {
   mockCores = [
     {
       id: '1',
+      codigo: 'PRETABSO',
       nome: 'Preto Absoluto',
       hex: '#000000',
       lab: '00,00 / 00,00 / 00,00',
@@ -27,6 +29,7 @@ function resetMockDb() {
     },
     {
       id: '2',
+      codigo: 'BRANPURO',
       nome: 'Branco Puro',
       hex: '#FFFFFF',
       lab: '100,00 / 00,00 / 00,00',
@@ -35,6 +38,7 @@ function resetMockDb() {
     },
     {
       id: '3',
+      codigo: 'AMARCANA',
       nome: 'Amarelo Canário',
       hex: '#FFCC00',
       lab: '83,25 / 08,12 / 85,34',
@@ -43,6 +47,7 @@ function resetMockDb() {
     },
     {
       id: '4',
+      codigo: 'AZULMARI',
       nome: 'Azul Marinho',
       hex: '#002244',
       lab: '14,28 / 05,42 / -28,91',
@@ -51,6 +56,7 @@ function resetMockDb() {
     },
     {
       id: '5',
+      codigo: 'VERMCARM',
       nome: 'Vermelho Carmim',
       hex: '#D62246',
       lab: '45,82 / 69,14 / 27,51',
@@ -59,6 +65,7 @@ function resetMockDb() {
     },
     {
       id: '6',
+      codigo: 'VERDMILI',
       nome: 'Verde Militar',
       hex: '#4B5320',
       lab: '34,12 / -12,45 / 26,80',
@@ -74,16 +81,34 @@ vi.mock('../../src/main/database/db', () => {
       prepare: (sql: string) => {
         const cleanSql = sql.replace(/\s+/g, ' ').trim()
 
+        if (cleanSql.includes('SELECT * FROM cores WHERE unaccent(codigo) LIKE ?')) {
+          return {
+            all: (term: string) => {
+              const cleanTerm = term.replace(/%/g, '').toLowerCase()
+              return mockCores
+                .filter((r) => {
+                  const c = normalizeUnaccent(r.codigo)
+                  const n = normalizeUnaccent(r.nome)
+                  const h = normalizeUnaccent(r.hex)
+                  const l = normalizeUnaccent(r.lab)
+                  return c.includes(cleanTerm) || n.includes(cleanTerm) || h.includes(cleanTerm) || l.includes(cleanTerm)
+                })
+                .sort((a, b) => a.nome.localeCompare(b.nome, undefined, { sensitivity: 'base' }))
+            }
+          }
+        }
+
         if (cleanSql.includes('SELECT * FROM cores WHERE unaccent(nome) LIKE ?')) {
           return {
             all: (term: string) => {
               const cleanTerm = term.replace(/%/g, '').toLowerCase()
               return mockCores
                 .filter((r) => {
+                  const c = normalizeUnaccent(r.codigo)
                   const n = normalizeUnaccent(r.nome)
                   const h = normalizeUnaccent(r.hex)
                   const l = normalizeUnaccent(r.lab)
-                  return n.includes(cleanTerm) || h.includes(cleanTerm) || l.includes(cleanTerm)
+                  return c.includes(cleanTerm) || n.includes(cleanTerm) || h.includes(cleanTerm) || l.includes(cleanTerm)
                 })
                 .sort((a, b) => a.nome.localeCompare(b.nome, undefined, { sensitivity: 'base' }))
             }
@@ -100,6 +125,12 @@ vi.mock('../../src/main/database/db', () => {
           }
         }
 
+        if (cleanSql.includes('SELECT id FROM cores WHERE codigo = ?')) {
+          return {
+            get: (codigo: string) => mockCores.find((r) => r.codigo === codigo)
+          }
+        }
+
         if (cleanSql.includes('SELECT * FROM cores WHERE id = ?')) {
           return {
             get: (id: string) => mockCores.find((r) => r.id === id)
@@ -110,6 +141,7 @@ vi.mock('../../src/main/database/db', () => {
           return {
             run: (
               id: string,
+              codigo: string,
               nome: string,
               hex: string,
               lab: string,
@@ -118,6 +150,7 @@ vi.mock('../../src/main/database/db', () => {
             ) => {
               mockCores.push({
                 id,
+                codigo,
                 nome,
                 hex,
                 lab,
@@ -132,6 +165,7 @@ vi.mock('../../src/main/database/db', () => {
         if (cleanSql.includes('UPDATE cores SET')) {
           return {
             run: (
+              codigo: string,
               nome: string,
               hex: string,
               lab: string,
@@ -142,6 +176,7 @@ vi.mock('../../src/main/database/db', () => {
               if (idx !== -1) {
                 mockCores[idx] = {
                   ...mockCores[idx],
+                  codigo,
                   nome,
                   hex,
                   lab,
@@ -184,11 +219,16 @@ describe('CoresService (SQLite Domain Operations)', () => {
     expect(names).toEqual(sorted)
   })
 
-  it('should filter colors by unaccented query, hex, or lab', () => {
+  it('should filter colors by unaccented query, hex, lab, or sku', () => {
     // Busca sem acento
     const resultsCanario = CoresService.list('canario')
     expect(resultsCanario.length).toBe(1)
     expect(resultsCanario[0].nome).toBe('Amarelo Canário')
+
+    // Busca por SKU
+    const resultsSku = CoresService.list('AZULMARI')
+    expect(resultsSku.length).toBe(1)
+    expect(resultsSku[0].nome).toBe('Azul Marinho')
 
     // Busca por HEX
     const resultsHex = CoresService.list('FFCC00')
@@ -199,11 +239,12 @@ describe('CoresService (SQLite Domain Operations)', () => {
   it('should retrieve a color by id', () => {
     const color = CoresService.getById('3')
     expect(color).not.toBeNull()
+    expect(color?.codigo).toBe('AMARCANA')
     expect(color?.nome).toBe('Amarelo Canário')
     expect(color?.hex).toBe('#FFCC00')
   })
 
-  it('should create a new color and format hex to uppercase with #', () => {
+  it('should create a new color, generate semantic 8-char SKU and format hex to uppercase with #', () => {
     const created = CoresService.create({
       nome: 'Rosa Choque',
       hex: 'ff007f',
@@ -211,13 +252,46 @@ describe('CoresService (SQLite Domain Operations)', () => {
     })
 
     expect(created.id).toBeDefined()
+    expect(created.codigo).toBe('ROSACHOQ')
     expect(created.nome).toBe('Rosa Choque')
     expect(created.hex).toBe('#FF007F')
     expect(created.lab).toBe('53,24 / 80,11 / 10,45')
 
     const fetched = CoresService.getById(created.id)
     expect(fetched).not.toBeNull()
+    expect(fetched?.codigo).toBe('ROSACHOQ')
     expect(fetched?.hex).toBe('#FF007F')
+  })
+
+  it('should handle color SKU collision by altering variation letters without numbers', () => {
+    // 1st color: Verde Militar -> VERDMILI
+    const c1 = CoresService.create({
+      nome: 'Verde Milionário',
+      hex: '#112233',
+      lab: '10,00 / 20,00 / 30,00'
+    })
+    // VERDMILI already taken by id '6'. c1 should get another letter combination like VERDMILT or VERDMILO without numbers
+    expect(c1.codigo.length).toBe(8)
+    expect(c1.codigo).not.toBe('VERDMILI')
+    expect(c1.codigo).toMatch(/^[A-Z]{8}$/)
+  })
+
+  it('should validate 2 words for color name on create', () => {
+    expect(() => {
+      CoresService.create({
+        nome: 'Azul', // only 1 word
+        hex: '#0000FF',
+        lab: '00,00 / 00,00 / 00,00'
+      })
+    }).toThrow(/2 palavras/i)
+
+    expect(() => {
+      CoresService.create({
+        nome: 'Azul Céu Claro', // 3 words
+        hex: '#87CEEB',
+        lab: '00,00 / 00,00 / 00,00'
+      })
+    }).toThrow(/2 palavras/i)
   })
 
   it('should validate required fields and hex regex on create', () => {
@@ -239,7 +313,7 @@ describe('CoresService (SQLite Domain Operations)', () => {
 
     expect(() => {
       CoresService.create({
-        nome: 'Cor Sem LAB',
+        nome: 'Vermelho Fogo',
         hex: '#FF0000',
         lab: ''
       })
