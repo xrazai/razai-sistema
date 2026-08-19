@@ -153,13 +153,14 @@ PR 4 (topo): Componentes UI Svelte (src/renderer/features)
 - Não criar stacked PRs apenas por ter múltiplos commits.
 - Tasks independentes devem usar branches/worktrees independentes.
 
-### 4. Desenvolvimento Local
+### 4. Desenvolvimento Local e Execução de Testes Fail-Fast
 
 Priorize feedback rápido durante o loop de edição:
 1. Lint do código afetado.
 2. Typecheck quando relevante.
 3. Menor conjunto relevante de testes.
-4. Corrigir falhas imediatamente.
+4. **Execução Fail-Fast em Testes**: Ao executar suítes de testes (especialmente E2E/Playwright), execute de forma fail-fast (`maxFailures: 1`). Se um teste falhar na primeira execução, cancele imediatamente a suíte, isole e resolva a causa raiz daquele teste pontual antes de avançar para o próximo teste ou suíte.
+5. Corrigir falhas imediatamente.
 
 Múltiplos commits intermediários são permitidos e esperados. Não perca tempo fazendo squash/rewrite durante o desenvolvimento ativo.
 
