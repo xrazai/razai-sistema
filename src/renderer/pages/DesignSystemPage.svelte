@@ -18,6 +18,7 @@
   import Metric from '../design-system/data-display/Metric.svelte'
   import Badge from '../design-system/data-display/Badge.svelte'
   import Progress from '../design-system/data-display/Progress.svelte'
+  import AsciiBarChart from '../design-system/data-display/AsciiBarChart.svelte'
   import Table, { type Column } from '../design-system/data-display/Table.svelte'
   import TableToolbar from '../design-system/data-display/TableToolbar.svelte'
   import Sidebar from '../design-system/navigation/Sidebar.svelte'
@@ -42,6 +43,24 @@
   let tab = $state('geral')
   let progressVal = $state(68)
   let breadcrumbStep = $state('detalhes')
+
+  // AsciiBarChart demo data
+  const demoChartItems = [
+    { label: 'SEG', value: 1250.0 },
+    { label: 'TER', value: 3400.5 },
+    { label: 'QUA', value: 2100.0 },
+    { label: 'QUI', value: 4800.0 },
+    { label: 'SEX', value: 5600.0, active: true },
+    { label: 'SÁB', value: 1800.0 },
+    { label: 'DOM', value: 0 }
+  ]
+
+  const demoHorizontalChartItems = [
+    { label: 'Tricoline Lisa 100% Algodão', value: 8900.0, secondaryLabel: '(52%)' },
+    { label: 'Seda Pura Importada', value: 4500.0, secondaryLabel: '(26%)' },
+    { label: 'Linho Rústico Cru', value: 2400.0, secondaryLabel: '(14%)' },
+    { label: 'Cetim Especial Brilho', value: 1400.0, secondaryLabel: '(8%)' }
+  ]
 
   // Form playground state
   let demoNome = $state('Tricoline Lisa 100% Algodão')
@@ -335,6 +354,25 @@
                   <Button size="sm" onclick={() => (progressVal = Math.max(0, progressVal - 15))}>-15%</Button>
                   <Button size="sm" onclick={() => (progressVal = Math.min(100, progressVal + 15))}>+15%</Button>
                 </Stack>
+              </Stack>
+            </Cell>
+
+            <!-- AsciiBarChart (Gráficos Técnicos) -->
+            <Cell>
+              <Label text="AsciiBarChart (Vertical e Horizontal)" />
+              <Stack gap="3">
+                <AsciiBarChart
+                  title="Faturamento Semanal (Vertical)"
+                  items={demoChartItems}
+                  height="130px"
+                  valueFormatter={(v) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
+                />
+                <AsciiBarChart
+                  title="Vendas por Categoria (Horizontal)"
+                  orientation="horizontal"
+                  items={demoHorizontalChartItems}
+                  valueFormatter={(v) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                />
               </Stack>
             </Cell>
 
