@@ -372,7 +372,7 @@ describe('TecidosService (SQLite Domain Operations)', () => {
     expect(found?.codigo).toBe('CHSE')
   })
 
-  it('should handle SKU collision deterministically with 4 characters', () => {
+  it('should handle SKU collision deterministically with 4 pure letters (no numbers)', () => {
     const t1 = TecidosService.create({
       nome: 'Tule Renda Alencon', // TU + AL -> TUAL
       composicao: '100% Poliamida',
@@ -382,15 +382,16 @@ describe('TecidosService (SQLite Domain Operations)', () => {
     expect(t1.codigo).toBe('TUAL')
 
     const t2 = TecidosService.create({
-      nome: 'Tule Rústico Algodão', // TU + AL -> colisão -> TUA2
+      nome: 'Tule Rústico Algodão', // TU + AL -> colisão -> TUAG (letras de Algodão)
       composicao: '100% Algodão',
       largura: 1.40,
       rendimento: 7.50
     })
 
-    expect(t2.codigo).toBe('TUA2')
+    expect(t2.codigo).toBe('TUAG')
     expect(t2.codigo.length).toBe(4)
     expect(t2.codigo).not.toBe(t1.codigo)
+    expect(t2.codigo).toMatch(/^[A-Z]{4}$/)
   })
 
   it('should validate required fields on create', () => {

@@ -52,6 +52,7 @@ export type TecidosApi = {
 
 export type CorRecord = {
   id: string
+  codigo: string
   nome: string
   hex: string
   lab: string

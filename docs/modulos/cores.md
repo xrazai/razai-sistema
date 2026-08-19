@@ -13,14 +13,16 @@ O módulo é estruturado em três visões principais integradas ao roteador reat
    - Amostra visual de cor (swatch) renderizada em cada linha da tabela.
    - Célula de HEX com **botão de cópia rápida** e feedback temporário visual (`COPIADO` / checkmark).
    - Busca em tempo real (insensível a maiúsculas e acentos) por nome, código HEX ou valores LAB.
-   - Tabela de alta densidade (`Amostra`, `Nome da Cor`, `HEX`, `LAB (L / A / B)`, `Atualizado em`).
+   - Tabela de alta densidade (`Amostra`, `SKU`, `Nome da Cor`, `HEX`, `LAB (L / A / B)`, `Atualizado em`).
    - Clique na linha para abrir a tela de detalhes da cor.
 2. **Cadastro (`CoresCadastroPage.svelte` - rota `#cores/cadastro`)**:
-   - Formulário em grade modular (`Grid cols={3}`).
+   - Formulário em grade modular (`Grid cols={4}`).
+   - Validação de nome comercial em **exatamente 2 palavras** (`<Família> <Variação>`).
+   - Preview automático do SKU semântico de 8 caracteres (`4 letras da Família + 4 letras da Variação`).
    - Campos com swatch embutido na extremidade direita do input (`Input swatch={...}`) fornecendo feedback visual instantâneo durante a digitação.
    - Conversão bidirecional automática: digitar HEX calcula e preenche o LAB; digitar LAB calcula e preenche o HEX.
 3. **Detalhes e Edição (`CoresDetalhesPage.svelte` - rota `#cores/<id>`)**:
-   - Visualização e edição dos parâmetros da cor com swatch e tag HEX de pré-visualização.
+   - Visualização e edição dos parâmetros da cor com swatch, tag de SKU e tag HEX de pré-visualização.
    - Ações de atualização, cancelamento e exclusão com diálogo semântico de confirmação.
 
 ---
@@ -29,9 +31,23 @@ O módulo é estruturado em três visões principais integradas ao roteador reat
 
 | Campo | Tipo | Obrigatoriedade | Formato / Validação | Descrição |
 | --- | --- | --- | --- | --- |
-| **Nome da cor** | Texto simples | **Obrigatório** | `String não vazia` | Nome comercial da cor (ex.: *Amarelo Canário*, *Preto Absoluto*). |
+| **SKU** | Texto técnico | **Automático / Único** | `8 caracteres maiúsculos` | 4 letras da família + 4 letras da variação (preenchido com `X` se menor que 4). Resolução de colisão alfabética sem números. |
+| **Nome da cor** | Texto simples | **Obrigatório** | `Exatamente 2 palavras` | Nome comercial da cor no formato `<Família> <Variação>` (ex.: *Azul Marinho*, *Verde Militar*, *Rosa Chá*). |
 | **HEX** | Texto com swatch | **Obrigatório** | `#RRGGBB` (sempre em maiúsculas) | Código hexadecimal sRGB de 6 caracteres precedido por `#` (ex.: `#FFCC00`). |
 | **LAB** | Texto com swatch | **Obrigatório** | `00,00 / 00,00 / 00,00` | Coordenadas no espaço de cor CIE-$L^*a^*b^*$ com iluminante D65. |
+
+---
+
+## 3. Regras de Geração e Resolução de Colisão do SKU
+
+1. **Estrutura Base (8 Chars)**:
+   - 4 primeiras letras da Família (1ª palavra).
+   - 4 primeiras letras da Variação (2ª palavra).
+   - Preenchimento com `X` caso alguma palavra tenha menos de 4 letras.
+2. **Resolução de Conflito / Colisão (Sem Números)**:
+   - **Passo 1**: Mantém a Família e as 2 primeiras letras da Variação e busca novas combinações das 2 últimas letras usando as letras da palavra de variação.
+   - **Passo 2**: Altera as 2 primeiras letras da variação usando outras letras da palavra de variação.
+   - **Passo 3**: Permutação alfabética pura (A-Z) garantindo unicidade determinística sem números.
 
 ---
 

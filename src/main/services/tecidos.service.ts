@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { getDb } from '../database/db'
-import { generateTecidoSku, normalizeUnaccent } from '../../shared/sku'
+import { generateTecidoSku, getTecidoSkuCandidates, normalizeUnaccent } from '../../shared/sku'
 import type { TecidoRecord, CreateTecidoInput, UpdateTecidoInput } from '../../shared/types'
 
 type DbTecidoRow = {
@@ -71,41 +71,14 @@ function validateTecidoFields(
 
 function getUniqueSku(nome: string, currentId?: string): string {
   const db = getDb()
-  const baseSku = generateTecidoSku(nome)
+  const candidates = getTecidoSkuCandidates(nome)
 
-  const existing = db
-    .prepare('SELECT id, codigo FROM tecidos WHERE codigo = ?')
-    .get(baseSku) as { id: string; codigo: string } | undefined
+  for (const candidate of candidates) {
+    const existing = db
+      .prepare('SELECT id, codigo FROM tecidos WHERE codigo = ?')
+      .get(candidate) as { id: string; codigo: string } | undefined
 
-  if (!existing || existing.id === currentId) {
-    return baseSku
-  }
-
-  // Se houver colisão de SKU com outro registro, gera sufixo alfanumérico garantindo estritamente 4 caracteres
-  // 1) Tentativa com 3 caracteres de base + 1 caractere alfanumérico (2..9, A..Z)
-  const chars3 = baseSku.slice(0, 3)
-  const singleCharSuffixes = '23456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  for (const suffix of singleCharSuffixes) {
-    const candidate = `${chars3}${suffix}`
-    const check = db
-      .prepare('SELECT id FROM tecidos WHERE codigo = ?')
-      .get(candidate) as { id: string } | undefined
-
-    if (!check || check.id === currentId) {
-      return candidate
-    }
-  }
-
-  // 2) Se esgotar (34 colisões), usa 2 caracteres de base + 2 caracteres base36 (01..ZZ = 1296 combinações)
-  const chars2 = baseSku.slice(0, 2)
-  for (let i = 1; i < 36 * 36; i++) {
-    const suffix = i.toString(36).toUpperCase().padStart(2, '0')
-    const candidate = `${chars2}${suffix}`
-    const check = db
-      .prepare('SELECT id FROM tecidos WHERE codigo = ?')
-      .get(candidate) as { id: string } | undefined
-
-    if (!check || check.id === currentId) {
+    if (!existing || existing.id === currentId) {
       return candidate
     }
   }

@@ -5,6 +5,7 @@
   import Input from '../../design-system/controls/Input.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
   import { formatHexInput, isValidHex, labToHex, hexToLab } from './utils'
+  import { generateCorSku, validateCorNome } from '../../../shared/sku'
   import type { CreateCorInput } from '../../../shared/types'
 
   type Props = {
@@ -20,7 +21,8 @@
   let erroMsg = $state('')
   let isSaving = $state(false)
 
-  // Swatches em tempo real derivados dos inputs
+  // SKU e Swatches em tempo real derivados dos inputs
+  let previewSku = $derived(nome.trim() ? generateCorSku(nome) : '—')
   let hexSwatch = $derived(isValidHex(hex) ? hex : null)
   let labSwatch = $derived(labToHex(lab))
 
@@ -52,8 +54,9 @@
   }
 
   async function handleSubmit() {
-    if (!nome.trim()) {
-      erroMsg = 'O campo "Nome da cor" é obrigatório.'
+    const nomeValidation = validateCorNome(nome)
+    if (!nomeValidation.valid) {
+      erroMsg = nomeValidation.error || 'O campo "Nome da cor" deve conter exatamente 2 palavras.'
       return
     }
 
@@ -98,13 +101,21 @@
                 <span class="head-rule">Campos obrigatórios</span>
               {/if}
             </header>
-              <Grid cols={3} bare>
+              <Grid cols={4} bare>
                 <div class="field-cell">
                   <Label text="Nome da cor *" for="nome" />
                   <Input
                     id="nome"
                     bind:value={nome}
-                    placeholder="Ex: Amarelo Canário, Azul Royal"
+                    placeholder="Ex: Azul Marinho, Verde Militar"
+                  />
+                </div>
+                <div class="field-cell">
+                  <Label text="SKU (Automático)" for="sku-preview" />
+                  <Input
+                    id="sku-preview"
+                    value={previewSku}
+                    disabled
                   />
                 </div>
                 <div class="field-cell">

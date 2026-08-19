@@ -5,6 +5,7 @@
   import Input from '../../design-system/controls/Input.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
   import { formatHexInput, isValidHex, labToHex, hexToLab } from './utils'
+  import { generateCorSku, validateCorNome } from '../../../shared/sku'
   import type { CorRecord, UpdateCorInput } from '../../../shared/types'
 
   type Props = {
@@ -24,6 +25,11 @@
   let isSaving = $state(false)
   let showDeleteConfirm = $state(false)
 
+  // SKU e Swatches dinâmicos baseados no estado atual dos inputs
+  let previewSku = $derived(nome.trim() ? generateCorSku(nome) : cor.codigo || '—')
+  let hexSwatch = $derived(isValidHex(hex) ? hex : null)
+  let labSwatch = $derived(labToHex(lab))
+
   $effect(() => {
     if (cor.id !== currentCorId) {
       currentCorId = cor.id
@@ -34,10 +40,6 @@
       showDeleteConfirm = false
     }
   })
-
-  // Swatches dinâmicos baseados no estado atual dos inputs
-  let hexSwatch = $derived(isValidHex(hex) ? hex : null)
-  let labSwatch = $derived(labToHex(lab))
 
   function handleHexInput(e: Event) {
     const target = e.target as HTMLInputElement
@@ -65,8 +67,9 @@
   }
 
   async function handleSave() {
-    if (!nome.trim()) {
-      erroMsg = 'O campo "Nome da cor" é obrigatório.'
+    const nomeValidation = validateCorNome(nome)
+    if (!nomeValidation.valid) {
+      erroMsg = nomeValidation.error || 'O campo "Nome da cor" deve conter exatamente 2 palavras.'
       return
     }
 
@@ -136,6 +139,7 @@
                   style:background-color={isValidHex(hex) ? hex : cor.hex}
                 ></div>
                 <span>01. Identificação e Especificação da Cor</span>
+                <span class="cor-sku-tag">{previewSku}</span>
                 <span class="cor-hex-tag">{isValidHex(hex) ? hex : cor.hex}</span>
               </div>
               {#if erroMsg}
@@ -144,13 +148,21 @@
                 <span class="head-rule">Edição cadastral</span>
               {/if}
             </header>
-              <Grid cols={3} bare>
+              <Grid cols={4} bare>
                 <div class="field-cell">
                   <Label text="Nome da cor *" for="nome" />
                   <Input
                     id="nome"
                     bind:value={nome}
                     placeholder="Ex: Amarelo Canário"
+                  />
+                </div>
+                <div class="field-cell">
+                  <Label text="SKU" for="sku-info" />
+                  <Input
+                    id="sku-info"
+                    value={previewSku}
+                    disabled
                   />
                 </div>
                 <div class="field-cell">
@@ -259,6 +271,17 @@
     height: 20px;
     border: var(--border-width) solid var(--color-border-strong);
     box-sizing: border-box;
+  }
+
+  .cor-sku-tag {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-fg-muted);
+    font-weight: 700;
+    letter-spacing: var(--tracking-header);
+    background: var(--color-bg);
+    padding: 2px 6px;
+    border: var(--border-width) solid var(--color-border);
   }
 
   .cor-hex-tag {
