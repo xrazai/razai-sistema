@@ -6,6 +6,7 @@
   import AgenteModal from './components/AgenteModal.svelte'
   import AgenteConhecimentoView from './components/AgenteConhecimentoView.svelte'
   import AgentSimulatorModal from './components/AgentSimulatorModal.svelte'
+  import WebSessionModal from './components/WebSessionModal.svelte'
   import type { AgenteRecord } from '../../../shared/types'
 
   let agentes = $state<AgenteRecord[]>([])
@@ -14,6 +15,7 @@
   let editingAgente = $state<AgenteRecord | null>(null)
   let selectedAgenteForKnowledge = $state<AgenteRecord | null>(null)
   let selectedAgenteForTest = $state<AgenteRecord | null>(null)
+  let selectedAgenteForSession = $state<AgenteRecord | null>(null)
 
   async function loadAgentes() {
     isLoading = true
@@ -167,6 +169,15 @@
                   <Badge text={ag.ativo ? 'ONLINE' : 'OFFLINE'} tone={ag.ativo ? 'ok' : 'neutral'} />
                 </td>
                 <td class="actions-cell">
+                  {#if ag.canal === 'shopee' && ag.tipoConexao === 'web_session'}
+                    <button
+                      class="btn-action"
+                      onclick={() => (selectedAgenteForSession = ag)}
+                      title="Gerenciar Sessão e Login da Shopee"
+                    >
+                      🌐 SESSÃO
+                    </button>
+                  {/if}
                   <button
                     class="btn-action highlight"
                     onclick={() => (selectedAgenteForTest = ag)}
@@ -223,6 +234,13 @@
   <AgentSimulatorModal
     agente={selectedAgenteForTest}
     onclose={() => (selectedAgenteForTest = null)}
+  />
+{/if}
+
+{#if selectedAgenteForSession}
+  <WebSessionModal
+    agente={selectedAgenteForSession}
+    onclose={() => (selectedAgenteForSession = null)}
   />
 {/if}
 

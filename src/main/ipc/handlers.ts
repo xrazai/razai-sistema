@@ -12,6 +12,7 @@ import { exportTecidosCsv, exportCoresCsv, exportDatabase } from '../services/ba
 import { DiagnosticsService } from '../services/diagnostics.service'
 import { RelatoriosService } from '../services/relatorios.service'
 import { AgentesService } from '../services/agent/agentes.service'
+import { ShopeeSessionManager } from '../services/agent/ShopeeSessionManager'
 import { checkForUpdates, quitAndInstall, getUpdateStatus } from '../updater'
 import { logger } from '../logger'
 import type {
@@ -344,4 +345,24 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('agentes:gerarRespostaIa', async (_event, agenteId: string, pergunta: string, conversaId?: string) => {
     return AgentesService.gerarRespostaIa(agenteId, pergunta, conversaId)
   })
+
+  // Handlers para Shopee Web Session (Electron)
+  ipcMain.handle('agentes:shopee:abrirLogin', async () => {
+    return ShopeeSessionManager.abrirJanelaLogin()
+  })
+
+  ipcMain.handle('agentes:shopee:verificarStatus', async () => {
+    return ShopeeSessionManager.verificarStatus()
+  })
+
+  ipcMain.handle('agentes:shopee:limparSessao', async () => {
+    return ShopeeSessionManager.limparSessao()
+  })
+
+  ipcMain.handle(
+    'agentes:shopee:simularMensagem',
+    async (_event, agenteId: string, clienteNome: string, textoPergunta: string) => {
+      return ShopeeSessionManager.simularMensagemRecebida(agenteId, clienteNome, textoPergunta)
+    }
+  )
 }

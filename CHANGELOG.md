@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Driver de sessão Electron para Shopee Seller Centre com persistência e login isolado (Task 33)
+
 ## 2026-08-19 — Motor de IA com ContextBuilder de regras/FAQs e simulador de testes no renderer (Task 32)
 
 ## 2026-08-19 — Telas de Gestão de Agentes e Base de Conhecimento com editor de FAQs e regras (Task 31)

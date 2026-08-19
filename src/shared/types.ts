@@ -518,6 +518,14 @@ export type AgenteGerarRespostaResult = {
   fontes: string[]
 }
 
+export type ShopeeSessionStatus = {
+  conectado: boolean
+  shopNome?: string
+  shopId?: string
+  cookiesCount: number
+  ultimaVerificacao: string
+}
+
 export type AgentesApi = {
   list: () => Promise<AgenteRecord[]>
   getById: (id: string) => Promise<AgenteRecord | null>
@@ -535,6 +543,16 @@ export type AgentesApi = {
   aprovarSugestao: (mensagemId: string, textoEditado?: string) => Promise<AgenteMensagemRecord>
   rejeitarSugestao: (mensagemId: string) => Promise<boolean>
   gerarRespostaIa: (agenteId: string, pergunta: string, conversaId?: string) => Promise<AgenteGerarRespostaResult>
+  shopee: {
+    abrirLogin: () => Promise<void>
+    verificarStatus: () => Promise<ShopeeSessionStatus>
+    limparSessao: () => Promise<boolean>
+    simularMensagem: (
+      agenteId: string,
+      clienteNome: string,
+      textoPergunta: string
+    ) => Promise<{ conversaId: string; msgClienteId: string; msgSugestaoId: string; respostaIa: string; confianca: number }>
+  }
 }
 
 export type RazaiApi = {

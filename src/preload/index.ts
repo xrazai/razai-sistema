@@ -138,7 +138,14 @@ const api: RazaiApi = {
     rejeitarSugestao: (mensagemId: string) =>
       ipcRenderer.invoke('agentes:mensagens:rejeitar', mensagemId),
     gerarRespostaIa: (agenteId: string, pergunta: string, conversaId?: string) =>
-      ipcRenderer.invoke('agentes:gerarRespostaIa', agenteId, pergunta, conversaId)
+      ipcRenderer.invoke('agentes:gerarRespostaIa', agenteId, pergunta, conversaId),
+    shopee: {
+      abrirLogin: () => ipcRenderer.invoke('agentes:shopee:abrirLogin'),
+      verificarStatus: () => ipcRenderer.invoke('agentes:shopee:verificarStatus'),
+      limparSessao: () => ipcRenderer.invoke('agentes:shopee:limparSessao'),
+      simularMensagem: (agenteId: string, clienteNome: string, textoPergunta: string) =>
+        ipcRenderer.invoke('agentes:shopee:simularMensagem', agenteId, clienteNome, textoPergunta)
+    }
   }
 }
 
