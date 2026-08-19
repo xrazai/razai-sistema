@@ -49,8 +49,8 @@
     try {
       if (typeof window !== 'undefined' && window.razai) {
         const [vincList, tecList] = await Promise.all([
-          window.razai.vinculos.list(query),
-          window.razai.tecidos.list()
+          window.razai.vinculos?.list ? window.razai.vinculos.list(query) : Promise.resolve([]),
+          window.razai.tecidos?.list ? window.razai.tecidos.list() : Promise.resolve([])
         ])
         vinculos = vincList
         tecidos = tecList

@@ -37,8 +37,8 @@
     try {
       if (typeof window !== 'undefined' && window.razai) {
         const [tecList, corList] = await Promise.all([
-          window.razai.tecidos.list(),
-          window.razai.cores.list()
+          window.razai.tecidos?.list ? window.razai.tecidos.list() : Promise.resolve([]),
+          window.razai.cores?.list ? window.razai.cores.list() : Promise.resolve([])
         ])
         tecidos = tecList
         cores = corList
