@@ -43,7 +43,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 80px;
+    height: 76px;
     padding: var(--space-2) var(--space-3);
     background: var(--color-bg);
     box-shadow: inset 0 0 0 1px var(--color-border);
