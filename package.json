@@ -9,9 +9,10 @@
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "electron-vite build",
-    "build:win": "electron-vite build && electron-builder --win",
-    "package:win": "electron-vite build && electron-builder --win --dir",
+    "build:native": "dotnet publish native/windows-share/WindowsShare.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o resources/bin",
+    "build": "npm run build:native && electron-vite build",
+    "build:win": "npm run build:native && electron-vite build && electron-builder --win",
+    "package:win": "npm run build:native && electron-vite build && electron-builder --win --dir",
     "preview": "electron-vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run tests/unit",

@@ -1,12 +1,34 @@
-import { BrowserWindow, shell } from 'electron'
+import { BrowserWindow, shell, app } from 'electron'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import * as fs from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import * as path from 'node:path'
 import * as os from 'node:os'
 import type { PedidoRecord } from '../../../shared/types'
 
 const execFileAsync = promisify(execFile)
+
+function getWindowsShareBinaryPath(): string | null {
+  const possiblePaths = [
+    // 1. App empacotado: process.resourcesPath/bin/WindowsShare.exe
+    process.resourcesPath ? path.join(process.resourcesPath, 'bin/WindowsShare.exe') : '',
+    // 2. Recursos do projeto / workspace: resources/bin/WindowsShare.exe
+    path.resolve(process.cwd(), 'resources/bin/WindowsShare.exe'),
+    // 3. Caminho de compilação do .NET: native/windows-share/bin/...
+    path.resolve(process.cwd(), 'native/windows-share/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish/WindowsShare.exe'),
+    // 4. Fallback relativo ao app
+    path.resolve(__dirname, '../../resources/bin/WindowsShare.exe'),
+    path.resolve(__dirname, '../resources/bin/WindowsShare.exe')
+  ].filter(Boolean)
+
+  for (const p of possiblePaths) {
+    if (existsSync(p)) {
+      return p
+    }
+  }
+  return null
+}
 
 export class PdfService {
   /**
@@ -338,7 +360,7 @@ export class PdfService {
 
   /**
    * Abre o compartilhamento nativo do Windows (Windows Share Sheet) para o PDF do pedido,
-   * permitindo envio direto para WhatsApp, Outlook, Telegram, etc.
+   * permitindo envio direto para WhatsApp, Outlook, Telegram, etc. através do helper nativo Win32/WinRT.
    */
   static async sharePedidoPdf(pedido: PedidoRecord): Promise<{ ok: boolean; filePath?: string; error?: string }> {
     const res = await this.generatePedidoPdf(pedido)
@@ -346,55 +368,46 @@ export class PdfService {
       return res
     }
 
-    // No Windows, tenta invocar o Windows Share Sheet via IDataTransferManagerInterop
+    // No Windows, aciona o helper nativo .NET 8 com IDataTransferManagerInterop
     if (process.platform === 'win32') {
-      try {
-        const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
-        let hwnd = '0'
-        if (mainWindow) {
-          const hwndBuffer = mainWindow.getNativeWindowHandle()
-          hwnd =
-            hwndBuffer.length >= 8
-              ? hwndBuffer.readBigInt64LE(0).toString()
-              : hwndBuffer.length >= 4
-                ? hwndBuffer.readInt32LE(0).toString()
-                : '0'
-        }
-
-        let scriptPath = path.resolve(__dirname, 'services/pdf/share-window.ps1')
+      const helperExe = getWindowsShareBinaryPath()
+      if (helperExe) {
         try {
-          await fs.access(scriptPath)
-        } catch {
-          scriptPath = path.resolve(process.cwd(), 'src/main/services/pdf/share-window.ps1')
+          const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0]
+          let hwndStr = '0'
+          if (mainWindow) {
+            const hwndBuffer = mainWindow.getNativeWindowHandle()
+            hwndStr =
+              hwndBuffer.length >= 8
+                ? hwndBuffer.readBigInt64LE(0).toString()
+                : hwndBuffer.length >= 4
+                  ? hwndBuffer.readInt32LE(0).toString()
+                  : '0'
+          }
+
+          const numeroFormatado = `#PED-${String(pedido.numero).padStart(4, '0')}`
+          const shareTitle = `Pedido ${numeroFormatado} - ${pedido.clienteNome || 'Razai Sistema'}`
+
+          // Executa o binário .NET nativo com argumentos separados e seguros
+          const { stdout, stderr } = await execFileAsync(helperExe, [
+            '--file',
+            res.filePath,
+            '--title',
+            shareTitle,
+            '--hwnd',
+            hwndStr
+          ])
+
+          if (stdout && stdout.includes('OK')) {
+            return { ok: true, filePath: res.filePath }
+          }
+
+          if (stderr && stderr.trim().length > 0) {
+            console.warn('[PdfService] Aviso do helper WindowsShare:', stderr)
+          }
+        } catch (err: any) {
+          console.warn('[PdfService] Falha ao acionar helper nativo WindowsShare, acionando fallback:', err?.message)
         }
-
-        const numeroFormatado = `#PED-${String(pedido.numero).padStart(4, '0')}`
-        const shareTitle = `Pedido ${numeroFormatado} - ${pedido.clienteNome || 'Razai Sistema'}`
-
-        const { stdout, stderr } = await execFileAsync('powershell.exe', [
-          '-NoProfile',
-          '-NonInteractive',
-          '-ExecutionPolicy',
-          'Bypass',
-          '-File',
-          scriptPath,
-          '-FilePath',
-          res.filePath,
-          '-Title',
-          shareTitle,
-          '-Hwnd',
-          hwnd
-        ])
-
-        if (stdout.includes('OK')) {
-          return { ok: true, filePath: res.filePath }
-        }
-
-        if (stderr && stderr.trim().length > 0) {
-          console.warn('[PdfService] Aviso no Share Sheet nativo:', stderr)
-        }
-      } catch (err: any) {
-        console.warn('[PdfService] Falha ao acionar Windows Share Sheet, abrindo fallback nativo:', err?.message)
       }
     }
 
