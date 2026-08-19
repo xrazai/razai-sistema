@@ -2,6 +2,11 @@ appId: com.razai.sistema
 productName: Razai Sistema
 copyright: Copyright © 2026 Razai
 
+publish:
+  provider: github
+  owner: xrazai
+  repo: razai-sistema
+
 directories:
   output: dist
   buildResources: resources

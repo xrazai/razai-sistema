@@ -266,6 +266,46 @@ export type DiagnosticsApi = {
   getMetrics: () => Promise<SystemMetrics>
 }
 
+export type UpdateStatus =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'not-available'
+  | 'downloading'
+  | 'downloaded'
+  | 'error'
+
+export type UpdateProgress = {
+  percent: number
+  bytesPerSecond: number
+  transferred: number
+  total: number
+}
+
+export type UpdateInfo = {
+  status: UpdateStatus
+  version?: string
+  currentVersion?: string
+  releaseDate?: string
+  releaseNotes?: string
+  progress?: UpdateProgress
+  error?: string
+}
+
+export type UpdaterCheckResult = {
+  ok: boolean
+  status: UpdateStatus
+  version?: string
+  error?: string
+}
+
+export type UpdaterApi = {
+  check: () => Promise<UpdaterCheckResult>
+  install: () => Promise<void>
+  getStatus: () => Promise<UpdateInfo>
+  onStatusChange: (callback: (info: UpdateInfo) => void) => () => void
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
@@ -278,6 +318,7 @@ export type RazaiApi = {
   printer: PrinterApi
   backup: BackupApi
   diagnostics: DiagnosticsApi
+  updater: UpdaterApi
 }
 
 declare global {

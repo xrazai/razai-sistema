@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs'
 import { openDatabase, closeDatabase } from './database/db'
 import { registerIpcHandlers } from './ipc/handlers'
 import { setupAppMenu } from './menu'
+import { initAutoUpdater } from './updater'
 import { logger } from './logger'
 
 // Define identificador único e exclusivo no Windows para isolamento na barra de tarefas, notificações e processos
@@ -75,6 +76,7 @@ app.whenReady().then(() => {
   registerIpcHandlers()
   createWindow()
   logger.info('Janela principal criada.')
+  initAutoUpdater(true)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

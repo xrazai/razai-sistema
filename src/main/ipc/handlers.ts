@@ -10,6 +10,7 @@ import { SettingsService } from '../services/settings.service'
 import { PrinterService } from '../services/printer/printer.service'
 import { exportTecidosCsv, exportCoresCsv, exportDatabase } from '../services/backup.service'
 import { DiagnosticsService } from '../services/diagnostics.service'
+import { checkForUpdates, quitAndInstall, getUpdateStatus } from '../updater'
 import { logger } from '../logger'
 import type {
   CreateTecidoInput,
@@ -236,5 +237,18 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('diagnostics:getMetrics', async () => {
     return DiagnosticsService.getMetrics()
+  })
+
+  // Handlers para Atualizações Automáticas (electron-updater)
+  ipcMain.handle('updater:check', async () => {
+    return checkForUpdates()
+  })
+
+  ipcMain.handle('updater:install', async () => {
+    return quitAndInstall()
+  })
+
+  ipcMain.handle('updater:getStatus', async () => {
+    return getUpdateStatus()
   })
 }

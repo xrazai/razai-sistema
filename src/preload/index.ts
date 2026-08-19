@@ -3,6 +3,7 @@ import type {
   AppInfo,
   DbHealth,
   RazaiApi,
+  UpdateInfo,
   CreateTecidoInput,
   UpdateTecidoInput,
   CreateCorInput,
@@ -79,6 +80,18 @@ const api: RazaiApi = {
     getLogs: (limit?: number) => ipcRenderer.invoke('diagnostics:getLogs', limit),
     clearLogs: () => ipcRenderer.invoke('diagnostics:clearLogs'),
     getMetrics: () => ipcRenderer.invoke('diagnostics:getMetrics')
+  },
+  updater: {
+    check: () => ipcRenderer.invoke('updater:check'),
+    install: () => ipcRenderer.invoke('updater:install'),
+    getStatus: () => ipcRenderer.invoke('updater:getStatus'),
+    onStatusChange: (callback: (info: UpdateInfo) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, info: UpdateInfo) => callback(info)
+      ipcRenderer.on('updater:status-changed', listener)
+      return () => {
+        ipcRenderer.removeListener('updater:status-changed', listener)
+      }
+    }
   }
 }
 
