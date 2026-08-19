@@ -3,6 +3,7 @@ import { getDb } from '../database/db'
 import { TecidosService } from '../services/tecidos.service'
 import { CoresService } from '../services/cores.service'
 import { SettingsService } from '../services/settings.service'
+import { PrinterService } from '../services/printer/printer.service'
 import type {
   AppInfo,
   DbHealth,
@@ -96,5 +97,14 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('settings:delete', (_event, key: string) => {
     return SettingsService.delete(key)
+  })
+
+  // Handlers para Impressão Térmica ESC/POS
+  ipcMain.handle('printer:list', async () => {
+    return PrinterService.listPrinters()
+  })
+
+  ipcMain.handle('printer:printTest', async (_event, printerName?: string) => {
+    return PrinterService.printTestReceipt(printerName)
   })
 }
