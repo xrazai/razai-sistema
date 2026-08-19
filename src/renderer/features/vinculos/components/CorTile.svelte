@@ -23,14 +23,14 @@
   aria-pressed={selected}
 >
   <div class="tile-head">
-    <div class="color-head-group">
-      <span class="swatch" style="background-color: {cor.hex};"></span>
-      <span class="cor-name" title={cor.nome}>{cor.nome}</span>
-    </div>
+    <span class="cor-name" title={cor.nome}>{cor.nome}</span>
 
-    {#if alreadyLinked}
-      <span class="linked-badge">JÁ VINCULADO</span>
-    {/if}
+    <div class="head-right">
+      {#if alreadyLinked}
+        <span class="linked-badge">JÁ VINCULADO</span>
+      {/if}
+      <span class="swatch" style="background-color: {cor.hex};" title={cor.hex}></span>
+    </div>
   </div>
 
   <div class="tile-foot">
@@ -83,23 +83,6 @@
     line-height: 100%;
   }
 
-  .color-head-group {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    line-height: 100%;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: var(--radius-sm);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 0 1px var(--color-border);
-    flex-shrink: 0;
-  }
-
   .cor-name {
     font-size: var(--text-xs);
     font-weight: 700;
@@ -108,6 +91,24 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .head-right {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    line-height: 100%;
+    flex-shrink: 0;
+  }
+
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-sm);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 0 1px var(--color-border);
+    flex-shrink: 0;
   }
 
   .linked-badge {
