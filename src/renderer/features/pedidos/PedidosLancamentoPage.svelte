@@ -338,11 +338,11 @@
       <div class="inputs-toolbar">
         <div class="inputs-row">
           <div class="input-field">
-            <Label text="Preço Unit. (R$/m) *" for="input-preco-pedido" />
+            <Label text="Preço Unitário (R$) *" for="input-preco-pedido" />
             <Input id="input-preco-pedido" bind:value={precoInput} placeholder="45,00" />
           </div>
           <div class="input-field">
-            <Label text="Quantidade (m) *" for="input-qtd-pedido" />
+            <Label text="Quantidade *" for="input-qtd-pedido" />
             <Input id="input-qtd-pedido" bind:value={quantidadeInput} placeholder="1,00" />
           </div>
         </div>
@@ -371,7 +371,7 @@
           <div class="carrinho-empty">
             <Icon name="orders" size="md" />
             <span class="empty-title">Nenhum item lançado</span>
-            <span class="empty-sub">Selecione tecido e cor, insira preço e metragem e clique em '+ Registrar Item'.</span>
+            <span class="empty-sub">Selecione tecido e cor, insira preço e quantidade e clique em '+ Registrar Item'.</span>
           </div>
         {:else}
           <div class="itens-list">
@@ -384,7 +384,7 @@
                   </div>
                   <div class="item-desc">{item.tecidoNome} — {item.corNome}</div>
                   <div class="item-math">
-                    {item.quantidade}m × {formatCurrency(item.precoUnitario)}
+                    {item.quantidade.toFixed(2).replace('.', ',')} × {formatCurrency(item.precoUnitario)}
                   </div>
                 </div>
 
@@ -424,8 +424,8 @@
             <span class="metric-val">{itensLancados.length}</span>
           </div>
           <div class="total-metric">
-            <span class="metric-label">Metragem Total</span>
-            <span class="metric-val">{totalMetragem.toFixed(2).replace('.', ',')} m</span>
+            <span class="metric-label">Quantidade Total</span>
+            <span class="metric-val">{totalMetragem.toFixed(2).replace('.', ',')}</span>
           </div>
           <div class="total-metric highlight">
             <span class="metric-label">Valor Total</span>

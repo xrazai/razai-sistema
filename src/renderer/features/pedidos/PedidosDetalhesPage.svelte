@@ -244,7 +244,7 @@
                 <th style="width: 35px; text-align: center;">#</th>
                 <th style="width: 150px;">SKU</th>
                 <th>Tecido & Cor</th>
-                <th style="width: 110px; text-align: right;">Quantidade (m)</th>
+                <th style="width: 110px; text-align: right;">Quantidade</th>
                 <th style="width: 120px; text-align: right;">Preço Unit. (R$)</th>
                 <th style="width: 120px; text-align: right;">Subtotal</th>
                 <th style="width: 60px; text-align: center;">Remover</th>
@@ -300,8 +300,8 @@
             <strong>{itens.length} itens</strong>
           </div>
           <div class="tot-item">
-            <span>Metragem Total:</span>
-            <strong>{totalMetragem.toFixed(2).replace('.', ',')} m</strong>
+            <span>Quantidade Total:</span>
+            <strong>{totalMetragem.toFixed(2).replace('.', ',')}</strong>
           </div>
           <div class="tot-item major">
             <span>Valor Total Geral:</span>

@@ -346,11 +346,11 @@
       <div class="inputs-toolbar">
         <div class="inputs-row">
           <div class="input-field">
-            <Label text="Preço Unit. (R$/m) *" for="input-preco" />
+            <Label text="Preço Unitário (R$) *" for="input-preco" />
             <Input id="input-preco" bind:value={precoInput} placeholder="45,00" />
           </div>
           <div class="input-field">
-            <Label text="Quantidade (m) *" for="input-qtd" />
+            <Label text="Quantidade *" for="input-qtd" />
             <Input id="input-qtd" bind:value={quantidadeInput} placeholder="1,00" />
           </div>
         </div>
@@ -392,7 +392,7 @@
                   </div>
                   <div class="item-desc">{item.tecidoNome} — {item.corNome}</div>
                   <div class="item-math">
-                    {item.quantidade}m × {formatCurrency(item.precoUnitario)}
+                    {item.quantidade.toFixed(2).replace('.', ',')} × {formatCurrency(item.precoUnitario)}
                   </div>
                 </div>
 
@@ -432,8 +432,8 @@
             <span class="metric-val">{itensLancados.length}</span>
           </div>
           <div class="total-metric">
-            <span class="metric-label">Metragem Total</span>
-            <span class="metric-val">{totalMetragem.toFixed(2).replace('.', ',')} m</span>
+            <span class="metric-label">Quantidade Total</span>
+            <span class="metric-val">{totalMetragem.toFixed(2).replace('.', ',')}</span>
           </div>
           <div class="total-metric highlight">
             <span class="metric-label">Valor Total</span>

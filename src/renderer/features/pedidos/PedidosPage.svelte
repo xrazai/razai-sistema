@@ -81,7 +81,7 @@
     { key: 'status', label: 'Status', width: '120px', align: 'center' },
     { key: 'clienteNome', label: 'Cliente' },
     { key: 'itensCount', label: 'Itens', width: '90px', align: 'center' },
-    { key: 'quantidadeTotal', label: 'Metragem', width: '110px', align: 'right' },
+    { key: 'quantidadeTotal', label: 'Quantidade', width: '110px', align: 'right' },
     { key: 'valorTotal', label: 'Valor Total', width: '140px', align: 'right' },
     { key: 'actions', label: 'Ações', width: '160px', align: 'center' }
   ]
@@ -253,7 +253,7 @@
               {:else if column.key === 'itensCount'}
                 <Badge text={`${value} itens`} tone="neutral" />
               {:else if column.key === 'quantidadeTotal'}
-                <span class="mono-val">{Number(value).toFixed(2).replace('.', ',')} m</span>
+                <span class="mono-val">{Number(value).toFixed(2).replace('.', ',')}</span>
               {:else if column.key === 'valorTotal'}
                 <span class="mono-price">{formatCurrency(Number(value))}</span>
               {:else if column.key === 'actions'}

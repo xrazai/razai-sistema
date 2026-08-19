@@ -99,7 +99,7 @@
             <div class="item-details">
               <span class="mono-sku">{item.sku}</span>
               <span class="item-math">
-                {item.quantidade}m × {formatCurrency(item.precoUnitario)} = <strong>{formatCurrency(item.subtotal)}</strong>
+                {item.quantidade.toFixed(2).replace('.', ',')} × {formatCurrency(item.precoUnitario)} = <strong>{formatCurrency(item.subtotal)}</strong>
               </span>
             </div>
           </div>
@@ -114,8 +114,8 @@
           <span>{venda.itensCount} itens</span>
         </div>
         <div class="receipt-row">
-          <span>METRAGEM TOTAL:</span>
-          <span>{venda.quantidadeTotal.toFixed(2).replace('.', ',')} m</span>
+          <span>QUANTIDADE TOTAL:</span>
+          <span>{venda.quantidadeTotal.toFixed(2).replace('.', ',')}</span>
         </div>
         <div class="receipt-divider">================================================</div>
         <div class="receipt-total-major">

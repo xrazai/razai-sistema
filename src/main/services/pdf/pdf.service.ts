@@ -23,7 +23,7 @@ export class PdfService {
           <td style="width: 170px; font-weight: 700;">${item.sku}</td>
           <td>${item.tecidoNome}</td>
           <td>${item.corNome}</td>
-          <td style="width: 80px; text-align: right;">${item.quantidade.toFixed(2).replace('.', ',')} m</td>
+          <td style="width: 80px; text-align: right;">${item.quantidade.toFixed(2).replace('.', ',')}</td>
           <td style="width: 100px; text-align: right;">${formatCurrency(item.precoUnitario)}</td>
           <td style="width: 110px; text-align: right; font-weight: 700;">${formatCurrency(item.subtotal)}</td>
         </tr>
@@ -232,7 +232,7 @@ export class PdfService {
               <th>SKU Produto</th>
               <th>Tecido</th>
               <th>Cor</th>
-              <th style="text-align: right;">Metragem</th>
+              <th style="text-align: right;">Qtd.</th>
               <th style="text-align: right;">Preço Unit.</th>
               <th style="text-align: right;">Subtotal</th>
             </tr>
@@ -248,8 +248,8 @@ export class PdfService {
             <span class="total-box-val" style="font-size: 12px;">${pedido.itensCount} itens</span>
           </div>
           <div class="total-box">
-            <span class="total-box-label">Metragem Total</span>
-            <span class="total-box-val" style="font-size: 12px;">${pedido.quantidadeTotal.toFixed(2).replace('.', ',')} m</span>
+            <span class="total-box-label">Quantidade Total</span>
+            <span class="total-box-val" style="font-size: 12px;">${pedido.quantidadeTotal.toFixed(2).replace('.', ',')}</span>
           </div>
           <div class="total-box">
             <span class="total-box-label">Valor Total do Pedido</span>

@@ -75,19 +75,19 @@ describe('PdfService — Geração de PDF e Design Brutalista A4', () => {
     expect(html).toContain('Ateliê Alta Costura')
   })
 
-  it('deve renderizar todas as linhas de itens com SKUs compostos, metragens e subtotais', () => {
+  it('deve renderizar todas as linhas de itens com SKUs compostos, quantidades e subtotais', () => {
     const html = PdfService.generatePedidoHtml(basePedido)
 
     expect(html).toContain('TRAL-PRETABSO')
     expect(html).toContain('Tricoline Lisa 100% Algodão')
     expect(html).toContain('Preto Absoluto')
-    expect(html).toContain('15,00 m')
+    expect(html).toContain('15,00')
     expect(html).toContain('R$ 750,00')
 
     expect(html).toContain('CETI-BRANPURO')
     expect(html).toContain('Cetim Especial')
     expect(html).toContain('Branco Puro')
-    expect(html).toContain('10,00 m')
+    expect(html).toContain('10,00')
     expect(html).toContain('R$ 500,00')
   })
 
@@ -95,7 +95,7 @@ describe('PdfService — Geração de PDF e Design Brutalista A4', () => {
     const html = PdfService.generatePedidoHtml(basePedido)
 
     expect(html).toContain('2 itens')
-    expect(html).toContain('25,00 m')
+    expect(html).toContain('25,00')
     expect(html).toContain('R$ 1.250,00')
     expect(html).toContain('Entregar na portaria B às 14h')
   })

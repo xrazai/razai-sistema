@@ -203,7 +203,7 @@ export class PrinterService {
           .line(itemDesc.length > 48 ? itemDesc.substring(0, 48) : itemDesc)
           .table4Columns(
             item.sku,
-            `${item.quantidade}m`,
+            item.quantidade.toFixed(2).replace('.', ','),
             item.precoUnitario.toFixed(2).replace('.', ','),
             item.subtotal.toFixed(2).replace('.', ',')
           )
@@ -213,7 +213,7 @@ export class PrinterService {
     builder
       .divider('-')
       .twoColumns('TOTAL DE ITENS:', `${venda.itensCount} itens`)
-      .twoColumns('METRAGEM TOTAL:', `${venda.quantidadeTotal} m`)
+      .twoColumns('QUANTIDADE TOTAL:', venda.quantidadeTotal.toFixed(2).replace('.', ','))
       .divider('-')
       .bold(true)
       .size(2, 1)
