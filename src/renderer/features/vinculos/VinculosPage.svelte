@@ -226,11 +226,8 @@
                   onclick={() => (selectedTecidoId = item.tecido.id)}
                 >
                   <div class="row-main">
-                    <div class="row-title-line">
-                      <span class="sku-code">{item.tecido.codigo}</span>
-                      <span class="tecido-name">{item.tecido.nome}</span>
-                    </div>
-                    <span class="tecido-comp">{item.tecido.composicao}</span>
+                    <span class="sku-code">{item.tecido.codigo}</span>
+                    <span class="tecido-name">{item.tecido.nome}</span>
                   </div>
 
                   <div class="row-badge">
@@ -516,13 +513,16 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    min-height: 48px;
+    padding: 0 var(--space-3);
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
     background: var(--color-bg);
     box-shadow: inset 0 -1px 0 0 var(--color-border);
     border: none;
     text-align: left;
     cursor: pointer;
+    box-sizing: border-box;
     line-height: 100%;
     transition: background var(--motion-fast);
   }
@@ -538,17 +538,11 @@
 
   .row-main {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-    line-height: 100%;
-  }
-
-  .row-title-line {
-    display: flex;
     align-items: center;
     gap: var(--space-2);
+    min-width: 0;
     line-height: 100%;
+    flex: 1;
   }
 
   .sku-code {
@@ -557,21 +551,13 @@
     font-weight: 700;
     color: var(--color-accent);
     line-height: 100%;
+    flex-shrink: 0;
   }
 
   .tecido-name {
     font-size: var(--text-xs);
     font-weight: 600;
     color: var(--color-fg);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 100%;
-  }
-
-  .tecido-comp {
-    font-size: 11px;
-    color: var(--color-fg-dim);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
