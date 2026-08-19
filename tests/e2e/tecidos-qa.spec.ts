@@ -15,7 +15,7 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
 
   test.beforeAll(async () => {
     // Cria diretório temporário totalmente isolado para o banco de dados do teste
-    tempDir = mkdtempSync(join(tmpdir(), 'razai-e2e-'))
+    tempDir = mkdtempSync(join(tmpdir(), 'razai-e2e-tecidos-'))
     tempDbPath = join(tempDir, 'razai-test.sqlite')
 
     app = await electron.launch({
@@ -50,15 +50,15 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     const navTecidos = page.locator('.nav-item', { hasText: 'Tecidos' })
     await navTecidos.click()
 
-    // Verifica que o painel de Tecidos está visível
-    await expect(page.locator('.panel .title', { hasText: 'Tecidos' })).toBeVisible()
+    // Verifica que a Topbar exibe o título Tecidos
+    await expect(page.locator('.topbar .title')).toHaveText(/Tecidos/i)
 
-    // Verifica botão de ação para cadastrar
+    // Verifica botão de ação para cadastrar na Topbar
     const btnCadastrar = page.getByRole('button', { name: /Cadastrar Tecido/i })
     await expect(btnCadastrar).toBeVisible()
 
     // Verifica presença do campo de busca e da tabela
-    await expect(page.locator('input[placeholder*="Buscar por SKU"]')).toBeVisible()
+    await expect(page.locator('input.search-input')).toBeVisible()
     await expect(page.locator('.table-container table')).toBeVisible()
 
     // Verifica colunas técnicas obrigatórias
@@ -72,12 +72,12 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
   })
 
   test('Flow 2: Busca em tempo real e insensível a acentos (Unaccented)', async () => {
-    const searchInput = page.locator('input[placeholder*="Buscar por SKU"]')
+    const searchInput = page.locator('input.search-input')
     await expect(searchInput).toBeVisible()
 
     // Busca por termo inexistente para validar filtragem e estado vazio
     await searchInput.fill('TERMO_INEXISTENTE_XYZ')
-    await page.waitForTimeout(200)
+    await page.waitForTimeout(300)
     await expect(page.getByText(/Nenhum tecido encontrado/i)).toBeVisible()
 
     // Limpa a busca pelo botão '✕' ou limpando o input
@@ -87,7 +87,7 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     } else {
       await searchInput.fill('')
     }
-    await page.waitForTimeout(200)
+    await page.waitForTimeout(300)
 
     // Tabela volta ao estado normal
     await expect(page.locator('.table-container table')).toBeVisible()
@@ -97,31 +97,31 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     // Clica em "Cadastrar Tecido"
     await page.getByRole('button', { name: /Cadastrar Tecido/i }).click()
 
-    // Verifica breadcrumb
-    await expect(page.getByText('Cadastro de Tecido')).toBeVisible()
+    // Verifica que está na rota de cadastro
+    await expect(page.locator('.topbar .title')).toHaveText(/Tecidos \/ Cadastro/i)
 
     // Tenta salvar com formulário vazio
-    await page.getByRole('button', { name: /Salvar Tecido/i }).first().click()
+    await page.getByRole('button', { name: /Salvar Tecido/i }).click()
     await expect(page.getByText('O campo Nome é obrigatório.')).toBeVisible()
 
     // Preenche nome e tenta salvar sem composição
     await page.locator('#nome').fill('Veludo Cristal')
-    await page.getByRole('button', { name: /Salvar Tecido/i }).first().click()
+    await page.getByRole('button', { name: /Salvar Tecido/i }).click()
     await expect(page.getByText('O campo Composição é obrigatório.')).toBeVisible()
 
     // Preenche composição e tenta salvar sem largura
     await page.locator('#composicao').fill('100% Poliamida')
-    await page.getByRole('button', { name: /Salvar Tecido/i }).first().click()
+    await page.getByRole('button', { name: /Salvar Tecido/i }).click()
     await expect(page.getByText('O campo Largura (m) é obrigatório')).toBeVisible()
 
     // Preenche largura sem grandezas secundárias
     await page.locator('#largura').fill('1,45')
-    await page.getByRole('button', { name: /Salvar Tecido/i }).first().click()
+    await page.getByRole('button', { name: /Salvar Tecido/i }).click()
     await expect(page.getByText(/Preencha ao menos mais um dado numérico/i)).toBeVisible()
 
     // Cancela o cadastro para retornar à lista
-    await page.getByRole('button', { name: /Voltar para Lista/i }).click()
-    await expect(page.locator('.panel .title', { hasText: 'Tecidos' })).toBeVisible()
+    await page.getByRole('button', { name: /Cancelar/i }).click()
+    await expect(page.locator('.topbar .title')).toHaveText('Tecidos')
   })
 
   test('Flow 4: Cadastro completo com auto-cálculo e geração de SKU', async () => {
@@ -152,10 +152,10 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     await page.locator('#acabamento').selectOption('fosco')
 
     // Salva o novo tecido
-    await page.getByRole('button', { name: /Salvar Tecido/i }).first().click()
+    await page.getByRole('button', { name: /Salvar Tecido/i }).click()
 
     // Confirma retorno para a listagem
-    await expect(page.locator('.panel .title', { hasText: 'Tecidos' })).toBeVisible()
+    await expect(page.locator('.topbar .title')).toHaveText('Tecidos')
 
     // Verifica que o novo tecido está listado na tabela com o nome único
     const tableArea = page.locator('.table-container')
@@ -168,25 +168,27 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     await tableArea.getByText(fabricName).click()
 
     // Verifica tela de detalhes
-    await expect(page.getByText(new RegExp(`Detalhes:.*${fabricName}`, 'i'))).toBeVisible()
+    await expect(page.locator('.topbar .title')).toHaveText(/Tecidos \/ Detalhes/i)
+    await expect(page.locator('#nome')).toHaveValue(fabricName)
 
     // Edita o nome
     await page.locator('#nome').fill(fabricNameEdited)
 
-    // O código de exibição preliminar deve recalcular
+    // O código de exibição preliminar deve estar visível
     await expect(page.locator('.code-badge')).toBeVisible()
 
     // Salva alterações
-    await page.getByRole('button', { name: /Salvar Alterações/i }).first().click()
+    await page.getByRole('button', { name: /Salvar Alterações/i }).click()
 
     // Retorna para a tabela e verifica atualização
+    await expect(page.locator('.topbar .title')).toHaveText('Tecidos')
     await expect(tableArea.getByText(fabricNameEdited)).toBeVisible()
 
     // Entra novamente nos detalhes para excluir
     await tableArea.getByText(fabricNameEdited).click()
-    await expect(page.getByText(new RegExp(`Detalhes:.*${fabricNameEdited}`, 'i'))).toBeVisible()
+    await expect(page.locator('.topbar .title')).toHaveText(/Tecidos \/ Detalhes/i)
 
-    // Clica em Excluir Tecido -> Deve solicitar confirmação
+    // Clica em Excluir Tecido -> Abre modal de confirmação
     await page.getByRole('button', { name: /Excluir Tecido/i }).click()
     const btnConfirmar = page.getByRole('button', { name: /Confirmar Exclusão/i })
     await expect(btnConfirmar).toBeVisible()
@@ -195,7 +197,7 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     await btnConfirmar.click()
 
     // Retorna para a lista e valida que o item foi excluído
-    await expect(page.locator('.panel .title', { hasText: 'Tecidos' })).toBeVisible()
+    await expect(page.locator('.topbar .title')).toHaveText('Tecidos')
     await expect(tableArea.getByText(fabricNameEdited)).not.toBeVisible()
   })
 })
