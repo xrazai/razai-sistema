@@ -123,12 +123,113 @@ export type VinculosApi = {
   deleteByTecidoAndCor: (tecidoId: string, corId: string) => Promise<boolean>
 }
 
+export type ItemLancamentoInput = {
+  tecidoId: string
+  corId: string
+  vinculoId?: string
+  sku: string
+  tecidoNome: string
+  tecidoCodigo: string
+  corNome: string
+  corCodigo: string
+  corHex?: string
+  precoUnitario: number
+  quantidade: number
+  subtotal: number
+}
+
+export type VendaItemRecord = ItemLancamentoInput & {
+  id: string
+  vendaId: string
+  createdAt: string
+}
+
+export type VendaRecord = {
+  id: string
+  numero: number
+  pedidoOrigemId?: string | null
+  clienteNome?: string | null
+  valorTotal: number
+  quantidadeTotal: number
+  itensCount: number
+  formaPagamento?: string | null
+  observacoes?: string | null
+  createdAt: string
+  updatedAt: string
+  itens?: VendaItemRecord[]
+}
+
+export type CreateVendaInput = {
+  clienteNome?: string
+  pedidoOrigemId?: string
+  formaPagamento?: string
+  observacoes?: string
+  itens: ItemLancamentoInput[]
+}
+
+export type VendasApi = {
+  list: (search?: string) => Promise<VendaRecord[]>
+  getById: (id: string) => Promise<VendaRecord | null>
+  create: (input: CreateVendaInput) => Promise<VendaRecord>
+  delete: (id: string) => Promise<boolean>
+  imprimirCupom: (vendaId: string, printerName?: string) => Promise<{ ok: boolean; error?: string }>
+}
+
+export type PedidoItemRecord = ItemLancamentoInput & {
+  id: string
+  pedidoId: string
+  createdAt: string
+}
+
+export type PedidoStatus = 'pendente' | 'aprovado' | 'cancelado'
+
+export type PedidoRecord = {
+  id: string
+  numero: number
+  clienteNome?: string | null
+  status: PedidoStatus
+  valorTotal: number
+  quantidadeTotal: number
+  itensCount: number
+  observacoes?: string | null
+  vendaGeradaId?: string | null
+  createdAt: string
+  updatedAt: string
+  itens?: PedidoItemRecord[]
+}
+
+export type CreatePedidoInput = {
+  clienteNome?: string
+  observacoes?: string
+  itens: ItemLancamentoInput[]
+}
+
+export type UpdatePedidoInput = {
+  clienteNome?: string
+  observacoes?: string
+  status?: PedidoStatus
+  itens?: ItemLancamentoInput[]
+}
+
+export type PedidosApi = {
+  list: (search?: string) => Promise<PedidoRecord[]>
+  getById: (id: string) => Promise<PedidoRecord | null>
+  create: (input: CreatePedidoInput) => Promise<PedidoRecord>
+  update: (id: string, input: UpdatePedidoInput) => Promise<PedidoRecord>
+  delete: (id: string) => Promise<boolean>
+  aprovar: (id: string) => Promise<{ pedido: PedidoRecord; venda: VendaRecord }>
+  gerarPdf: (id: string) => Promise<{ ok: boolean; filePath?: string; error?: string }>
+  compartilhar: (id: string) => Promise<{ ok: boolean; filePath?: string; error?: string }>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
   tecidos: TecidosApi
   cores: CoresApi
   vinculos: VinculosApi
+  vendas: VendasApi
+  pedidos: PedidosApi
   settings: SettingsApi
   printer: PrinterApi
 }

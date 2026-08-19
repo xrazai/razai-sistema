@@ -3,16 +3,20 @@ import { getDb } from '../database/db'
 import { TecidosService } from '../services/tecidos.service'
 import { CoresService } from '../services/cores.service'
 import { VinculosService } from '../services/vinculos.service'
+import { VendasService } from '../services/vendas.service'
+import { PedidosService } from '../services/pedidos.service'
+import { PdfService } from '../services/pdf/pdf.service'
 import { SettingsService } from '../services/settings.service'
 import { PrinterService } from '../services/printer/printer.service'
 import type {
-  AppInfo,
-  DbHealth,
   CreateTecidoInput,
   UpdateTecidoInput,
   CreateCorInput,
   UpdateCorInput,
-  CreateVinculosInput
+  CreateVinculosInput,
+  CreateVendaInput,
+  CreatePedidoInput,
+  UpdatePedidoInput
 } from '../../shared/types'
 
 export function registerIpcHandlers(): void {
@@ -103,6 +107,72 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('vinculos:deleteByTecidoAndCor', (_event, tecidoId: string, corId: string) => {
     return VinculosService.deleteByTecidoAndCor(tecidoId, corId)
+  })
+
+  // Handlers para Vendas
+  ipcMain.handle('vendas:list', (_event, search?: string) => {
+    return VendasService.list(search)
+  })
+
+  ipcMain.handle('vendas:getById', (_event, id: string) => {
+    return VendasService.getById(id)
+  })
+
+  ipcMain.handle('vendas:create', (_event, input: CreateVendaInput) => {
+    return VendasService.create(input)
+  })
+
+  ipcMain.handle('vendas:delete', (_event, id: string) => {
+    return VendasService.delete(id)
+  })
+
+  ipcMain.handle('vendas:imprimirCupom', async (_event, vendaId: string, printerName?: string) => {
+    const venda = VendasService.getById(vendaId)
+    if (!venda) {
+      return { ok: false, error: 'Venda não encontrada' }
+    }
+    return PrinterService.printSaleReceipt(venda, printerName)
+  })
+
+  // Handlers para Pedidos
+  ipcMain.handle('pedidos:list', (_event, search?: string) => {
+    return PedidosService.list(search)
+  })
+
+  ipcMain.handle('pedidos:getById', (_event, id: string) => {
+    return PedidosService.getById(id)
+  })
+
+  ipcMain.handle('pedidos:create', (_event, input: CreatePedidoInput) => {
+    return PedidosService.create(input)
+  })
+
+  ipcMain.handle('pedidos:update', (_event, id: string, input: UpdatePedidoInput) => {
+    return PedidosService.update(id, input)
+  })
+
+  ipcMain.handle('pedidos:delete', (_event, id: string) => {
+    return PedidosService.delete(id)
+  })
+
+  ipcMain.handle('pedidos:aprovar', (_event, id: string) => {
+    return PedidosService.aprovar(id)
+  })
+
+  ipcMain.handle('pedidos:gerarPdf', async (_event, id: string) => {
+    const pedido = PedidosService.getById(id)
+    if (!pedido) {
+      return { ok: false, error: 'Pedido não encontrado' }
+    }
+    return PdfService.generatePedidoPdf(pedido)
+  })
+
+  ipcMain.handle('pedidos:compartilhar', async (_event, id: string) => {
+    const pedido = PedidosService.getById(id)
+    if (!pedido) {
+      return { ok: false, error: 'Pedido não encontrado' }
+    }
+    return PdfService.sharePedidoPdf(pedido)
   })
 
   // Handlers para Preferências e Configurações (app_meta)

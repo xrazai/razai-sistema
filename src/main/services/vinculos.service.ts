@@ -88,25 +88,27 @@ export class VinculosService {
 
   static listByTecido(tecidoId: string): VinculoRecord[] {
     const db = getDb()
+    const targetId = String(tecidoId).trim()
     const rows = db
       .prepare(`
         ${SELECT_VINCULOS_SQL}
-        WHERE v.tecido_id = ?
+        WHERE CAST(v.tecido_id AS TEXT) = ?
         ORDER BY c.nome ASC
       `)
-      .all(tecidoId) as DbVinculoRow[]
+      .all(targetId) as DbVinculoRow[]
 
     return rows.map(mapRowToRecord)
   }
 
   static getById(id: string): VinculoRecord | null {
     const db = getDb()
+    const targetId = String(id).trim()
     const row = db
       .prepare(`
         ${SELECT_VINCULOS_SQL}
-        WHERE v.id = ?
+        WHERE CAST(v.id AS TEXT) = ?
       `)
-      .get(id) as DbVinculoRow | undefined
+      .get(targetId) as DbVinculoRow | undefined
 
     return row ? mapRowToRecord(row) : null
   }
