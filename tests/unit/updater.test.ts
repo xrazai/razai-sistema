@@ -30,7 +30,10 @@ vi.mock('electron-updater', () => {
     }),
     quitAndInstall: vi.fn()
   }
-  return { autoUpdater }
+  return {
+    default: { autoUpdater },
+    autoUpdater
+  }
 })
 
 vi.mock('../../src/main/logger', () => ({
