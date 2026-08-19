@@ -25,6 +25,11 @@ const api: RazaiApi = {
     create: (input: CreateCorInput) => ipcRenderer.invoke('cores:create', input),
     update: (id: string, input: UpdateCorInput) => ipcRenderer.invoke('cores:update', id, input),
     delete: (id: string) => ipcRenderer.invoke('cores:delete', id)
+  },
+  settings: {
+    get: (key: string): Promise<string | null> => ipcRenderer.invoke('settings:get', key),
+    set: (key: string, value: string): Promise<boolean> => ipcRenderer.invoke('settings:set', key, value),
+    getAll: (): Promise<Record<string, string>> => ipcRenderer.invoke('settings:getAll')
   }
 }
 

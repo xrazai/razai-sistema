@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-18 — Persistência de preferências de UI no SQLite app_meta e configuração de módulo inicial (Task 5)
+
 ## 2026-08-18 — Modelo de bordas direcionais e consolidação de box-sizing sem colisão no Design System
 
 ## 2026-08-18 — Substituição de separadores avulsos por bordas estruturais e régua de seção padronizada em 40px

@@ -75,11 +75,18 @@ export type CoresApi = {
   delete: (id: string) => Promise<boolean>
 }
 
+export type SettingsApi = {
+  get: (key: string) => Promise<string | null>
+  set: (key: string, value: string) => Promise<boolean>
+  getAll: () => Promise<Record<string, string>>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
   tecidos: TecidosApi
   cores: CoresApi
+  settings: SettingsApi
 }
 
 declare global {

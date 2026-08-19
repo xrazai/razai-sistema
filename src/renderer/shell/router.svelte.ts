@@ -63,6 +63,17 @@ class Router {
       window.addEventListener('hashchange', () => {
         this.#state = parseHash(window.location.hash)
       })
+
+      // Se a URL não tiver rota específica ou for a raiz, tenta carregar o módulo padrão salvo nas configurações
+      if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#/') {
+        if (window.razai?.settings) {
+          window.razai.settings.get('default_route').then((savedRoute) => {
+            if (savedRoute && VALID_ROUTES.includes(savedRoute as Route)) {
+              this.navigate(savedRoute)
+            }
+          }).catch(() => {})
+        }
+      }
     }
   }
 
