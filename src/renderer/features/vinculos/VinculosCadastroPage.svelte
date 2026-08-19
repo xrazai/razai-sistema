@@ -86,10 +86,10 @@
     }
   })
 
-  let selectedTecido = $derived(tecidos.find((t) => t.id === selectedTecidoId) || null)
+  let selectedTecido = $derived(tecidos.find((t) => String(t.id) === String(selectedTecidoId)) || null)
 
   let existingCorIdsSet = $derived.by(() => {
-    return new Set(existingVinculos.map((v) => v.corId))
+    return new Set(existingVinculos.map((v) => String(v.corId)))
   })
 
   // Filtro de Tecidos
@@ -121,20 +121,21 @@
 
   // Cores disponíveis para marcar (que ainda não foram vinculadas)
   let availableCores = $derived(
-    filteredCores.filter((c) => !existingCorIdsSet.has(c.id))
+    filteredCores.filter((c) => !existingCorIdsSet.has(String(c.id)))
   )
 
   function handleSelectTecido(id: string) {
-    selectedTecidoId = id
+    selectedTecidoId = String(id)
   }
 
   function toggleCor(id: string) {
-    if (existingCorIdsSet.has(id)) return
+    const sId = String(id)
+    if (existingCorIdsSet.has(sId)) return
     const next = new Set(selectedCorIds)
-    if (next.has(id)) {
-      next.delete(id)
+    if (next.has(sId)) {
+      next.delete(sId)
     } else {
-      next.add(id)
+      next.add(sId)
     }
     selectedCorIds = next
   }
@@ -142,7 +143,7 @@
   function handleSelectAllAvailable() {
     const next = new Set(selectedCorIds)
     for (const cor of availableCores) {
-      next.add(cor.id)
+      next.add(String(cor.id))
     }
     selectedCorIds = next
   }

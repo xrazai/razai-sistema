@@ -57,8 +57,8 @@
 
         // Se não tiver selecionado nenhum tecido ainda, seleciona o primeiro que possui vínculos ou o primeiro do catálogo
         if (!selectedTecidoId && tecList.length > 0) {
-          const tecWithVinc = tecList.find((t) => vincList.some((v) => v.tecidoId === t.id))
-          selectedTecidoId = tecWithVinc ? tecWithVinc.id : tecList[0].id
+          const tecWithVinc = tecList.find((t) => vincList.some((v) => String(v.tecidoId) === String(t.id)))
+          selectedTecidoId = tecWithVinc ? String(tecWithVinc.id) : String(tecList[0].id)
         }
       }
     } catch (err: any) {
@@ -82,7 +82,7 @@
     const term = normalizeUnaccent(debouncedSearch.trim())
     return tecidos
       .map((t) => {
-        const tVinculos = vinculos.filter((v) => v.tecidoId === t.id)
+        const tVinculos = vinculos.filter((v) => String(v.tecidoId) === String(t.id))
         return {
           tecido: t,
           vinculos: tVinculos,
@@ -105,10 +105,10 @@
       })
   })
 
-  let selectedTecido = $derived(tecidos.find((t) => t.id === selectedTecidoId) || null)
+  let selectedTecido = $derived(tecidos.find((t) => String(t.id) === String(selectedTecidoId)) || null)
 
   let selectedTecidoVinculos = $derived(
-    vinculos.filter((v) => v.tecidoId === selectedTecidoId)
+    vinculos.filter((v) => String(v.tecidoId) === String(selectedTecidoId))
   )
 
   const columns: Column[] = [
@@ -123,9 +123,9 @@
   async function handleSalvarNovosVinculos(tecidoId: string, corIds: string[]) {
     try {
       if (typeof window !== 'undefined' && window.razai?.vinculos) {
-        await window.razai.vinculos.createBatch({ tecidoId, corIds })
+        await window.razai.vinculos.createBatch({ tecidoId: String(tecidoId), corIds: corIds.map(String) })
       }
-      selectedTecidoId = tecidoId
+      selectedTecidoId = String(tecidoId)
       router.navigate('vinculos')
       await loadData(debouncedSearch)
     } catch (err: any) {

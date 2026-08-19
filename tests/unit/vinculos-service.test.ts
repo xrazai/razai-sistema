@@ -86,10 +86,10 @@ vi.mock('../../src/main/database/db', () => {
           }
         }
 
-        if (cleanSql.includes('SELECT id FROM vinculos WHERE tecido_id = ? AND cor_id = ?')) {
+        if (cleanSql.includes('SELECT id FROM vinculos WHERE CAST(tecido_id AS TEXT) = ? AND CAST(cor_id AS TEXT) = ?')) {
           return {
             get: (tId: string, cId: string) =>
-              mockVinculos.find((v) => v.tecido_id === tId && v.cor_id === cId)
+              mockVinculos.find((v) => String(v.tecido_id) === String(tId) && String(v.cor_id) === String(cId))
           }
         }
 
@@ -135,7 +135,7 @@ vi.mock('../../src/main/database/db', () => {
           }
         }
 
-        if (cleanSql.includes('INSERT INTO vinculos')) {
+        if (cleanSql.includes('INSERT') && cleanSql.includes('INTO vinculos')) {
           return {
             run: (
               id: string,

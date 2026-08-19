@@ -73,7 +73,7 @@ test.describe('QA E2E — Módulo de Vínculos', () => {
     const corTiles = page.locator('.cor-tile')
     await expect(corTiles.first()).toBeVisible()
 
-    // Clica em "Marcar todas" se disponível, ou seleciona o primeiro tile
+    // Clica em "Marcar todas" se disponível, ou seleciona os tiles disponíveis
     const btnSelectAll = page.getByRole('button', { name: /Marcar todas/i })
     if (await btnSelectAll.isVisible()) {
       await btnSelectAll.click()
@@ -88,8 +88,11 @@ test.describe('QA E2E — Módulo de Vínculos', () => {
     // Salva os vínculos criados
     await btnSalvar.click()
 
-    // Retorna para a visualização principal
+    // Retorna para a visualização principal e valida que os vínculos aparecem na tabela
     await expect(page.locator('.topbar .title')).toHaveText('Vínculos')
+    await expect(page.locator('table tbody tr').first()).toBeVisible()
+    const count = await page.locator('table tbody tr').count()
+    expect(count).toBeGreaterThan(0)
   })
 
   test('Flow 3: Desvinculação com confirmação', async () => {
