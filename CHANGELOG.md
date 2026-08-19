@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Rota de Relatórios, tela Hub de inteligência com KPIs rápidos e gráfico ASCII de 7 dias (Task 27)
+
 ## 2026-08-19 — Componente AsciiBarChart no Design System e documentação visual (Task 26)
 
 ## 2026-08-19 — Serviço Main, handlers IPC e tipagens no Preload para Relatórios de Vendas (Task 25)
