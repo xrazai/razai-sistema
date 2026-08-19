@@ -236,7 +236,7 @@ export class RelatoriosService {
         tecidoValorTotal += c.valorTotal
       }
 
-      const cores: RelatorioCorItem[] = tGroup.rawCores.map((c) => {
+      const cores: RelatorioCorItem[] = tGroup.rawCores.map((c: (typeof tGroup.rawCores)[number]) => {
         const precoMedio = c.quantidadeTotal > 0 ? c.valorTotal / c.quantidadeTotal : 0
         const percentualTecido = tecidoValorTotal > 0 ? (c.valorTotal / tecidoValorTotal) * 100 : 0
         const percentualGeral = kpis.faturamentoTotal > 0 ? (c.valorTotal / kpis.faturamentoTotal) * 100 : 0
@@ -380,9 +380,9 @@ export class RelatoriosService {
     const nowTimestamp = Date.now()
     const msPerDay = 1000 * 60 * 60 * 24
 
-    for (const group of skuGroupsMap.values()) {
-      const totalVendido = group.transacoes.reduce((acc, t) => acc + t.quantidade, 0)
-      const totalFaturado = group.transacoes.reduce((acc, t) => acc + t.subtotal, 0)
+    for (const group of Array.from(skuGroupsMap.values())) {
+      const totalVendido = group.transacoes.reduce((acc: number, t: (typeof group.transacoes)[number]) => acc + t.quantidade, 0)
+      const totalFaturado = group.transacoes.reduce((acc: number, t: (typeof group.transacoes)[number]) => acc + t.subtotal, 0)
       const vendasCount = group.transacoes.length
       const precoMedio = totalVendido > 0 ? totalFaturado / totalVendido : 0
 
@@ -417,8 +417,8 @@ export class RelatoriosService {
 
       // Análise de Momentum / Tendência (Vendas dos últimos 14 dias vs taxa normal)
       const cutoff14d = nowTimestamp - 14 * msPerDay
-      const vendasRecentes = group.transacoes.filter((t) => t.timestamp >= cutoff14d)
-      const volumeRecente14d = vendasRecentes.reduce((acc, t) => acc + t.quantidade, 0)
+      const vendasRecentes = group.transacoes.filter((t: (typeof group.transacoes)[number]) => t.timestamp >= cutoff14d)
+      const volumeRecente14d = vendasRecentes.reduce((acc: number, t: (typeof group.transacoes)[number]) => acc + t.quantidade, 0)
       const taxaRecenteDiaria = volumeRecente14d / 14
 
       let tendencia: PrevisibilidadeTendencia = 'estavel'

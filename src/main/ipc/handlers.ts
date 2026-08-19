@@ -14,6 +14,8 @@ import { RelatoriosService } from '../services/relatorios.service'
 import { checkForUpdates, quitAndInstall, getUpdateStatus } from '../updater'
 import { logger } from '../logger'
 import type {
+  AppInfo,
+  DbHealth,
   CreateTecidoInput,
   UpdateTecidoInput,
   CreateCorInput,
