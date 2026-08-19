@@ -5,6 +5,7 @@
   import EmptyState from '../../design-system/compositions/EmptyState.svelte'
   import AgenteModal from './components/AgenteModal.svelte'
   import AgenteConhecimentoView from './components/AgenteConhecimentoView.svelte'
+  import AgentSimulatorModal from './components/AgentSimulatorModal.svelte'
   import type { AgenteRecord } from '../../../shared/types'
 
   let agentes = $state<AgenteRecord[]>([])
@@ -12,6 +13,7 @@
   let modalOpen = $state(false)
   let editingAgente = $state<AgenteRecord | null>(null)
   let selectedAgenteForKnowledge = $state<AgenteRecord | null>(null)
+  let selectedAgenteForTest = $state<AgenteRecord | null>(null)
 
   async function loadAgentes() {
     isLoading = true
@@ -166,11 +168,18 @@
                 </td>
                 <td class="actions-cell">
                   <button
+                    class="btn-action highlight"
+                    onclick={() => (selectedAgenteForTest = ag)}
+                    title="Testar Respostas do Agente no Simulador"
+                  >
+                    💬 TESTAR
+                  </button>
+                  <button
                     class="btn-action"
                     onclick={() => openKnowledge(ag)}
                     title="Gerenciar Base de Conhecimento"
                   >
-                    📚 CONHECIMENTO
+                    📚 REGRAS
                   </button>
                   <button class="btn-action" onclick={() => openEdit(ag)} title="Configurar Agente">
                     ⚙ CONFIG
@@ -207,6 +216,13 @@
       modalOpen = false
       await loadAgentes()
     }}
+  />
+{/if}
+
+{#if selectedAgenteForTest}
+  <AgentSimulatorModal
+    agente={selectedAgenteForTest}
+    onclose={() => (selectedAgenteForTest = null)}
   />
 {/if}
 
@@ -370,6 +386,16 @@
     cursor: pointer;
     line-height: 100%;
     box-sizing: border-box;
+  }
+
+  .btn-action.highlight {
+    color: var(--color-ok);
+    border-color: var(--color-ok);
+  }
+
+  .btn-action.highlight:hover {
+    background: var(--color-ok);
+    color: var(--color-bg);
   }
 
   .btn-action:hover {

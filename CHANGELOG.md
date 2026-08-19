@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Motor de IA com ContextBuilder de regras/FAQs e simulador de testes no renderer (Task 32)
+
 ## 2026-08-19 — Telas de Gestão de Agentes e Base de Conhecimento com editor de FAQs e regras (Task 31)
 
 ## 2026-08-19 — Schema SQLite, migração 007, tipos compartilhados e handlers IPC para Agentes e Conhecimento (Task 30)

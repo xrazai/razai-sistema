@@ -342,11 +342,6 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('agentes:gerarRespostaIa', async (_event, agenteId: string, pergunta: string, conversaId?: string) => {
-    // Por enquanto retorna stub ou delega para o servico
-    return {
-      resposta: 'Resposta simulada do agente',
-      confianca: 1,
-      fontes: []
-    }
+    return AgentesService.gerarRespostaIa(agenteId, pergunta, conversaId)
   })
 }
