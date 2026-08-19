@@ -157,6 +157,33 @@ vi.mock('../../src/main/database/db', () => {
           }
         }
 
+        // getPrevisibilidadeEstoque query
+        if (cleanSql.includes('ORDER BY v.created_at ASC')) {
+          return {
+            all: () => {
+              return mockVendaItens
+                .map((vi) => {
+                  const venda = mockVendas.find((v) => v.id === vi.venda_id)
+                  return {
+                    tecido_id: vi.tecido_id,
+                    tecido_nome: vi.tecido_nome,
+                    tecido_codigo: vi.tecido_codigo,
+                    cor_id: vi.cor_id,
+                    cor_nome: vi.cor_nome,
+                    cor_codigo: vi.cor_codigo,
+                    cor_hex: vi.cor_hex,
+                    sku: `${vi.tecido_codigo}-${vi.cor_codigo}`,
+                    quantidade: vi.quantidade,
+                    subtotal: vi.subtotal,
+                    preco_unitario: vi.subtotal / (vi.quantidade || 1),
+                    venda_created_at: venda?.created_at || new Date().toISOString()
+                  }
+                })
+                .sort((a, b) => new Date(a.venda_created_at).getTime() - new Date(b.venda_created_at).getTime())
+            }
+          }
+        }
+
         // getVendasPorTecidoCor query
         if (cleanSql.includes('FROM venda_itens vi JOIN vendas v ON v.id = vi.venda_id')) {
           return {
@@ -310,6 +337,7 @@ describe('RelatoriosService', () => {
     expect(corPreto.percentualGeral).toBe(10.0)
 
     // Segundo tecido (Seda)
+    // Seda
     const seda = relatorio.tecidos[1]
     expect(seda.tecidoId).toBe('tec-2')
     expect(seda.valorTotal).toBe(400.0)
@@ -318,5 +346,29 @@ describe('RelatoriosService', () => {
     expect(seda.cores[0].corNome).toBe('Branco')
     expect(seda.cores[0].percentualTecido).toBe(100.0)
     expect(seda.cores[0].percentualGeral).toBe(40.0)
+  })
+
+  it('should calculate demand forecasting with Croston-SBA and ABC classification', () => {
+    const result = RelatoriosService.getPrevisibilidadeEstoque({ horizonteDias: 30 })
+
+    expect(result.kpis.horizonteDias).toBe(30)
+    expect(result.itens.length).toBe(3) // 3 SKUs (Tricoline Azul, Tricoline Preto, Seda Branco)
+
+    // Curva ABC: maior volume é Tricoline Azul (10m / 20m = 50% => Classe A)
+    const azul = result.itens.find((i) => i.corNome === 'Azul')
+    expect(azul).toBeDefined()
+    expect(azul?.curvaAbc).toBe('A')
+    expect(azul?.demandaPrevistaMetros).toBeGreaterThan(0)
+    expect(azul?.demandaPrevistaRolos).toBeGreaterThanOrEqual(1)
+    expect(azul?.valorPrevistoReposicao).toBeGreaterThan(0)
+
+    // Teste com horizonte de 7 dias
+    const result7d = RelatoriosService.getPrevisibilidadeEstoque({ horizonteDias: 7 })
+    expect(result7d.kpis.horizonteDias).toBe(7)
+    expect(result7d.kpis.demandaTotalProjetadaMetros).toBeLessThan(result.kpis.demandaTotalProjetadaMetros)
+
+    // Teste com filtro por Curva ABC
+    const resultClasseA = RelatoriosService.getPrevisibilidadeEstoque({ curvaAbc: 'A' })
+    expect(resultClasseA.itens.every((i) => i.curvaAbc === 'A')).toBe(true)
   })
 })

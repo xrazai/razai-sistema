@@ -38,6 +38,7 @@
     }
     if (router.route === 'relatorios') {
       if (router.subRoute === 'vendas-tecido-cor') return 'Relatórios / Vendas por Tecido e Cor'
+      if (router.subRoute === 'previsibilidade-estoque') return 'Relatórios / Previsibilidade de Demanda'
       return 'Relatórios'
     }
     if (router.route === 'tecidos') {

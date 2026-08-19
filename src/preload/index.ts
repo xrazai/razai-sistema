@@ -12,7 +12,8 @@ import type {
   CreateVendaInput,
   CreatePedidoInput,
   UpdatePedidoInput,
-  RelatorioFiltroInput
+  RelatorioFiltroInput,
+  PrevisibilidadeFiltroInput
 } from '../shared/types'
 
 const api: RazaiApi = {
@@ -99,7 +100,9 @@ const api: RazaiApi = {
       ipcRenderer.invoke('relatorios:getKpis', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined),
     getVendasUltimos7Dias: () => ipcRenderer.invoke('relatorios:getVendasUltimos7Dias'),
     getVendasPorTecidoCor: (filtro?: RelatorioFiltroInput) =>
-      ipcRenderer.invoke('relatorios:getVendasPorTecidoCor', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined)
+      ipcRenderer.invoke('relatorios:getVendasPorTecidoCor', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined),
+    getPrevisibilidadeEstoque: (filtro?: PrevisibilidadeFiltroInput) =>
+      ipcRenderer.invoke('relatorios:getPrevisibilidadeEstoque', filtro ? JSON.parse(JSON.stringify(filtro)) : undefined)
   }
 }
 
