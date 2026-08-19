@@ -8,6 +8,7 @@ import { PedidosService } from '../services/pedidos.service'
 import { PdfService } from '../services/pdf/pdf.service'
 import { SettingsService } from '../services/settings.service'
 import { PrinterService } from '../services/printer/printer.service'
+import { exportTecidosCsv, exportCoresCsv, exportDatabase } from '../services/backup.service'
 import type {
   CreateTecidoInput,
   UpdateTecidoInput,
@@ -206,5 +207,18 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('printer:printTest', async (_event, printerName?: string) => {
     return PrinterService.printTestReceipt(printerName)
+  })
+
+  // Handlers para Exportação CSV e Backup do Banco
+  ipcMain.handle('backup:exportTecidosCsv', async (_event, filePath?: string) => {
+    return exportTecidosCsv(filePath)
+  })
+
+  ipcMain.handle('backup:exportCoresCsv', async (_event, filePath?: string) => {
+    return exportCoresCsv(filePath)
+  })
+
+  ipcMain.handle('backup:exportDatabase', async (_event, destinationPath?: string) => {
+    return exportDatabase(destinationPath)
   })
 }

@@ -69,6 +69,11 @@ const api: RazaiApi = {
   printer: {
     list: () => ipcRenderer.invoke('printer:list'),
     printTest: (printerName?: string) => ipcRenderer.invoke('printer:printTest', printerName)
+  },
+  backup: {
+    exportTecidosCsv: (filePath?: string) => ipcRenderer.invoke('backup:exportTecidosCsv', filePath),
+    exportCoresCsv: (filePath?: string) => ipcRenderer.invoke('backup:exportCoresCsv', filePath),
+    exportDatabase: (destinationPath?: string) => ipcRenderer.invoke('backup:exportDatabase', destinationPath)
   }
 }
 

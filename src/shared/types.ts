@@ -232,6 +232,19 @@ export type PedidosApi = {
   abrirShareNativo: (filePath: string, title: string) => Promise<PedidoPdfResult>
 }
 
+export type BackupResult = {
+  ok: boolean
+  filePath?: string
+  canceled?: boolean
+  error?: string
+}
+
+export type BackupApi = {
+  exportTecidosCsv: (filePath?: string) => Promise<BackupResult>
+  exportCoresCsv: (filePath?: string) => Promise<BackupResult>
+  exportDatabase: (destinationPath?: string) => Promise<BackupResult>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
@@ -242,6 +255,7 @@ export type RazaiApi = {
   pedidos: PedidosApi
   settings: SettingsApi
   printer: PrinterApi
+  backup: BackupApi
 }
 
 declare global {
