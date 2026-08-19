@@ -379,4 +379,13 @@ export class AgentesService {
       .run(mensagemId)
     return result.changes > 0
   }
+
+  static async gerarRespostaIa(
+    agenteId: string,
+    pergunta: string,
+    conversaId?: string
+  ): Promise<AgenteGerarRespostaResult> {
+    const { LLMProvider } = await import('./LLMProvider')
+    return LLMProvider.generateResponse(agenteId, pergunta, conversaId)
+  }
 }
