@@ -4,6 +4,7 @@
   import Icon from '../../design-system/primitives/Icon.svelte'
   import RelatoriosHub from './components/RelatoriosHub.svelte'
   import RelatorioVendasTecidoCor from './components/RelatorioVendasTecidoCor.svelte'
+  import RelatorioPrevisibilidadeEstoque from './components/RelatorioPrevisibilidadeEstoque.svelte'
   import { router } from '../../shell/router.svelte'
   import type { RelatorioKpis, VendaDiariaItem } from '../../../shared/types'
 
@@ -13,6 +14,7 @@
   let errorMsg = $state<string | null>(null)
 
   let isSubRouteVendasTecidoCor = $derived(router.subRoute === 'vendas-tecido-cor')
+  let isSubRoutePrevisibilidade = $derived(router.subRoute === 'previsibilidade-estoque')
 
   async function loadData() {
     isLoading = true
@@ -58,6 +60,8 @@
     </div>
   {:else if isSubRouteVendasTecidoCor}
     <RelatorioVendasTecidoCor />
+  {:else if isSubRoutePrevisibilidade}
+    <RelatorioPrevisibilidadeEstoque />
   {:else}
     <RelatoriosHub
       {kpis}

@@ -130,9 +130,9 @@
         </div>
       </Panel>
 
-      <!-- Seção 3: Catálogo de Relatórios Disponíveis -->
-      <Panel title="Catálogo de Relatórios Analíticos">
-        <Grid cols={3}>
+      <!-- Seção 3: Relatórios Analíticos Disponíveis -->
+      <Panel title="Relatórios Analíticos & Inteligência de Estoque">
+        <Grid cols={2}>
           <RelatorioCard
             code="REL-01"
             title="Vendas por Tecido e Cor"
@@ -145,22 +145,12 @@
 
           <RelatorioCard
             code="REL-02"
-            title="Histórico de Vendas Diárias"
-            description="Visão consolidada de pedidos finalizados e vendas de balcão com extrato de formas de pagamento e recibos térmicos emitidos."
-            badge="OPERACIONAL"
+            title="Previsibilidade de Demanda e Estoque"
+            description="Forecasting de consumo e reposição de estoque via algoritmo Croston-SBA, classificação de giro por Curva ABC e conversão em rolos de 50m."
+            badge="PREVISÃO"
             badgeTone="info"
-            actionLabel="Ver Vendas"
-            onclick={() => router.navigate('#vendas')}
-          />
-
-          <RelatorioCard
-            code="REL-03"
-            title="Matriz de Tecidos e Vínculos"
-            description="Mapeamento completo da cartela de cores ativas e SKUs vinculados disponíveis para pedidos e catálogo têxtil."
-            badge="PRODUTO"
-            badgeTone="neutral"
-            actionLabel="Ver Tecidos"
-            onclick={() => router.navigate('#tecidos')}
+            actionLabel="Acessar Previsão"
+            onclick={() => router.navigate('#relatorios/previsibilidade-estoque')}
           />
         </Grid>
       </Panel>

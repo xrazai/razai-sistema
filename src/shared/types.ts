@@ -333,10 +333,66 @@ export type RelatorioVendasTecidoCor = {
   tecidos: RelatorioTecidoItem[]
 }
 
+export type PrevisibilidadeHorizonte = 7 | 15 | 30 | 60
+
+export type PrevisibilidadeTendencia = 'alta' | 'estavel' | 'queda'
+export type ConfiancaForecast = 'alta' | 'media' | 'baixa' | 'preliminar'
+export type CurvaAbc = 'A' | 'B' | 'C'
+
+export type PrevisibilidadeFiltroInput = {
+  horizonteDias?: PrevisibilidadeHorizonte
+  curvaAbc?: 'todas' | 'A' | 'B' | 'C'
+  tendencia?: 'todas' | 'alta' | 'estavel' | 'queda'
+  search?: string
+}
+
+export type PrevisibilidadeItem = {
+  tecidoId: string
+  tecidoNome: string
+  tecidoCodigo: string
+  corId: string
+  corNome: string
+  corCodigo: string
+  corHex?: string
+  sku: string
+  totalVendidoMetros: number
+  totalFaturado: number
+  vendasCount: number
+  precoMedioMetro: number
+  intervaloMedioDias: number
+  tamanhoMedioPedidoMetros: number
+  taxaDiariaCroston: number
+  tendencia: PrevisibilidadeTendencia
+  variacaoPercentual: number
+  curvaAbc: CurvaAbc
+  confianca: ConfiancaForecast
+  horizonteDias: number
+  demandaPrevistaMetros: number
+  demandaPrevistaRolos: number
+  valorPrevistoReposicao: number
+}
+
+export type PrevisibilidadeKpis = {
+  horizonteDias: number
+  demandaTotalProjetadaMetros: number
+  demandaTotalProjetadaRolos: number
+  investimentoTotalReposicao: number
+  taxaMediaDiariaGeralMetros: number
+  totalSkusAnalisados: number
+  totalSkusEmAlta: number
+}
+
+export type RelatorioPrevisibilidadeResult = {
+  kpis: PrevisibilidadeKpis
+  itens: PrevisibilidadeItem[]
+  generatedAt: string
+}
+
 export type RelatoriosApi = {
   getKpis: (filtro?: RelatorioFiltroInput) => Promise<RelatorioKpis>
   getVendasUltimos7Dias: () => Promise<VendaDiariaItem[]>
   getVendasPorTecidoCor: (filtro?: RelatorioFiltroInput) => Promise<RelatorioVendasTecidoCor>
+  getPrevisibilidadeEstoque: (filtro?: PrevisibilidadeFiltroInput) => Promise<RelatorioPrevisibilidadeResult>
 }
 
 export type UpdateInfo = {

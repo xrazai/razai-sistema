@@ -22,7 +22,8 @@ import type {
   CreateVendaInput,
   CreatePedidoInput,
   UpdatePedidoInput,
-  RelatorioFiltroInput
+  RelatorioFiltroInput,
+  PrevisibilidadeFiltroInput
 } from '../../shared/types'
 
 export function registerIpcHandlers(): void {
@@ -252,6 +253,10 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('relatorios:getVendasPorTecidoCor', async (_event, filtro?: RelatorioFiltroInput) => {
     return RelatoriosService.getVendasPorTecidoCor(filtro)
+  })
+
+  ipcMain.handle('relatorios:getPrevisibilidadeEstoque', async (_event, filtro?: PrevisibilidadeFiltroInput) => {
+    return RelatoriosService.getPrevisibilidadeEstoque(filtro)
   })
 
   // Handlers para Atualizações Automáticas (electron-updater)
