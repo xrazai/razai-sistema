@@ -7,6 +7,7 @@
   import AgenteConhecimentoView from './components/AgenteConhecimentoView.svelte'
   import AgentSimulatorModal from './components/AgentSimulatorModal.svelte'
   import WebSessionModal from './components/WebSessionModal.svelte'
+  import ChatCopilotView from './components/ChatCopilotView.svelte'
   import type { AgenteRecord } from '../../../shared/types'
 
   let agentes = $state<AgenteRecord[]>([])
@@ -16,6 +17,7 @@
   let selectedAgenteForKnowledge = $state<AgenteRecord | null>(null)
   let selectedAgenteForTest = $state<AgenteRecord | null>(null)
   let selectedAgenteForSession = $state<AgenteRecord | null>(null)
+  let selectedAgenteForChat = $state<AgenteRecord | null>(null)
 
   async function loadAgentes() {
     isLoading = true
@@ -85,7 +87,15 @@
   }
 </script>
 
-{#if selectedAgenteForKnowledge}
+{#if selectedAgenteForChat}
+  <ChatCopilotView
+    agente={selectedAgenteForChat}
+    onback={() => {
+      selectedAgenteForChat = null
+      loadAgentes()
+    }}
+  />
+{:else if selectedAgenteForKnowledge}
   <AgenteConhecimentoView
     agente={selectedAgenteForKnowledge}
     onback={() => {
@@ -169,6 +179,13 @@
                   <Badge text={ag.ativo ? 'ONLINE' : 'OFFLINE'} tone={ag.ativo ? 'ok' : 'neutral'} />
                 </td>
                 <td class="actions-cell">
+                  <button
+                    class="btn-action chat-btn"
+                    onclick={() => (selectedAgenteForChat = ag)}
+                    title="Abrir Central de Atendimento e Co-piloto"
+                  >
+                    ⚡ CHAT
+                  </button>
                   {#if ag.canal === 'shopee' && ag.tipoConexao === 'web_session'}
                     <button
                       class="btn-action"
@@ -404,6 +421,17 @@
     cursor: pointer;
     line-height: 100%;
     box-sizing: border-box;
+  }
+
+  .btn-action.chat-btn {
+    color: var(--color-info);
+    border-color: var(--color-info);
+    font-weight: 600;
+  }
+
+  .btn-action.chat-btn:hover {
+    background: var(--color-info);
+    color: var(--color-bg);
   }
 
   .btn-action.highlight {
