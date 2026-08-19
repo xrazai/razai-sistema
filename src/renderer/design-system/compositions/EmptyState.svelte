@@ -68,6 +68,7 @@
     align-items: center;
     justify-content: center;
     min-height: 160px;
+    height: 100%;
     padding: var(--space-5) var(--space-4);
     border: var(--border-width) dashed var(--color-border-strong);
     background: var(--color-bg);

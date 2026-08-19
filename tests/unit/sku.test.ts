@@ -5,7 +5,8 @@ import {
   generateCorSku,
   getCorSkuCandidates,
   validateCorNome,
-  normalizeUnaccent
+  normalizeUnaccent,
+  generateVinculoSku
 } from '../../src/shared/sku'
 
 describe('normalizeUnaccent', () => {
@@ -154,5 +155,21 @@ describe('getTecidoSkuCandidates (Collision Resolution for Fabrics)', () => {
     for (const c of candidates.slice(0, 100)) {
       expect(c).toMatch(/^[A-Z]{4}$/)
     }
+  })
+})
+
+describe('generateVinculoSku', () => {
+  it('should concatenate fabric SKU and color SKU with a hyphen', () => {
+    expect(generateVinculoSku('TRAL', 'AZULMARI')).toBe('TRAL-AZULMARI')
+    expect(generateVinculoSku('LIRU', 'BRANPURO')).toBe('LIRU-BRANPURO')
+    expect(generateVinculoSku('SAEL', 'VERDMILI')).toBe('SAEL-VERDMILI')
+  })
+
+  it('should handle whitespace and lowercase inputs', () => {
+    expect(generateVinculoSku(' tral ', ' azulmari ')).toBe('TRAL-AZULMARI')
+  })
+
+  it('should fallback to placeholders if empty', () => {
+    expect(generateVinculoSku('', '')).toBe('XXXX-XXXXXXXX')
   })
 })

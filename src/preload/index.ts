@@ -6,7 +6,8 @@ import type {
   CreateTecidoInput,
   UpdateTecidoInput,
   CreateCorInput,
-  UpdateCorInput
+  UpdateCorInput,
+  CreateVinculosInput
 } from '../shared/types'
 
 const api: RazaiApi = {
@@ -25,6 +26,14 @@ const api: RazaiApi = {
     create: (input: CreateCorInput) => ipcRenderer.invoke('cores:create', input),
     update: (id: string, input: UpdateCorInput) => ipcRenderer.invoke('cores:update', id, input),
     delete: (id: string) => ipcRenderer.invoke('cores:delete', id)
+  },
+  vinculos: {
+    list: (search?: string) => ipcRenderer.invoke('vinculos:list', search),
+    listByTecido: (tecidoId: string) => ipcRenderer.invoke('vinculos:listByTecido', tecidoId),
+    createBatch: (input: CreateVinculosInput) => ipcRenderer.invoke('vinculos:createBatch', input),
+    delete: (id: string) => ipcRenderer.invoke('vinculos:delete', id),
+    deleteByTecidoAndCor: (tecidoId: string, corId: string) =>
+      ipcRenderer.invoke('vinculos:deleteByTecidoAndCor', tecidoId, corId)
   },
   settings: {
     get: (key: string): Promise<string | null> => ipcRenderer.invoke('settings:get', key),

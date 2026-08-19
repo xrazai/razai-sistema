@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import { getDb } from '../database/db'
 import { TecidosService } from '../services/tecidos.service'
 import { CoresService } from '../services/cores.service'
+import { VinculosService } from '../services/vinculos.service'
 import { SettingsService } from '../services/settings.service'
 import { PrinterService } from '../services/printer/printer.service'
 import type {
@@ -10,7 +11,8 @@ import type {
   CreateTecidoInput,
   UpdateTecidoInput,
   CreateCorInput,
-  UpdateCorInput
+  UpdateCorInput,
+  CreateVinculosInput
 } from '../../shared/types'
 
 export function registerIpcHandlers(): void {
@@ -80,6 +82,27 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('cores:delete', (_event, id: string) => {
     return CoresService.delete(id)
+  })
+
+  // Handlers para Vínculos (Matriz Tecido-Cor)
+  ipcMain.handle('vinculos:list', (_event, search?: string) => {
+    return VinculosService.list(search)
+  })
+
+  ipcMain.handle('vinculos:listByTecido', (_event, tecidoId: string) => {
+    return VinculosService.listByTecido(tecidoId)
+  })
+
+  ipcMain.handle('vinculos:createBatch', (_event, input: CreateVinculosInput) => {
+    return VinculosService.createBatch(input)
+  })
+
+  ipcMain.handle('vinculos:delete', (_event, id: string) => {
+    return VinculosService.delete(id)
+  })
+
+  ipcMain.handle('vinculos:deleteByTecidoAndCor', (_event, tecidoId: string, corId: string) => {
+    return VinculosService.deleteByTecidoAndCor(tecidoId, corId)
   })
 
   // Handlers para Preferências e Configurações (app_meta)

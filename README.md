@@ -36,24 +36,41 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 
 ### 🧶 Módulo de Tecidos
 - **Catálogo Técnico**: Listagem com colunas técnicas (SKU, Nome, Composição, Largura, Rendimento, Gramatura Linear, Gramatura Superficial, Tipo, Acabamento).
-- **Geração de SKU**: Regra têxtil de 4 caracteres maiúsculos a partir do nome com remoção de acentuação (*unaccented*).
+- **Geração de SKU**: Regra têxtil de 4 caracteres maiúsculos a partir do nome com remoção de acentuação (*unaccented*) e resolução alfabética de colisões sem números.
 - **Engenharia Têxtil**: Auto-cálculo e interconversão em tempo real entre Largura ($L$), Rendimento ($R$), Gramatura Linear ($GL$) e Gramatura ($GM$).
 - **CRUD Completo**: Cadastro em grid modular, detalhes, edição, busca e exclusão semântica com confirmação.
 
 ### 🎨 Módulo de Cores
 - **Paleta e Swatches**: Amostra visual de cor em tempo real nas tabelas e formulários.
+- **SKU Semântico (8 Caracteres)**: 4 letras da Família + 4 letras da Variação com resolução determinística alfabética sem números.
 - **Espaços de Cor**: Conversão matemática bidirecional instantânea entre **CIE-$L^*a^*b^*$** (D65) e **sRGB HEX**.
+- **Ações Rápidas**: Cópia de HEX em 1 clique com feedback visual (`COPIADO` / checkmark).
 - **Busca e Filtro**: Busca insensível a maiúsculas e acentos por nome, código HEX ou valores LAB.
 
+### 🔗 Módulo de Vínculos (Matriz Tecido-Cor / Produtos Vendáveis)
+- **SKU Composto Determinístico**: Geração automática de SKU de produto comercializável ($\text{SKU\_Tecido} + \text{"-"} + \text{SKU\_Cor}$, ex.: `TRAL-AZULMARI`).
+- **Visão Mestre-Detalhes**: Lista densa de tecidos à esquerda com contagem de cartela ativa e tabela de cores vinculadas à direita com cópia rápida de SKU.
+- **Cadastro em Lote com Grade Modular**: Seleção de tecido base em grid de `TecidoTile` (76px) e seleção múltipla de cores em grid de `CorTile` (76px) ordenado alfabeticamente.
+- **Integridade Relacional**: Chaves estrangeiras com `ON DELETE CASCADE` para tecidos e `ON DELETE RESTRICT` para cores com índice único composto.
+
+### 🖨️ Integração de Impressora Térmica ESC/POS (80mm)
+- **Comunicação Binária RAW Direta**: Builder fluente `EscPosBuilder` com suporte a 48 colunas (80mm), corte automático de guilhotina (`auto-cut`), negrito, tamanhos escalados e charset PT-BR (`CP850`).
+- **Spooler Win32 USB**: Envio direto para a impressora via spooler do Windows (`winspool.drv`), homologado na impressora **Gertec G250W**.
+- **Painel em Settings**: Detecção e seleção de impressoras disponíveis, persistência da impressora padrão e emissão de cupom de teste.
+
+### ⚙️ Preferências e Configurações (Settings)
+- **Persistência em Banco (`app_meta`)**: Salva tema visual, módulo padrão de inicialização e impressora configurada diretamente no SQLite local.
+
 ### 📐 Design System Industrial Brutalist (Grid 4/8 & Line-Height 100%)
-- **Line-Height 100% Universal**: Todo texto, span, label, input, button e célula tem `line-height: 100%`.
-- **Alturas Múltiplas de 4 ou 8px**: Todo componente pronto, container pai, elemento filho e bloco de layout possui altura somada estritamente múltipla de 4 ou 8px.
-- **Compensação Estrutural**: Padding e heights compensados com `box-sizing: border-box` e bordas rígidas de 1px.
+- **Line-Height 100% Universal**: Todo texto, span, label, input, button, célula e pseudo-elemento tem `line-height: 100%`.
+- **Ritmo Modular Rígido de 40px**: Linhas horizontais alinhadas de ponta a ponta na tela (Brand, Topbar, NavItem, Toolbar, Table th/td/footer, Painéis).
+- **Alturas Múltiplas de 4 ou 8px**: Todo componente e bloco de layout possui altura somada estritamente múltipla de 4 ou 8px (20px, 24px, 32px, 40px, 48px, 56px, 76px/80px).
+- **Divisores Virtuais Inset**: Linhas desenhadas via `box-shadow: inset` para zero colisão de bordas e zero subtração física no modelo de caixa.
 
 ### 🧭 Navegação & Topbar Unificada
 - **Topbar Única**: Cabeçalho unificado sem duplicações de títulos em páginas.
-- **Ações de Topbar**: Botões de ação primária (`+ Cadastrar Tecido`, `+ Cadastrar Cor`) integrados no canto superior direito ao lado do status de conexão do banco.
-- **Roteador Reativo**: Navegação por hash URL (`#tecidos`, `#cores`, `#settings`, etc.) sem dependências externas pesadas.
+- **Ações de Topbar**: Botões de ação primária (`+ Cadastrar Tecido`, `+ Cadastrar Cor`, `+ Cadastrar Vínculo`) integrados no canto superior direito ao lado do status de conexão do banco.
+- **Roteador Reativo**: Navegação por hash URL (`#tecidos`, `#cores`, `#vinculos`, `#settings`, etc.) sem dependências externas pesadas.
 
 ### 🗄️ Banco de Dados & Persistência Local
 - **SQLite Nativo (`better-sqlite3`)**: Persistência no caminho canônico `%APPDATA%\razai-sistema\data\razai.sqlite`.
@@ -66,15 +83,16 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 
 ```
 src/
-├── main/                 → Electron main process, banco SQLite, migrations e IPC
+├── main/                 → Electron main process, banco SQLite, migrations, IPC e serviços
 │   ├── database/         → Conexão db.ts, runner migrator.ts e migrations versionadas
 │   ├── ipc/              → Handlers de comunicação IPC
-│   └── services/         → Lógica de negócio de Tecidos e Cores
+│   └── services/         → Lógica de negócio (Tecidos, Cores, Vínculos, Settings, Printer)
+│       └── printer/      → EscPosBuilder, Win32 RAW Spooler e serviço de impressão
 ├── preload/              → Bridge seguro (contextIsolation) expondo window.razai
 ├── shared/               → Tipagens TypeScript compartilhadas (types.ts, sku.ts, textile-math.ts)
 └── renderer/             → Interface Svelte 5
     ├── design-system/    → Foundations, Primitives, Controls, Data Display, Layout, Compositions
-    ├── features/         → Telas e regras de produto (tecidos, cores, dashboard, settings, vinculos)
+    ├── features/         → Telas e regras de produto (tecidos, cores, vinculos, settings, dashboard)
     ├── shell/            → AppShell, AppSidebar, AppTopbar, Router reativo
     └── pages/            → Living Design System Page
 ```
@@ -124,9 +142,12 @@ npm run build:win
 
 ## 6. Documentação Detalhada
 
-- [Design System — Regras e Componentes](docs/design-system.md)
+- [Design System — Regras, Baseline e Componentes](docs/design-system.md)
 - [Módulo de Tecidos — Especificação e Fórmulas](docs/modulos/tecidos.md)
 - [Módulo de Cores — Especificação e Conversão de Cores](docs/modulos/cores.md)
+- [Módulo de Vínculos — Matriz Tecido-Cor e SKU Composto](docs/modulos/vinculos.md)
+- [Impressão Térmica ESC/POS — Especificação Técnica (80mm)](docs/impressora-termal-escpos.md)
+- [Padrão de Layout de Recibo Térmico 80mm](docs/padrao-layout-recibo-80mm.md)
 - [Guia de Empacotamento, Distribuição e Smoke Test](docs/packaging.md)
 - [Workflow de Desenvolvimento e GitHub Stacks](docs/workflow-github.md)
 - [Diretrizes de Agentes e Regras do Repositório](AGENTS.md)
