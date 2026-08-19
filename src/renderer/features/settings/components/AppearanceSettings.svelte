@@ -15,6 +15,8 @@
 
   const routeOptions = [
     { value: 'dashboard', label: 'Início (Padrão)' },
+    { value: 'vendas', label: 'Vendas' },
+    { value: 'pedidos', label: 'Pedidos' },
     { value: 'tecidos', label: 'Tecidos (Catálogo)' },
     { value: 'cores', label: 'Cores (Paleta)' },
     { value: 'vinculos', label: 'Vínculos' },

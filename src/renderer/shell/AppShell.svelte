@@ -2,8 +2,7 @@
   import type { Snippet } from 'svelte'
   import AppSidebar from './AppSidebar.svelte'
   import AppTopbar from './AppTopbar.svelte'
-
-  type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
+  import type { Route } from './router.svelte'
 
   type Props = {
     route: Route

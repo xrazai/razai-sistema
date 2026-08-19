@@ -73,6 +73,8 @@
   const iconsList = [
     'grid',
     'dash',
+    'cart',
+    'orders',
     'fabric',
     'palette',
     'link',

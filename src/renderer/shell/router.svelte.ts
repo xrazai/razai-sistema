@@ -1,5 +1,7 @@
 export type Route =
   | 'dashboard'
+  | 'vendas'
+  | 'pedidos'
   | 'tecidos'
   | 'cores'
   | 'vinculos'
@@ -15,6 +17,8 @@ export interface RouterState {
 
 const VALID_ROUTES: Route[] = [
   'dashboard',
+  'vendas',
+  'pedidos',
   'tecidos',
   'cores',
   'vinculos',

@@ -4,10 +4,8 @@
   import Status from '../design-system/data-display/Status.svelte'
   import Icon from '../design-system/primitives/Icon.svelte'
   import Button from '../design-system/controls/Button.svelte'
-  import { router } from './router.svelte'
+  import { router, type Route } from './router.svelte'
   import type { DbHealth } from '../../shared/types'
-
-  type Route = 'dashboard' | 'tecidos' | 'cores' | 'vinculos' | 'settings' | 'design-system'
 
   type Props = {
     route: Route
@@ -17,6 +15,8 @@
 
   const titles: Record<Route, string> = {
     dashboard: 'Início',
+    vendas: 'Vendas',
+    pedidos: 'Pedidos',
     tecidos: 'Tecidos',
     cores: 'Cores',
     vinculos: 'Vínculos',
