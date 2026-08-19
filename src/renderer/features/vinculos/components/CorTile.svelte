@@ -37,17 +37,16 @@
         <span>SELECIONADA</span>
       </span>
     {:else}
-      <span class="checkbox-indicator"></span>
+      <span class="indicator">SELECIONAR</span>
     {/if}
   </div>
 
   <div class="tile-body">
     <span class="cor-name" title={cor.nome}>{cor.nome}</span>
-    <span class="cor-hex">{cor.hex}</span>
   </div>
 
   <div class="tile-foot">
-    <span class="cor-lab" title={`LAB: ${cor.lab}`}>LAB: {cor.lab}</span>
+    <span class="cor-hex">{cor.hex}</span>
   </div>
 </button>
 
@@ -115,9 +114,13 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     font-weight: 700;
-    color: var(--color-fg);
-    letter-spacing: var(--tracking-label);
+    color: var(--color-fg-dim);
+    letter-spacing: var(--tracking-header);
     line-height: 100%;
+  }
+
+  .cor-tile.selected .sku-tag {
+    color: var(--color-accent);
   }
 
   .selected-badge {
@@ -128,6 +131,14 @@
     font-size: 10px;
     font-weight: 700;
     color: var(--color-accent);
+    letter-spacing: var(--tracking-label);
+    line-height: 100%;
+  }
+
+  .indicator {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-fg-dim);
     letter-spacing: var(--tracking-label);
     line-height: 100%;
   }
@@ -144,37 +155,23 @@
     line-height: 100%;
   }
 
-  .checkbox-indicator {
-    width: 12px;
-    height: 12px;
-    box-shadow: inset 0 0 0 1px var(--color-border-strong);
-    background: var(--color-bg);
-    flex-shrink: 0;
-  }
-
   .tile-body {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    line-height: 100%;
+    justify-content: center;
     min-width: 0;
+    line-height: 100%;
+    flex: 1;
   }
 
   .cor-name {
     font-size: var(--text-xs);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-fg);
     line-height: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .cor-hex {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--color-fg-muted);
-    line-height: 100%;
   }
 
   .tile-foot {
@@ -184,13 +181,11 @@
     line-height: 100%;
   }
 
-  .cor-lab {
+  .cor-hex {
     font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--color-fg-dim);
+    font-size: 11px;
+    color: var(--color-fg-muted);
     line-height: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    letter-spacing: var(--tracking-tight);
   }
 </style>
