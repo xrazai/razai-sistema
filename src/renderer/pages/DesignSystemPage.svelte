@@ -19,6 +19,7 @@
   import Badge from '../design-system/data-display/Badge.svelte'
   import Progress from '../design-system/data-display/Progress.svelte'
   import Table, { type Column } from '../design-system/data-display/Table.svelte'
+  import TableToolbar from '../design-system/data-display/TableToolbar.svelte'
   import Sidebar from '../design-system/navigation/Sidebar.svelte'
   import Topbar from '../design-system/navigation/Topbar.svelte'
   import Tabs from '../design-system/navigation/Tabs.svelte'
@@ -69,6 +70,17 @@
     { id: '3', codigo: 'ANAR', nome: 'Anarruga Estampada', largura: '1,40 m', rendimento: '4,50 m/kg', status: 'neutral' },
     { id: '4', codigo: 'LIRU', nome: 'Linho Puro Rústico', largura: '1,45 m', rendimento: '3,00 m/kg', status: 'info' }
   ]
+
+  let toolbarSearch = $state('')
+  let filteredDemoRows = $derived(
+    toolbarSearch
+      ? demoRows.filter(
+          (r) =>
+            r.nome.toLowerCase().includes(toolbarSearch.toLowerCase()) ||
+            r.codigo.toLowerCase().includes(toolbarSearch.toLowerCase())
+        )
+      : demoRows
+  )
 
   const iconsList = [
     'grid',
@@ -326,24 +338,33 @@
               </Stack>
             </Cell>
 
-            <!-- Table (com Ordenação Interativa) -->
+            <!-- Table & TableToolbar -->
             <Cell>
-              <Label text="Table (Cabeçalhos Ordenáveis & Alinhamentos)" />
-              <Table
-                columns={demoColumns}
-                rows={demoRows}
-                bordered={true}
-              >
-                {#snippet cell({ column, value })}
-                  {#if column.key === 'codigo'}
-                    <span class="code-sku">{value}</span>
-                  {:else if column.key === 'status'}
-                    <Badge text={value} tone={value === 'ok' ? 'ok' : value === 'warn' ? 'warn' : value === 'info' ? 'info' : 'neutral'} />
-                  {:else}
-                    <span>{value}</span>
-                  {/if}
-                {/snippet}
-              </Table>
+              <Label text="TableToolbar & Table (Busca, Filtros e Ordenação)" />
+              <Stack gap="0">
+                <TableToolbar
+                  bind:search={toolbarSearch}
+                  placeholder="Filtrar tecidos demo..."
+                  totalCount={demoRows.length}
+                  filteredCount={toolbarSearch ? filteredDemoRows.length : undefined}
+                />
+                <Table
+                  columns={demoColumns}
+                  rows={filteredDemoRows}
+                  bordered={true}
+                  emptyMessage="Nenhum tecido demo encontrado"
+                >
+                  {#snippet cell({ column, value })}
+                    {#if column.key === 'codigo'}
+                      <span class="code-sku">{value}</span>
+                    {:else if column.key === 'status'}
+                      <Badge text={value} tone={value === 'ok' ? 'ok' : value === 'warn' ? 'warn' : value === 'info' ? 'info' : 'neutral'} />
+                    {:else}
+                      <span>{value}</span>
+                    {/if}
+                  {/snippet}
+                </Table>
+              </Stack>
             </Cell>
           </Grid>
         </section>

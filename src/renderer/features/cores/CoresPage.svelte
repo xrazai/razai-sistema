@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '../../design-system/primitives/Icon.svelte'
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
+  import TableToolbar from '../../design-system/data-display/TableToolbar.svelte'
   import Badge from '../../design-system/data-display/Badge.svelte'
   import EmptyState from '../../design-system/compositions/EmptyState.svelte'
   import CoresCadastroPage from './CoresCadastroPage.svelte'
@@ -210,36 +211,14 @@
   <div class="page">
     <div class="layout">
       <!-- Barra superior de ferramentas e contadores -->
-      <div class="toolbar">
-          <div class="search-box">
-            <Icon name="search" size="sm" />
-            <input
-              type="text"
-              class="search-input"
-              bind:value={searchTerm}
-              placeholder="Buscar por SKU, nome, HEX ou LAB..."
-            />
-            {#if searchTerm}
-              <button class="clear-btn" onclick={() => (searchTerm = '')} aria-label="Limpar busca">
-                ✕
-              </button>
-            {/if}
-          </div>
-          <div class="toolbar-meta">
-            {#if errorMsg}
-              <Badge text={errorMsg} tone="danger" />
-            {:else if isLoading}
-              <Badge text="Carregando..." tone="neutral" />
-            {:else if isFiltered}
-              <Badge
-                text={`${cores.length} ${cores.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}`}
-                tone={cores.length === 0 ? 'warn' : 'neutral'}
-              />
-            {:else}
-              <Badge text={`${cores.length} ${cores.length === 1 ? 'cor cadastrada' : 'cores cadastradas'}`} tone="neutral" />
-            {/if}
-          </div>
-        </div>
+      <TableToolbar
+        bind:search={searchTerm}
+        placeholder="Buscar por SKU, nome, HEX ou LAB..."
+        totalCount={cores.length}
+        filteredCount={isFiltered ? cores.length : undefined}
+        {isLoading}
+        {errorMsg}
+      />
 
         <!-- Tabela padrão de itens -->
         <div class="table-container">
@@ -330,80 +309,6 @@
     height: 100%;
     min-height: 0;
     width: 100%;
-  }
-
-  .toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
-    height: 40px;
-    min-height: 40px;
-    padding: 0 var(--space-4) 0 0;
-    background: var(--color-bg-sunken);
-    box-shadow: inset 0 -1px 0 0 var(--color-border);
-    width: 100%;
-    box-sizing: border-box;
-    line-height: 100%;
-  }
-
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    flex: 1;
-    max-width: 460px;
-    height: 100%;
-    padding: var(--space-2) var(--space-3);
-    border: none;
-    box-shadow: inset -1px 0 0 0 var(--color-border);
-    background: var(--color-bg);
-    color: var(--color-fg-muted);
-    box-sizing: border-box;
-    line-height: 100%;
-    transition: background var(--motion-fast), box-shadow var(--motion-fast);
-  }
-
-  .search-box:focus-within {
-    box-shadow: inset -1px 0 0 0 var(--color-border-strong);
-    background: var(--color-bg-elevated);
-    color: var(--color-fg);
-  }
-
-  .search-input {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: transparent;
-    color: var(--color-fg);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    line-height: 100%;
-    outline: none;
-  }
-
-  .search-input::placeholder {
-    color: var(--color-fg-dim);
-  }
-
-  .clear-btn {
-    border: none;
-    background: transparent;
-    color: var(--color-fg-dim);
-    font-size: var(--text-xs);
-    line-height: 100%;
-    padding: var(--space-1);
-    cursor: pointer;
-  }
-
-  .clear-btn:hover {
-    color: var(--color-fg);
-  }
-
-  .toolbar-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
   }
 
   .table-container {

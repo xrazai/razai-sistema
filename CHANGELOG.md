@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Componentização do TableToolbar no Design System e unificação de busca/filtros em tabelas (Task 11)
+
 ## 2026-08-19 — Menu nativo Electron com atalhos de sistema e restrição de DevTools em produção (Task 7)
 
 ## 2026-08-19 — Fontes técnicas locais IBM Plex Mono e IBM Plex Sans em WOFF2 sem dependência externa (Task 6)

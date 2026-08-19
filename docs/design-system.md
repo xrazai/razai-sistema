@@ -99,6 +99,7 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 
 ### 3.3 Data Display (`design-system/data-display/`)
 - `Table.svelte`: Tabela técnica com ordenação automática e interativa por colunas (ASC/DESC), colunas com alinhamento e largura customizável, clique na linha e fallback de dados vazios.
+- `TableToolbar.svelte`: Barra técnica de busca, contadores e filtros para tabelas densas, com botão de limpar (✕), badges de estado e slots de filtros/ações no grid rígido de 40px.
 - `Status.svelte`: Indicador de estado do sistema com pontos luminosos (`ok`, `warn`, `danger`, `neutral`).
 - `Badge.svelte`: Tag compacta em monoespaçado para status, mensagens e contadores.
 - `Metric.svelte`: Exibição destacada de valores numéricos com rótulo e unidade.
