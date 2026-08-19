@@ -1,9 +1,10 @@
 import { BrowserWindow, session } from 'electron'
 import { logger } from '../../logger'
-import { AgentesService } from './agentes.service'
 import { LLMProvider } from './LLMProvider'
 import { randomUUID } from 'node:crypto'
 import { getDb } from '../../database/db'
+import { ShopeeChatMapper, SHOPEE_WEBCHAT_URL } from './ShopeeChatMapper'
+import type { ShopeeChatMapSnapshot } from '../../../shared/types'
 
 export type ShopeeSessionStatus = {
   conectado: boolean
@@ -24,6 +25,7 @@ export class ShopeeSessionManager {
   static async abrirJanelaLogin(): Promise<void> {
     if (this.loginWindow && !this.loginWindow.isDestroyed()) {
       this.loginWindow.focus()
+      await ShopeeChatMapper.attach(this.loginWindow)
       return
     }
 
@@ -32,7 +34,7 @@ export class ShopeeSessionManager {
     this.loginWindow = new BrowserWindow({
       width: 1024,
       height: 720,
-      title: 'Shopee Seller Centre — Conectar Sessão',
+      title: 'Shopee Seller Centre — WebChat',
       webPreferences: {
         session: sess,
         nodeIntegration: false,
@@ -40,12 +42,29 @@ export class ShopeeSessionManager {
       }
     })
 
-    this.loginWindow.loadURL('https://seller.shopee.com.br/webchat/conversations')
+    await ShopeeChatMapper.attach(this.loginWindow)
+    this.loginWindow.loadURL(SHOPEE_WEBCHAT_URL)
 
     this.loginWindow.on('closed', () => {
       this.loginWindow = null
       logger.info('Janela de login da Shopee fechada pelo operador.')
     })
+  }
+
+  static async iniciarMapeamento(): Promise<ShopeeChatMapSnapshot> {
+    await this.abrirJanelaLogin()
+    return ShopeeChatMapper.refresh()
+  }
+
+  static obterMapa(): ShopeeChatMapSnapshot {
+    return ShopeeChatMapper.getSnapshot()
+  }
+
+  static async atualizarMapa(): Promise<ShopeeChatMapSnapshot> {
+    if (this.loginWindow && !this.loginWindow.isDestroyed()) {
+      await ShopeeChatMapper.attach(this.loginWindow)
+    }
+    return ShopeeChatMapper.refresh()
   }
 
   static async verificarStatus(): Promise<ShopeeSessionStatus> {
@@ -74,6 +93,7 @@ export class ShopeeSessionManager {
     try {
       const sess = this.getSession()
       await sess.clearStorageData()
+      ShopeeChatMapper.reset()
       logger.info('Sessão e cookies da Shopee limpos.')
       return true
     } catch (err: any) {

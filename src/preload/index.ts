@@ -144,7 +144,10 @@ const api: RazaiApi = {
       verificarStatus: () => ipcRenderer.invoke('agentes:shopee:verificarStatus'),
       limparSessao: () => ipcRenderer.invoke('agentes:shopee:limparSessao'),
       simularMensagem: (agenteId: string, clienteNome: string, textoPergunta: string) =>
-        ipcRenderer.invoke('agentes:shopee:simularMensagem', agenteId, clienteNome, textoPergunta)
+        ipcRenderer.invoke('agentes:shopee:simularMensagem', agenteId, clienteNome, textoPergunta),
+      iniciarMapeamento: () => ipcRenderer.invoke('agentes:shopee:iniciarMapeamento'),
+      obterMapa: () => ipcRenderer.invoke('agentes:shopee:obterMapa'),
+      atualizarMapa: () => ipcRenderer.invoke('agentes:shopee:atualizarMapa')
     }
   }
 }

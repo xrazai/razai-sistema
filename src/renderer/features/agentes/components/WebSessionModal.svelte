@@ -3,7 +3,7 @@
   import Button from '../../../design-system/controls/Button.svelte'
   import Badge from '../../../design-system/data-display/Badge.svelte'
   import Input from '../../../design-system/controls/Input.svelte'
-  import type { AgenteRecord, ShopeeSessionStatus } from '../../../../shared/types'
+  import type { AgenteRecord, ShopeeChatMapSnapshot, ShopeeSessionStatus } from '../../../../shared/types'
 
   type Props = {
     agente: AgenteRecord
@@ -18,6 +18,8 @@
   let testPergunta = $state('Qual o prazo de postagem do pedido?')
   let isSimulating = $state(false)
   let simulationSuccess = $state<string | null>(null)
+  let mapa = $state<ShopeeChatMapSnapshot | null>(null)
+  let isMapping = $state(false)
 
   async function checkStatus() {
     isChecking = true
@@ -30,8 +32,19 @@
     }
   }
 
+  async function loadMapa() {
+    try {
+      mapa = await window.razai.agentes.shopee.obterMapa()
+    } catch (err) {
+      console.error('Erro ao obter mapa do WebChat:', err)
+    }
+  }
+
   onMount(() => {
     checkStatus()
+    loadMapa()
+    const timer = setInterval(loadMapa, 8000)
+    return () => clearInterval(timer)
   })
 
   async function handleOpenLogin() {
@@ -42,6 +55,28 @@
     if (confirm('Deseja realmente desconectar e limpar os cookies salvos da Shopee?')) {
       await window.razai.agentes.shopee.limparSessao()
       await checkStatus()
+    }
+  }
+
+  async function handleIniciarMapeamento() {
+    isMapping = true
+    try {
+      mapa = await window.razai.agentes.shopee.iniciarMapeamento()
+    } catch (err: any) {
+      alert(`Erro ao mapear WebChat: ${err.message || 'Falha'}`)
+    } finally {
+      isMapping = false
+    }
+  }
+
+  async function handleAtualizarMapa() {
+    isMapping = true
+    try {
+      mapa = await window.razai.agentes.shopee.atualizarMapa()
+    } catch (err: any) {
+      alert(`Erro ao atualizar mapa: ${err.message || 'Falha'}`)
+    } finally {
+      isMapping = false
     }
   }
 
@@ -120,6 +155,62 @@
         </div>
       </div>
 
+      <div class="sim-card">
+        <div class="sim-title">MAPA DO WEBCHAT (HOJE + ONTEM)</div>
+        <p class="sim-desc">
+          Só entram conversas com última mensagem hoje ou ontem (horário de Brasília). Conversas mais
+          antigas são ignoradas e o agente não responde a elas.
+        </p>
+
+        <div class="status-details">
+          <div class="detail-row">
+            <span class="key">URL:</span>
+            <span class="val mono">{mapa?.urlAtual || 'https://seller.shopee.com.br/new-webchat/conversations'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="key">Janela:</span>
+            <span class="val mono">{mapa ? `${mapa.janelaOntem} → ${mapa.janelaHoje}` : '—'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="key">Recentes / ignoradas:</span>
+            <span class="val mono">{mapa?.conversasRecentes.length ?? 0} / {mapa?.conversasIgnoradas ?? 0}</span>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <Button variant="primary" onclick={handleIniciarMapeamento} disabled={isMapping}>
+            {isMapping ? 'MAPEANDO...' : 'MAPEAR WEBCHAT ABERTO'}
+          </Button>
+          <Button variant="secondary" onclick={handleAtualizarMapa} disabled={isMapping}>
+            ATUALIZAR MAPA
+          </Button>
+        </div>
+
+        {#if mapa && mapa.conversasRecentes.length > 0}
+          <div class="map-list">
+            {#each mapa.conversasRecentes as conv (conv.id)}
+              <div class="map-row">
+                <div class="map-main">
+                  <span class="map-name">{conv.clienteNome}</span>
+                  <span class="map-preview">{conv.ultimaMensagem || '—'}</span>
+                </div>
+                <span class="map-time mono">{conv.ultimaMensagemLabel}</span>
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <p class="sim-desc">Nenhuma conversa de hoje ou ontem mapeada ainda. Abra o WebChat e clique em mapear.</p>
+        {/if}
+
+        {#if mapa && mapa.endpoints.length > 0}
+          <div class="endpoint-list">
+            {#each mapa.endpoints.slice(0, 8) as ep (`${ep.method}-${ep.url}`)}
+              <div class="endpoint-row mono">{ep.method} · {ep.kind} · {ep.url}</div>
+            {/each}
+          </div>
+        {/if}
+      </div>
+
       <!-- Teste de Mensagem / Simulação do Canal -->
       <div class="sim-card">
         <div class="sim-title">TESTAR RECEBIMENTO DE MENSAGEM DO CHAT</div>
@@ -178,8 +269,9 @@
   }
 
   .modal-box {
-    width: 620px;
+    width: 720px;
     max-width: 90vw;
+    max-height: 90vh;
     background: var(--color-bg);
     border: var(--border-width) solid var(--color-border-strong);
     display: flex;
@@ -240,6 +332,7 @@
     flex-direction: column;
     gap: var(--space-4);
     box-sizing: border-box;
+    overflow-y: auto;
   }
 
   .status-card,
@@ -331,6 +424,62 @@
   .sim-action {
     display: flex;
     justify-content: flex-end;
+  }
+
+  .map-list,
+  .endpoint-list {
+    display: flex;
+    flex-direction: column;
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    box-sizing: border-box;
+  }
+
+  .map-row {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: 0 var(--space-2);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
+    box-sizing: border-box;
+  }
+
+  .map-row:last-child {
+    box-shadow: none;
+  }
+
+  .map-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .map-name {
+    font-size: var(--text-xs);
+    color: var(--color-fg);
+    line-height: 100%;
+  }
+
+  .map-preview,
+  .map-time,
+  .endpoint-row {
+    font-size: 11px;
+    color: var(--color-fg-muted);
+    line-height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .endpoint-row {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-2);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
+    box-sizing: border-box;
   }
 
   .success-banner {

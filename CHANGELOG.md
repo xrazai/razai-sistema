@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Mapeador do WebChat Shopee com filtro de conversas de hoje e ontem (Task 35)
+
 ## 2026-08-19 — Central de Atendimento e Painel Co-piloto de Mensagens com aprovação em 1 clique (Task 34)
 
 ## 2026-08-19 — Driver de sessão Electron para Shopee Seller Centre com persistência e login isolado (Task 33)
