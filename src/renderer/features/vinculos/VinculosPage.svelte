@@ -445,10 +445,17 @@
 
   .empty-container {
     flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-6);
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .empty-container :global(.empty) {
+    min-height: 100%;
+    height: 100%;
+    box-sizing: border-box;
   }
 
   .split-body {
@@ -640,11 +647,17 @@
   }
 
   .no-vinculos-box {
-    padding: var(--space-6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
     height: 100%;
+    min-height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .no-vinculos-box :global(.empty) {
+    min-height: 100%;
+    height: 100%;
+    box-sizing: border-box;
   }
 
   .empty-hint-pane {
