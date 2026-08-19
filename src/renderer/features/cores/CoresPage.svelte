@@ -336,7 +336,7 @@
     min-height: 40px;
     padding: 0 var(--space-4) 0 0;
     background: var(--color-bg-sunken);
-    border-bottom: var(--border-width) solid var(--color-border);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
     width: 100%;
     box-sizing: border-box;
     line-height: 100%;
@@ -351,16 +351,16 @@
     height: 100%;
     padding: var(--space-2) var(--space-3);
     border: none;
-    border-right: var(--border-width) solid var(--color-border);
+    box-shadow: inset -1px 0 0 0 var(--color-border);
     background: var(--color-bg);
     color: var(--color-fg-muted);
     box-sizing: border-box;
     line-height: 100%;
-    transition: background var(--motion-fast), border-color var(--motion-fast);
+    transition: background var(--motion-fast), box-shadow var(--motion-fast);
   }
 
   .search-box:focus-within {
-    border-right-color: var(--color-border-strong);
+    box-shadow: inset -1px 0 0 0 var(--color-border-strong);
     background: var(--color-bg-elevated);
     color: var(--color-fg);
   }
@@ -498,7 +498,7 @@
     height: 40px;
     min-height: 40px;
     padding: var(--space-2) var(--space-4);
-    border-top: var(--border-width) solid var(--color-border);
+    box-shadow: inset 0 1px 0 0 var(--color-border);
     background: var(--color-bg-elevated);
     font-size: var(--text-xs);
     line-height: 100%;

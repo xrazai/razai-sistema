@@ -28,7 +28,7 @@
     min-height: 40px;
     padding: var(--space-2) var(--space-3);
     border: none;
-    border-bottom: var(--border-width) solid var(--color-border);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
     background: transparent;
     color: var(--color-fg-muted);
     font-size: var(--text-sm);

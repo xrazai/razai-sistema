@@ -63,7 +63,7 @@
     text-transform: uppercase;
     color: var(--color-fg);
     line-height: 100%;
-    border-bottom: var(--border-width) solid var(--color-border);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
     box-sizing: border-box;
   }
 </style>

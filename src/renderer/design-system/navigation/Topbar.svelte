@@ -26,7 +26,7 @@
     gap: var(--space-3);
     height: 40px;
     padding: var(--space-2) var(--space-4);
-    border-bottom: var(--border-width) solid var(--color-border);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
     background: var(--color-bg-elevated);
     box-sizing: border-box;
     line-height: 100%;

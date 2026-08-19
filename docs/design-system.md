@@ -73,12 +73,11 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 > Exemplo: Célula de formulário composta (`.field-cell`):
 > $$\text{Padding Top }(12\text{px}) + \text{Label }(16\text{px}) + \text{Margin }(4\text{px}) + \text{Input }(32\text{px}) + \text{Padding Bottom }(16\text{px}) = 80\text{px}\quad(10 \times 8\text{px})$$
 >
-> ### 5. Modelo de Bordas Direcionais e Fechamento Geométrico (Zero Border Collision)
-> Para evitar colisão e acúmulo de bordas duplas de 2px entre elementos adjacentes:
-> - **Direcionalidade Rígida**: Cada célula desenha divisores apenas nas direções **inferior (`border-bottom: 1px`)** e **direita (`border-right: 1px`)**.
-> - **Zero Borda Oposta**: O elemento irmão imediatamente abaixo ou à direita nunca desenha borda oposta redundante (`border-top: none`), encostando na borda do elemento anterior.
-> - **Fechamento Final**: A última linha de tabelas e compartimentos preserva sua borda inferior de 1px (`border-bottom: 1px solid var(--color-border)`), delimitando claramente a célula contra o espaço vazio.
-> - **`box-sizing: border-box` Universal**: Toda a régua computada (conteúdo + padding + borda de 1px) está encapsulada dentro da altura declarada (ex: 40px), impedindo qualquer expansão ou desvio geométrico de 1px.
+> ### 5. Modelo de Bordas Virtuais Inset e Fechamento Geométrico (Zero Layout Drift & Zero Collision)
+> Para eliminar o desconto de 1px na área interna do DevTools (que gerava áreas ímpares como 23px em vez de 24px) e prevenir colisões de 2px:
+> - **Divisores Virtuais via `box-shadow: inset`**: As linhas estruturais e divisores de compartimentos são desenhados pela GPU via `box-shadow: inset 0 -1px 0 0 var(--color-border)` (inferior) e `box-shadow: inset -1px 0 0 0 var(--color-border)` (direita).
+> - **Área Útil Pura e Simétrica**: Um elemento de `height: 40px` com `padding: 8px` possui conteúdo interno de exatamente **`24px`** ($40 - 8 - 8 = 24\text{px}$, múltiplo de 8), com centralização óptica perfeita.
+> - **Zero Subtração Física no Box Model**: O modelo de caixa mantém borda física `0px` nos divisores, preservando o grid de 40px/8px puro e sem desvios dimensionais.
 
 ---
 

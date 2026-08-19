@@ -175,8 +175,8 @@
   td {
     height: 40px;
     padding: var(--space-2) var(--space-4);
-    border-bottom: var(--border-width) solid var(--color-border);
-    border-right: var(--border-width) solid var(--color-border);
+    border: none;
+    box-shadow: inset 0 -1px 0 0 var(--color-border), inset -1px 0 0 0 var(--color-border);
     text-align: left;
     white-space: nowrap;
     box-sizing: border-box;
@@ -186,7 +186,7 @@
 
   th:last-child,
   td:last-child {
-    border-right: none;
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
   }
 
   th {
