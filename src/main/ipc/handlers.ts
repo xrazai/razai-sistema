@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, app } from 'electron'
 import { getDb } from '../database/db'
 import { TecidosService } from '../services/tecidos.service'
 import { CoresService } from '../services/cores.service'
@@ -26,7 +26,7 @@ import type {
 export function registerIpcHandlers(): void {
   ipcMain.handle('app:getInfo', (): AppInfo => ({
     name: 'razai-sistema',
-    version: '0.1.0'
+    version: app.getVersion()
   }))
 
   ipcMain.handle('db:health', (): DbHealth => {
