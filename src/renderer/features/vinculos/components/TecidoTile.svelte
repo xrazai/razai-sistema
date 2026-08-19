@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Icon from '../../../design-system/primitives/Icon.svelte'
   import type { TecidoRecord } from '../../../../shared/types'
 
   type Props = {
@@ -28,14 +27,6 @@
 >
   <div class="tile-head">
     <span class="sku-tag">{tecido.codigo}</span>
-    {#if selected}
-      <span class="selected-badge">
-        <Icon name="check" size="sm" />
-        <span>SELECIONADO</span>
-      </span>
-    {:else}
-      <span class="indicator">SELECIONAR</span>
-    {/if}
   </div>
 
   <div class="tile-body">
@@ -94,26 +85,6 @@
     font-weight: 700;
     color: var(--color-accent);
     letter-spacing: var(--tracking-header);
-    line-height: 100%;
-  }
-
-  .selected-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--color-accent);
-    letter-spacing: var(--tracking-label);
-    line-height: 100%;
-  }
-
-  .indicator {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--color-fg-dim);
-    letter-spacing: var(--tracking-label);
     line-height: 100%;
   }
 

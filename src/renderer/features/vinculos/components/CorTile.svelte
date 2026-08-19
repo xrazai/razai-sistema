@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Icon from '../../../design-system/primitives/Icon.svelte'
   import type { CorRecord } from '../../../../shared/types'
 
   type Props = {
@@ -31,13 +30,6 @@
 
     {#if alreadyLinked}
       <span class="linked-badge">JÁ VINCULADO</span>
-    {:else if selected}
-      <span class="selected-badge">
-        <Icon name="check" size="sm" />
-        <span>SELECIONADA</span>
-      </span>
-    {:else}
-      <span class="indicator">SELECIONAR</span>
     {/if}
   </div>
 
@@ -121,26 +113,6 @@
 
   .cor-tile.selected .sku-tag {
     color: var(--color-accent);
-  }
-
-  .selected-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--color-accent);
-    letter-spacing: var(--tracking-label);
-    line-height: 100%;
-  }
-
-  .indicator {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--color-fg-dim);
-    letter-spacing: var(--tracking-label);
-    line-height: 100%;
   }
 
   .linked-badge {
