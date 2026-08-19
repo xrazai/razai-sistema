@@ -9,6 +9,8 @@ import { PdfService } from '../services/pdf/pdf.service'
 import { SettingsService } from '../services/settings.service'
 import { PrinterService } from '../services/printer/printer.service'
 import { exportTecidosCsv, exportCoresCsv, exportDatabase } from '../services/backup.service'
+import { DiagnosticsService } from '../services/diagnostics.service'
+import { logger } from '../logger'
 import type {
   CreateTecidoInput,
   UpdateTecidoInput,
@@ -38,6 +40,7 @@ export function registerIpcHandlers(): void {
         timestamp: new Date().toISOString()
       }
     } catch (err: any) {
+      logger.error('Falha ao verificar saúde do banco', err)
       return {
         ok: false,
         schemaVersion: 'none',
@@ -220,5 +223,18 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('backup:exportDatabase', async (_event, destinationPath?: string) => {
     return exportDatabase(destinationPath)
+  })
+
+  // Handlers para Diagnóstico e Logs do Sistema
+  ipcMain.handle('diagnostics:getLogs', async (_event, limit?: number) => {
+    return DiagnosticsService.getLogs(limit)
+  })
+
+  ipcMain.handle('diagnostics:clearLogs', async () => {
+    return DiagnosticsService.clearLogs()
+  })
+
+  ipcMain.handle('diagnostics:getMetrics', async () => {
+    return DiagnosticsService.getMetrics()
   })
 }

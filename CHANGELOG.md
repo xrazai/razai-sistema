@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Sistema de logs no Main e painel visual de Diagnóstico em Settings (Task 13)
+
 ## 2026-08-19 — Exportação CSV de dados (UTF-8 BOM para Excel) e backup do banco SQLite (Task 12)
 
 ## 2026-08-19 — Componentização do TableToolbar no Design System e unificação de busca/filtros em tabelas (Task 11)

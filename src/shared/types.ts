@@ -245,6 +245,27 @@ export type BackupApi = {
   exportDatabase: (destinationPath?: string) => Promise<BackupResult>
 }
 
+export type SystemMetrics = {
+  electronVersion: string
+  nodeVersion: string
+  chromeVersion: string
+  platform: string
+  arch: string
+  memoryRssMb: number
+  memoryHeapUsedMb: number
+  memoryHeapTotalMb: number
+  uptimeSeconds: number
+  dbPath: string
+  dbSizeBytes: number
+  dbOk: boolean
+}
+
+export type DiagnosticsApi = {
+  getLogs: (limit?: number) => Promise<string[]>
+  clearLogs: () => Promise<boolean>
+  getMetrics: () => Promise<SystemMetrics>
+}
+
 export type RazaiApi = {
   getAppInfo: () => Promise<AppInfo>
   getDbHealth: () => Promise<DbHealth>
@@ -256,6 +277,7 @@ export type RazaiApi = {
   settings: SettingsApi
   printer: PrinterApi
   backup: BackupApi
+  diagnostics: DiagnosticsApi
 }
 
 declare global {
