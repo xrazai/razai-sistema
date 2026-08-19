@@ -18,19 +18,39 @@ export const m005_create_vinculos: Migration = {
       CREATE INDEX IF NOT EXISTS idx_vinculos_sku ON vinculos(sku);
       CREATE INDEX IF NOT EXISTS idx_vinculos_tecido_id ON vinculos(tecido_id);
       CREATE INDEX IF NOT EXISTS idx_vinculos_cor_id ON vinculos(cor_id);
-
-      -- Seed inicial de vínculos para tecidos padrão
-      INSERT OR IGNORE INTO vinculos (id, tecido_id, cor_id, sku, created_at, updated_at) VALUES
-        ('v1', '1', '1', 'TRAL-PRETABSO', datetime('now'), datetime('now')),
-        ('v2', '1', '2', 'TRAL-BRANPURO', datetime('now'), datetime('now')),
-        ('v3', '1', '4', 'TRAL-AZULMARI', datetime('now'), datetime('now')),
-        ('v4', '1', '6', 'TRAL-VERDMILI', datetime('now'), datetime('now')),
-        ('v5', '5', '1', 'LIRU-PRETABSO', datetime('now'), datetime('now')),
-        ('v6', '5', '2', 'LIRU-BRANPURO', datetime('now'), datetime('now')),
-        ('v7', '6', '1', 'SAEL-PRETABSO', datetime('now'), datetime('now')),
-        ('v8', '6', '4', 'SAEL-AZULMARI', datetime('now'), datetime('now')),
-        ('v9', '7', '2', 'VISA-BRANPURO', datetime('now'), datetime('now')),
-        ('v10', '7', '5', 'VISA-VERMCARM', datetime('now'), datetime('now'));
     `)
+
+    // Popula seeds iniciais apenas se os tecidos e cores correspondentes existirem no banco
+    const initialPairs = [
+      { tecidoCod: 'TRAL', corCod: 'PRETABSO' },
+      { tecidoCod: 'TRAL', corCod: 'BRANPURO' },
+      { tecidoCod: 'TRAL', corCod: 'AZULMARI' },
+      { tecidoCod: 'TRAL', corCod: 'VERDMILI' },
+      { tecidoCod: 'LIRU', corCod: 'PRETABSO' },
+      { tecidoCod: 'LIRU', corCod: 'BRANPURO' },
+      { tecidoCod: 'SAEL', corCod: 'PRETABSO' },
+      { tecidoCod: 'SAEL', corCod: 'AZULMARI' },
+      { tecidoCod: 'VISA', corCod: 'BRANPURO' },
+      { tecidoCod: 'VISA', corCod: 'VERMCARM' }
+    ]
+
+    const insertStmt = db.prepare(`
+      INSERT OR IGNORE INTO vinculos (id, tecido_id, cor_id, sku, created_at, updated_at)
+      VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+    `)
+
+    for (let i = 0; i < initialPairs.length; i++) {
+      const { tecidoCod, corCod } = initialPairs[i]
+      const tecido = db.prepare('SELECT id FROM tecidos WHERE codigo = ?').get(tecidoCod) as
+        | { id: string }
+        | undefined
+      const cor = db.prepare('SELECT id FROM cores WHERE codigo = ?').get(corCod) as
+        | { id: string }
+        | undefined
+
+      if (tecido && cor) {
+        insertStmt.run(`v${i + 1}`, tecido.id, cor.id, `${tecidoCod}-${corCod}`)
+      }
+    }
   }
 }
