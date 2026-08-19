@@ -11,7 +11,7 @@
   const columns: Column[] = [
     { key: 'swatch', label: 'Amostra', width: '70px', align: 'center' },
     { key: 'nome', label: 'Nome da Cor' },
-    { key: 'hex', label: 'HEX', width: '160px' },
+    { key: 'hex', label: 'HEX', width: '130px' },
     { key: 'lab', label: 'LAB (L / A / B)', width: '220px' },
     { key: 'updatedAt', label: 'Atualizado em', width: '140px' }
   ]
@@ -275,12 +275,7 @@
                       title={copiedId === row.id ? 'Código copiado!' : `Copiar ${value}`}
                       aria-label={`Copiar código ${value}`}
                     >
-                      {#if copiedId === row.id}
-                        <Icon name="check" size="sm" />
-                        <span class="copy-text">Copiado</span>
-                      {:else}
-                        <Icon name="copy" size="sm" />
-                      {/if}
+                      <Icon name={copiedId === row.id ? 'check' : 'copy'} size="sm" />
                     </button>
                   </div>
                 {:else if column.key === 'lab'}
@@ -448,14 +443,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    width: 24px;
     height: 24px;
-    padding: 0 var(--space-1);
+    padding: 0;
     background: var(--color-bg-elevated);
     border: var(--border-width) solid var(--color-border);
     color: var(--color-fg-muted);
-    font-size: 10px;
-    font-family: var(--font-mono);
     line-height: 100%;
     cursor: pointer;
     box-sizing: border-box;
@@ -472,15 +465,6 @@
     color: var(--color-ok);
     border-color: var(--color-ok);
     background: var(--color-bg-sunken);
-    padding: 0 var(--space-2);
-  }
-
-  .copy-text {
-    font-size: 10px;
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    font-family: var(--font-mono);
-    line-height: 100%;
   }
 
   .code {
