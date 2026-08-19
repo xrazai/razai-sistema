@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-19 — Lançamento da versão v0.3.0 com Módulo Completo de Relatórios e Previsibilidade de Demanda Croston-SBA
+
 ## 2026-08-19 — Relatório de previsibilidade de estoque e demanda têxtil com método Croston-SBA (Task 29)
 
 ## 2026-08-19 — Relatório analítico de vendas por tecido e cor com filtros de período e tabela hierárquica (Task 28)
