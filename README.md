@@ -13,9 +13,9 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        Processo Renderer (Svelte 5)                    │
-│   • AppShell & Topbar Unificada    • Módulo Tecidos (CRUD + Cálculos)  │
-│   • Router Reativo (Hash-based)    • Módulo Cores (LAB/HEX Swatches)   │
-│   • Design System Industrial Grid  • Living Design System Page         │
+│   • AppShell & Topbar Unificada    • Tecidos, Cores e Vínculos         │
+│   • Router Reativo (Hash-based)    • Vendas, Pedidos e Relatórios      │
+│   • Design System Industrial Grid  • Agentes & Atendimento Shopee     │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ window.razai (Context Bridge)
 ┌───────────────────────────────────▼────────────────────────────────────┐
@@ -53,6 +53,21 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 - **Cadastro em Lote com Grade Modular**: Seleção de tecido base em grid de `TecidoTile` (76px) e seleção múltipla de cores em grid de `CorTile` (76px) ordenado alfabeticamente.
 - **Integridade Relacional**: Chaves estrangeiras com `ON DELETE CASCADE` para tecidos e `ON DELETE RESTRICT` para cores com índice único composto.
 
+### 💰 Módulos de Vendas e Pedidos
+- **Vendas**: Lançamento de itens por tecido/cor vinculados, cálculo de totais, histórico e impressão de cupom térmico ESC/POS.
+- **Pedidos**: Criação e edição de pedidos, aprovação com conversão em venda, detalhes, exclusão e acompanhamento de status.
+- **Documentos**: Geração de PDF A4 e compartilhamento por Web Share, com fallback para o helper nativo do Windows.
+
+### 📊 Módulo de Relatórios
+- **Indicadores**: KPIs de faturamento, quantidade, número de vendas, ticket médio e preço médio por metro.
+- **Análises**: Vendas dos últimos 7 dias e relatório hierárquico por tecido e cor com filtros de período.
+- **Previsibilidade**: Estimativa de demanda e estoque por tecido usando Croston-SBA em horizontes configuráveis.
+
+### 🤖 Módulo de Agentes e Atendimento Shopee
+- **Agentes**: Cadastro de agentes, modo de operação, prompt de sistema e base de conhecimento com FAQs, políticas e manuais.
+- **Co-piloto**: Central de conversas com geração de respostas, aprovação ou rejeição de sugestões e histórico de mensagens.
+- **Shopee**: Sessão persistente de Seller Centre e mapeamento de conversas recentes do WebChat.
+
 ### 🖨️ Integração de Impressora Térmica ESC/POS (80mm)
 - **Comunicação Binária RAW Direta**: Builder fluente `EscPosBuilder` com suporte a 48 colunas (80mm), corte automático de guilhotina (`auto-cut`), negrito, tamanhos escalados e charset PT-BR (`CP850`).
 - **Spooler Win32 USB**: Envio direto para a impressora via spooler do Windows (`winspool.drv`), homologado na impressora **Gertec G250W**.
@@ -60,6 +75,7 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 
 ### ⚙️ Preferências e Configurações (Settings)
 - **Persistência em Banco (`app_meta`)**: Salva tema visual, módulo padrão de inicialização e impressora configurada diretamente no SQLite local.
+- **Operação e Suporte**: Exportação CSV, backup do SQLite, logs de diagnóstico, métricas do sistema e verificação de atualizações.
 
 ### 📐 Design System Industrial Brutalist (Grid 4/8 & Line-Height 100%)
 - **Line-Height 100% Universal**: Todo texto, span, label, input, button, célula e pseudo-elemento tem `line-height: 100%`.
@@ -69,8 +85,8 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 
 ### 🧭 Navegação & Topbar Unificada
 - **Topbar Única**: Cabeçalho unificado sem duplicações de títulos em páginas.
-- **Ações de Topbar**: Botões de ação primária (`+ Cadastrar Tecido`, `+ Cadastrar Cor`, `+ Cadastrar Vínculo`) integrados no canto superior direito ao lado do status de conexão do banco.
-- **Roteador Reativo**: Navegação por hash URL (`#tecidos`, `#cores`, `#vinculos`, `#settings`, etc.) sem dependências externas pesadas.
+- **Ações de Topbar**: Botões de ação primária (`+ Cadastrar Tecido`, `+ Cadastrar Cor`, `+ Cadastrar Vínculo`, `+ Nova Venda`, `+ Novo Pedido`) integrados no canto superior direito ao lado do status de conexão do banco.
+- **Roteador Reativo**: Navegação por hash URL (`#tecidos`, `#cores`, `#vinculos`, `#vendas`, `#pedidos`, `#relatorios`, `#agentes`, `#settings`, etc.) sem dependências externas pesadas.
 
 ### 🗄️ Banco de Dados & Persistência Local
 - **SQLite Nativo (`better-sqlite3`)**: Persistência no caminho canônico `%APPDATA%\razai-sistema\data\razai.sqlite`.
@@ -86,13 +102,15 @@ src/
 ├── main/                 → Electron main process, banco SQLite, migrations, IPC e serviços
 │   ├── database/         → Conexão db.ts, runner migrator.ts e migrations versionadas
 │   ├── ipc/              → Handlers de comunicação IPC
-│   └── services/         → Lógica de negócio (Tecidos, Cores, Vínculos, Settings, Printer)
+│   └── services/         → Lógica de negócio (Tecidos, Cores, Vínculos, Vendas, Pedidos, Relatórios, Agentes)
+│       ├── agent/        → ContextBuilder, LLM, sessão e mapeamento Shopee
+│       ├── pdf/          → Geração de PDF e compartilhamento nativo
 │       └── printer/      → EscPosBuilder, Win32 RAW Spooler e serviço de impressão
 ├── preload/              → Bridge seguro (contextIsolation) expondo window.razai
 ├── shared/               → Tipagens TypeScript compartilhadas (types.ts, sku.ts, textile-math.ts)
 └── renderer/             → Interface Svelte 5
     ├── design-system/    → Foundations, Primitives, Controls, Data Display, Layout, Compositions
-    ├── features/         → Telas e regras de produto (tecidos, cores, vinculos, settings, dashboard)
+    ├── features/         → Telas e regras de produto (tecidos, cores, vinculos, vendas, pedidos, relatorios, agentes, settings)
     ├── shell/            → AppShell, AppSidebar, AppTopbar, Router reativo
     └── pages/            → Living Design System Page
 ```
@@ -139,6 +157,26 @@ npm run build:win
 ```
 
 ---
+
+### Validação no GitHub Actions
+
+O workflow [`CI`](.github/workflows/ci.yml) é executado ao abrir ou atualizar qualquer Pull Request e também em pushes para a `main`.
+
+Atualmente, o job de validação instala as dependências com `npm ci` e executa:
+
+```powershell
+npm run lint
+npm run typecheck
+```
+
+Testes automatizados e build completo ainda não fazem parte da CI. Antes de submeter um PR, execute localmente:
+
+```powershell
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
 
 ## 6. Documentação Detalhada
 
