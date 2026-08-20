@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-20 — Ingestão idempotente, sugestões e envio Shopee no Atendimento (Task 38)
+
 ## 2026-08-20 — ESLint integrado à CI e README atualizado
 
 ## 2026-08-19 — Mapeador do WebChat Shopee com filtro de conversas de hoje e ontem (Task 35)

@@ -425,7 +425,7 @@ export type AgenteModoOperacao = 'copiloto' | 'autonomo' | 'pausado'
 export type AgenteConhecimentoTipo = 'faq' | 'politica' | 'manual_produto' | 'texto_livre'
 export type AgenteConversaStatus = 'aguardando_aprovacao' | 'respondido' | 'arquivado'
 export type AgenteMensagemRemetente = 'cliente' | 'agente_sugestao' | 'agente_enviado' | 'operador'
-export type AgenteMensagemStatus = 'pendente' | 'aprovado' | 'enviado' | 'rejeitado'
+export type AgenteMensagemStatus = 'pendente' | 'aprovado' | 'enviado' | 'rejeitado' | 'falha'
 
 export type AgenteRecord = {
   id: string
@@ -491,6 +491,8 @@ export type AgenteConversaRecord = {
   ultimaMensagemAt: string
   createdAt: string
   updatedAt: string
+  externalId?: string | null
+  ultimoErro?: string | null
   mensagens?: AgenteMensagemRecord[]
 }
 
@@ -502,6 +504,8 @@ export type AgenteMensagemRecord = {
   status: AgenteMensagemStatus
   confianca: number | null
   createdAt: string
+  externalId?: string | null
+  fontes?: string[]
 }
 
 export type CreateAgenteMensagemInput = {
@@ -541,6 +545,7 @@ export type ShopeeMappedConversation = {
   ultimaMensagemLabel: string
   unread: number
   fonte: 'network' | 'dom'
+  ultimaMensagemId?: string
 }
 
 export type ShopeeChatMapSnapshot = {

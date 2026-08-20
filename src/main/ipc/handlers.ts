@@ -331,11 +331,11 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('agentes:mensagens:enviar', async (_event, conversaId: string, texto: string) => {
-    return AgentesService.enviarMensagem(conversaId, texto)
+    return ShopeeSessionManager.enviarMensagem(conversaId, texto)
   })
 
   ipcMain.handle('agentes:mensagens:aprovar', async (_event, mensagemId: string, textoEditado?: string) => {
-    return AgentesService.aprovarSugestao(mensagemId, textoEditado)
+    return ShopeeSessionManager.aprovarSugestao(mensagemId, textoEditado)
   })
 
   ipcMain.handle('agentes:mensagens:rejeitar', async (_event, mensagemId: string) => {
