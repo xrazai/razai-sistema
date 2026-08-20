@@ -9,7 +9,7 @@ import { AgentesService } from './agentes.service'
 import type { AgenteMensagemRecord, ShopeeChatMapSnapshot } from '../../../shared/types'
 
 export type ShopeeSessionStatus = {
-  conectado: boolean
+  status: 'desconectado' | 'conectando' | 'conectado' | 'erro'
   shopNome?: string
   shopId?: string
   cookiesCount: number
@@ -20,6 +20,7 @@ export class ShopeeSessionManager {
   private static readonly PARTITION = 'persist:shopee-seller'
   private static loginWindow: BrowserWindow | null = null
   private static integrationBound = false
+  private static sessionStatus: 'desconectado' | 'conectando' | 'conectado' | 'erro' = 'desconectado'
 
   static getSession() {
     return session.fromPartition(this.PARTITION)
@@ -29,6 +30,7 @@ export class ShopeeSessionManager {
     this.bindConversationIntegration()
     if (this.loginWindow && !this.loginWindow.isDestroyed()) {
       this.loginWindow.focus()
+      // Auto-reanexar o mapper quando a janela já existe
       await ShopeeChatMapper.attach(this.loginWindow)
       return
     }
@@ -46,13 +48,50 @@ export class ShopeeSessionManager {
       }
     })
 
+    // Definir status inicial
+    this.sessionStatus = 'conectando'
+
     await ShopeeChatMapper.attach(this.loginWindow)
     this.loginWindow.loadURL(SHOPEE_WEBCHAT_URL)
 
+    // Verificar status inicial após a página terminar de carregar
+    // Isso garante que verificamos o estado assim que a página carregar,
+    // complementando o listener de navegação que vem depois
+    this.loginWindow.webContents.on('did-finish-load', async () => {
+      await this.verificarEAtualizarStatus()
+    })
+
+    // Monitorar carga útil para detectar autenticação
+    this.loginWindow.webContents.on('did-navigate-in-page', async (event, url) => {
+      if (url.includes('seller.shopee.com.br')) {
+        // Verificar cookies após navegação
+        await this.verificarEAtualizarStatus()
+      }
+    })
+
     this.loginWindow.on('closed', () => {
       this.loginWindow = null
+      this.sessionStatus = 'desconectado'
       logger.info('Janela de login da Shopee fechada pelo operador.')
     })
+  }
+
+  private static async verificarEAtualizarStatus(): Promise<void> {
+    try {
+      const sess = this.getSession()
+      const cookies = await sess.cookies.get({ domain: '.shopee.com.br' })
+      const hasAuthCookie = cookies.some((c) => c.name.includes('SPC_') || c.name.includes('shopee_token'))
+
+      if (hasAuthCookie) {
+        this.sessionStatus = 'conectado'
+        logger.info('Sessão Shopee autenticada com sucesso.')
+      } else {
+        this.sessionStatus = 'conectando'
+      }
+    } catch (err: any) {
+      this.sessionStatus = 'erro'
+      logger.error('Erro ao verificar status da sessão Shopee:', err)
+    }
   }
 
   static async iniciarMapeamento(): Promise<ShopeeChatMapSnapshot> {
@@ -73,20 +112,45 @@ export class ShopeeSessionManager {
 
   static async verificarStatus(): Promise<ShopeeSessionStatus> {
     try {
-      const sess = this.getSession()
-      const cookies = await sess.cookies.get({ domain: '.shopee.com.br' })
-      const hasAuthCookie = cookies.some((c) => c.name.includes('SPC_') || c.name.includes('shopee_token'))
+      // Retornar status consistente com o rastreamento interno
+      // Em vez de verificar cookies novamente, usamos o sessionStatus
+      // que já foi atualizado via verificarEAtualizarStatus() ou navegação
+      const baseStatus = this.sessionStatus === 'erro' ? 'erro' : this.sessionStatus
+
+      // Contar cookies apenas para relatório, mas status vem do rastreamento
+      let cookiesCount = 0
+      try {
+        const sess = this.getSession()
+        cookiesCount = (await sess.cookies.get({ domain: '.shopee.com.br' })).length
+      } catch {
+        // Ignorar erro ao contar cookies - status já é consistente
+      }
+
+      // Extrair shopId real dos cookies se autenticado
+      let shopId: string | undefined
+      try {
+        const sess = this.getSession()
+        const cookies = await sess.cookies.get({ domain: '.shopee.com.br' })
+        // Procurar por cookie que contenha ID da loja Shopee
+        const shopCookie = cookies.find((c) => c.name.includes('shopid') || c.name.includes('shop_id'))
+        if (shopCookie) {
+          shopId = shopCookie.value
+        }
+      } catch {
+        // Ignorar erro ao extrair shopId
+      }
 
       return {
-        conectado: hasAuthCookie,
-        cookiesCount: cookies.length,
-        shopNome: hasAuthCookie ? 'Loja Razai Shopee' : undefined,
+        status: baseStatus,
+        shopNome: baseStatus === 'conectado' ? 'Loja Razai Shopee' : undefined,
+        shopId,
+        cookiesCount,
         ultimaVerificacao: new Date().toISOString()
       }
     } catch (err: any) {
-      logger.error('Erro ao verificar cookies da Shopee:', err)
+      logger.error('Erro ao verificar status da sessão Shopee:', err)
       return {
-        conectado: false,
+        status: 'erro',
         cookiesCount: 0,
         ultimaVerificacao: new Date().toISOString()
       }
@@ -98,6 +162,7 @@ export class ShopeeSessionManager {
       const sess = this.getSession()
       await sess.clearStorageData()
       ShopeeChatMapper.reset()
+      this.sessionStatus = 'desconectado'
       logger.info('Sessão e cookies da Shopee limpos.')
       return true
     } catch (err: any) {
