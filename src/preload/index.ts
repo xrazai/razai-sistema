@@ -147,7 +147,8 @@ const api: RazaiApi = {
         ipcRenderer.invoke('agentes:shopee:simularMensagem', agenteId, clienteNome, textoPergunta),
       iniciarMapeamento: () => ipcRenderer.invoke('agentes:shopee:iniciarMapeamento'),
       obterMapa: () => ipcRenderer.invoke('agentes:shopee:obterMapa'),
-      atualizarMapa: () => ipcRenderer.invoke('agentes:shopee:atualizarMapa')
+      atualizarMapa: () => ipcRenderer.invoke('agentes:shopee:atualizarMapa'),
+      getStatus: () => ipcRenderer.invoke('agentes:shopee:getStatus')
     }
   }
 }

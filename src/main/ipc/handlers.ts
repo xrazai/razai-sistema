@@ -377,4 +377,8 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('agentes:shopee:atualizarMapa', async () => {
     return ShopeeSessionManager.atualizarMapa()
   })
+
+  ipcMain.handle('agentes:shopee:getStatus', async () => {
+    return ShopeeSessionManager.verificarStatus()
+  })
 }
