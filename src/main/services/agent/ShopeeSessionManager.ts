@@ -4,7 +4,9 @@ import { LLMProvider } from './LLMProvider'
 import { randomUUID } from 'node:crypto'
 import { getDb } from '../../database/db'
 import { ShopeeChatMapper, SHOPEE_WEBCHAT_URL } from './ShopeeChatMapper'
-import type { ShopeeChatMapSnapshot } from '../../../shared/types'
+import { ShopeeConversationIntegration } from './ShopeeConversationIntegration'
+import { AgentesService } from './agentes.service'
+import type { AgenteMensagemRecord, ShopeeChatMapSnapshot } from '../../../shared/types'
 
 export type ShopeeSessionStatus = {
   conectado: boolean
@@ -17,12 +19,14 @@ export type ShopeeSessionStatus = {
 export class ShopeeSessionManager {
   private static readonly PARTITION = 'persist:shopee-seller'
   private static loginWindow: BrowserWindow | null = null
+  private static integrationBound = false
 
   static getSession() {
     return session.fromPartition(this.PARTITION)
   }
 
   static async abrirJanelaLogin(): Promise<void> {
+    this.bindConversationIntegration()
     if (this.loginWindow && !this.loginWindow.isDestroyed()) {
       this.loginWindow.focus()
       await ShopeeChatMapper.attach(this.loginWindow)
@@ -102,6 +106,35 @@ export class ShopeeSessionManager {
     }
   }
 
+  static async enviarMensagem(conversaId: string, texto: string): Promise<AgenteMensagemRecord> {
+    const conversa = AgentesService.getConversa(conversaId)
+    if (!conversa) throw new Error('Conversa não encontrada.')
+
+    try {
+      await this.enviarParaShopeeSeNecessario(conversa.externalId, conversa.canal, texto)
+      return AgentesService.enviarMensagem(conversaId, texto)
+    } catch (error) {
+      this.registrarFalha(conversaId, texto, error)
+      throw error
+    }
+  }
+
+  static async aprovarSugestao(mensagemId: string, textoEditado?: string): Promise<AgenteMensagemRecord> {
+    const mensagem = AgentesService.getMensagem(mensagemId)
+    if (!mensagem) throw new Error('Mensagem não encontrada.')
+    const conversa = AgentesService.getConversa(mensagem.conversaId)
+    if (!conversa) throw new Error('Conversa não encontrada.')
+    const texto = textoEditado?.trim() || mensagem.texto
+
+    try {
+      await this.enviarParaShopeeSeNecessario(conversa.externalId, conversa.canal, texto)
+      return AgentesService.aprovarSugestao(mensagemId, texto)
+    } catch (error) {
+      this.registrarFalha(conversa.id, texto, error)
+      throw error
+    }
+  }
+
   /**
    * Simula a chegada de uma nova mensagem da Shopee para teste do fluxo completo
    */
@@ -133,9 +166,9 @@ export class ShopeeSessionManager {
     // 4. Salva a sugestão pendente
     const msgSugestaoId = `msg-${randomUUID().substring(0, 8)}`
     db.prepare(
-      `INSERT INTO agente_mensagens (id, conversa_id, remetente, texto, status, confianca, created_at)
-       VALUES (?, ?, 'agente_sugestao', ?, 'pendente', ?, ?)`
-    ).run(msgSugestaoId, conversaId, resIa.resposta, resIa.confianca, now)
+      `INSERT INTO agente_mensagens (id, conversa_id, remetente, texto, status, confianca, fontes_json, created_at)
+       VALUES (?, ?, 'agente_sugestao', ?, 'pendente', ?, ?, ?)`
+    ).run(msgSugestaoId, conversaId, resIa.resposta, resIa.confianca, JSON.stringify(resIa.fontes || []), now)
 
     return {
       conversaId,
@@ -143,6 +176,33 @@ export class ShopeeSessionManager {
       msgSugestaoId,
       respostaIa: resIa.resposta,
       confianca: resIa.confianca
+    }
+  }
+
+  private static bindConversationIntegration(): void {
+    if (this.integrationBound) return
+    ShopeeChatMapper.onConversation((conversation) => ShopeeConversationIntegration.ingest(conversation))
+    this.integrationBound = true
+  }
+
+  private static async enviarParaShopeeSeNecessario(
+    externalId: string | null | undefined,
+    canal: string,
+    texto: string
+  ): Promise<void> {
+    if (canal !== 'shopee' || !externalId || externalId.startsWith('sim-')) return
+    if (externalId.startsWith('dom-')) {
+      throw new Error('A conversa ainda não possui uma identidade Shopee confiável para envio.')
+    }
+    await ShopeeChatMapper.sendMessage(externalId, texto)
+  }
+
+  private static registrarFalha(conversaId: string, texto: string, error: unknown): void {
+    const message = error instanceof Error ? error.message : String(error)
+    try {
+      AgentesService.registrarFalhaEnvio(conversaId, texto, message)
+    } catch (persistError) {
+      logger.error('Não foi possível registrar a falha de envio no Atendimento:', persistError)
     }
   }
 }

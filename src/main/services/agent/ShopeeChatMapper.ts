@@ -13,6 +13,16 @@ export const SHOPEE_WEBCHAT_URL = 'https://seller.shopee.com.br/new-webchat/conv
 type PendingRequest = {
   url: string
   method: string
+  kind: ShopeeChatEndpoint['kind']
+  status?: number
+}
+
+type ConversationListener = (conversation: ShopeeMappedConversation) => void | Promise<void>
+
+type SendWaiter = {
+  requestId: string | null
+  resolve: (ok: boolean) => void
+  timer: ReturnType<typeof setTimeout>
 }
 
 export class ShopeeChatMapper {
@@ -26,6 +36,15 @@ export class ShopeeChatMapper {
   private static webRequestBound = false
   private static readyHandler: (() => void) | null = null
   private static scrapeHandler: (() => void) | null = null
+  private static conversationListener: ConversationListener | null = null
+  private static sendWaiter: SendWaiter | null = null
+
+  static onConversation(listener: ConversationListener): () => void {
+    this.conversationListener = listener
+    return () => {
+      if (this.conversationListener === listener) this.conversationListener = null
+    }
+  }
 
   static getSnapshot(): ShopeeChatMapSnapshot {
     const window = currentDateWindow()
@@ -50,6 +69,7 @@ export class ShopeeChatMapper {
     this.conversas.clear()
     this.pending.clear()
     this.ignoredIds.clear()
+    this.finishSendWaiter(false)
   }
 
   static async attach(win: BrowserWindow): Promise<void> {
@@ -89,6 +109,7 @@ export class ShopeeChatMapper {
   }
 
   static detach(): void {
+    this.finishSendWaiter(false)
     if (this.pollTimer) {
       clearInterval(this.pollTimer)
       this.pollTimer = null
@@ -123,6 +144,36 @@ export class ShopeeChatMapper {
   static async refresh(): Promise<ShopeeChatMapSnapshot> {
     await this.scrapeDom()
     return this.getSnapshot()
+  }
+
+  static async sendMessage(conversationId: string, text: string): Promise<void> {
+    const win = this.attachedWindow && !this.attachedWindow.isDestroyed() ? this.attachedWindow : null
+    const trimmedText = text.trim()
+    if (!win) throw new Error('A sessão Shopee não está aberta.')
+    if (!conversationId.trim()) throw new Error('A conversa Shopee não possui identidade externa.')
+    if (!trimmedText) throw new Error('A mensagem não pode ficar vazia.')
+
+    const requestPromise = this.waitForSendRequest()
+    let result: { ok?: boolean; error?: string }
+    try {
+      result = (await win.webContents.executeJavaScript(
+        buildSendMessageScript(conversationId, trimmedText),
+        true
+      )) as { ok?: boolean; error?: string }
+    } catch (error) {
+      this.finishSendWaiter(false)
+      throw error
+    }
+
+    if (!result?.ok) {
+      this.finishSendWaiter(false)
+      throw new Error(result?.error || 'Não foi possível preencher o compositor do WebChat.')
+    }
+
+    const confirmed = await requestPromise
+    if (!confirmed) {
+      throw new Error('A Shopee não confirmou o envio da mensagem.')
+    }
   }
 
   private static startPolling(): void {
@@ -192,10 +243,32 @@ export class ShopeeChatMapper {
     if (method === 'Network.requestWillBeSent') {
       const url = String(payload?.request?.url || '')
       const httpMethod = String(payload?.request?.method || 'GET')
-      const kind = classifyChatEndpoint(url, httpMethod)
+      const requestBody = String(payload?.request?.postData || '').toLowerCase()
+      const kind = classifyChatEndpoint(url, httpMethod, requestBody)
       if (!kind) return
-      this.pending.set(String(payload.requestId), { url, method: httpMethod })
+      const requestId = String(payload.requestId)
+      this.pending.set(requestId, { url, method: httpMethod, kind })
+      if (kind === 'envio' && this.sendWaiter && !this.sendWaiter.requestId) {
+        this.sendWaiter.requestId = requestId
+      }
       this.rememberEndpoint(httpMethod, url, kind)
+      return
+    }
+
+    if (method === 'Network.responseReceived') {
+      const requestId = String(payload?.requestId || '')
+      const pending = this.pending.get(requestId)
+      if (pending) pending.status = Number(payload?.response?.status || 0)
+      return
+    }
+
+    if (method === 'Network.loadingFailed') {
+      const requestId = String(payload?.requestId || '')
+      const pending = this.pending.get(requestId)
+      this.pending.delete(requestId)
+      if (pending?.kind === 'envio' && this.sendWaiter?.requestId === requestId) {
+        this.finishSendWaiter(false)
+      }
       return
     }
 
@@ -210,13 +283,18 @@ export class ShopeeChatMapper {
         requestId
       })) as { body?: string; base64Encoded?: boolean }
       const raw = body?.base64Encoded && body.body ? Buffer.from(body.body, 'base64').toString('utf8') : body?.body
-      if (!raw) return
-      const json = JSON.parse(raw)
-      const extracted = extractConversationsFromPayload(json)
-      this.mergeConversations(extracted.recentes, 'network')
-      for (const item of extracted.ignoradas) this.ignoredIds.add(item.id)
+      if (raw) {
+        const json = JSON.parse(raw)
+        const extracted = extractConversationsFromPayload(json)
+        this.mergeConversations(extracted.recentes, 'network')
+        for (const item of extracted.ignoradas) this.ignoredIds.add(item.id)
+      }
     } catch {
       // resposta não-JSON ou corpo já descartado
+    }
+
+    if (pending.kind === 'envio' && this.sendWaiter?.requestId === requestId) {
+      this.finishSendWaiter(pending.status !== undefined && pending.status >= 200 && pending.status < 300)
     }
   }
 
@@ -237,12 +315,47 @@ export class ShopeeChatMapper {
   ): void {
     for (const item of items) {
       const at = new Date(item.ultimaMensagemAt)
-      this.conversas.set(item.id, {
+      const previous = this.conversas.get(item.id)
+      const conversation = {
         ...item,
         fonte,
         ultimaMensagemLabel: formatLabel(at)
-      })
+      }
+      this.conversas.set(item.id, conversation)
+
+      const changed =
+        !previous ||
+        previous.ultimaMensagem !== conversation.ultimaMensagem ||
+        previous.ultimaMensagemAt !== conversation.ultimaMensagemAt ||
+        previous.clienteNome !== conversation.clienteNome
+      if (changed) this.notifyConversation(conversation)
     }
+  }
+
+  private static notifyConversation(conversation: ShopeeMappedConversation): void {
+    if (!this.conversationListener) return
+    Promise.resolve(this.conversationListener(conversation)).catch((error) => {
+      logger.error('Falha ao processar conversa recebida da Shopee:', error)
+    })
+  }
+
+  private static waitForSendRequest(timeoutMs = 12000): Promise<boolean> {
+    this.finishSendWaiter(false)
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        if (this.sendWaiter?.timer === timer) this.sendWaiter = null
+        resolve(false)
+      }, timeoutMs)
+      this.sendWaiter = { requestId: null, resolve, timer }
+    })
+  }
+
+  private static finishSendWaiter(ok: boolean): void {
+    const waiter = this.sendWaiter
+    if (!waiter) return
+    this.sendWaiter = null
+    clearTimeout(waiter.timer)
+    waiter.resolve(ok)
   }
 
   private static async scrapeDom(): Promise<void> {
@@ -288,12 +401,19 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function classifyChatEndpoint(url: string, method: string): ShopeeChatEndpoint['kind'] | null {
+function classifyChatEndpoint(url: string, method: string, requestBody = ''): ShopeeChatEndpoint['kind'] | null {
   const lower = url.toLowerCase()
   if (!/shopee\.com\.br/.test(lower)) return null
   if (/\.(js|css|png|jpe?g|gif|svg|webp|woff2?|ttf|map|ico)(\?|$)/.test(lower)) return null
+  if (method !== 'GET' && /send|reply|message|msg/.test(lower)) return 'envio'
+  if (
+    method !== 'GET' &&
+    /conversation|webchat|sellerchat|\/chat|\/im\//.test(lower) &&
+    /text|message|content|body|reply/.test(requestBody)
+  ) {
+    return 'envio'
+  }
   if (lower.includes('conversation') && /message|msg/.test(lower)) return 'mensagens'
-  if (lower.includes('send') && method !== 'GET') return 'envio'
   if (lower.includes('conversation') || lower.includes('webchat') || lower.includes('sellerchat')) {
     return lower.includes('conversation') ? 'conversas' : 'chat'
   }
@@ -359,3 +479,63 @@ const DOM_SCRAPE_SCRIPT = `(() => {
   }
   return rows.slice(0, 40)
 })()`
+
+function buildSendMessageScript(conversationId: string, text: string): string {
+  return `(async () => {
+    const conversationId = ${JSON.stringify(conversationId)};
+    const text = ${JSON.stringify(text)};
+    const visible = (element) => {
+      if (!element) return false;
+      const rect = element.getBoundingClientRect();
+      const style = window.getComputedStyle(element);
+      return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+    };
+    const rows = Array.from(document.querySelectorAll('[data-id], [data-conversation-id], [data-conversationid]'));
+    const row = rows.find((element) =>
+      element.getAttribute('data-id') === conversationId ||
+      element.getAttribute('data-conversation-id') === conversationId ||
+      element.getAttribute('data-conversationid') === conversationId
+    );
+    if (!row || !visible(row)) {
+      return { ok: false, error: 'Conversa Shopee não encontrada na janela do WebChat.' };
+    }
+    row.click();
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    const editors = Array.from(document.querySelectorAll('textarea, input[type="text"], [contenteditable="true"]'))
+      .filter(visible)
+      .filter((element) => {
+        const text = [element.getAttribute('placeholder'), element.getAttribute('aria-label'), element.getAttribute('data-testid')]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return !/search|buscar|pesquisar|filter|filtro/.test(text);
+      });
+    const editor = editors[editors.length - 1];
+    if (!editor) return { ok: false, error: 'Campo de mensagem do WebChat não encontrado.' };
+
+    editor.focus();
+    if (editor instanceof HTMLTextAreaElement || editor instanceof HTMLInputElement) {
+      const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(editor), 'value');
+      if (descriptor && descriptor.set) descriptor.set.call(editor, text);
+      else editor.value = text;
+    } else {
+      editor.textContent = text;
+    }
+    editor.dispatchEvent(new InputEvent('input', { bubbles: true, data: text, inputType: 'insertText' }));
+    editor.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const container = editor.closest('form, [role="dialog"], section, footer, div') || document;
+    const buttons = Array.from(container.querySelectorAll('button, [role="button"]')).filter(visible);
+    const sendButton = buttons.find((button) => {
+      const label = [button.textContent, button.getAttribute('aria-label'), button.getAttribute('title'), button.getAttribute('data-testid')]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return /send|enviar|responder|submit/.test(label);
+    });
+    if (!sendButton) return { ok: false, error: 'Botão de envio do WebChat não encontrado.' };
+    sendButton.click();
+    return { ok: true };
+  })()`
+}

@@ -4,6 +4,7 @@ export type ParsedShopeeConversation = {
   id: string
   clienteNome: string
   ultimaMensagem: string
+  ultimaMensagemId?: string
   ultimaMensagemAt: string
   unread: number
 }
@@ -59,6 +60,7 @@ const TEXT_KEYS = [
 ]
 
 const UNREAD_KEYS = ['unread_count', 'unreadCount', 'unread']
+const MESSAGE_ID_KEYS = ['latest_message_id', 'latestMessageId', 'last_message_id', 'lastMessageId', 'message_id', 'messageId']
 
 export function extractConversationsFromPayload(
   payload: unknown,
@@ -104,6 +106,9 @@ function parseConversationObject(
     unread: firstNumber(obj, UNREAD_KEYS) ?? 0
   }
 
+  const messageId = firstString(obj, MESSAGE_ID_KEYS) || extractMessageId(firstValue(obj, TEXT_KEYS))
+  if (messageId) item.ultimaMensagemId = messageId
+
   return {
     item,
     dentroDaJanela: isTodayOrYesterday(at, now)
@@ -123,6 +128,11 @@ function extractMessageText(value: unknown): string {
     }
   }
   return ''
+}
+
+function extractMessageId(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null
+  return firstString(value as Record<string, unknown>, MESSAGE_ID_KEYS)
 }
 
 function firstString(obj: Record<string, unknown>, keys: string[]): string | null {

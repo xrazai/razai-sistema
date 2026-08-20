@@ -52,6 +52,8 @@ type DbConversaRow = {
   ultima_mensagem_at: string
   created_at: string
   updated_at: string
+  external_id?: string | null
+  ultimo_erro?: string | null
 }
 
 type DbMensagemRow = {
@@ -62,6 +64,8 @@ type DbMensagemRow = {
   status: string
   confianca: number | null
   created_at: string
+  external_id?: string | null
+  fontes_json?: string | null
 }
 
 function mapAgenteRow(row: DbAgenteRow): AgenteRecord {
@@ -107,11 +111,23 @@ function mapConversaRow(row: DbConversaRow): AgenteConversaRecord {
     ultimaMensagemTexto: row.ultima_mensagem_texto,
     ultimaMensagemAt: row.ultima_mensagem_at,
     createdAt: row.created_at,
-    updatedAt: row.updated_at
+    updatedAt: row.updated_at,
+    externalId: row.external_id ?? null,
+    ultimoErro: row.ultimo_erro ?? null
   }
 }
 
 function mapMensagemRow(row: DbMensagemRow): AgenteMensagemRecord {
+  let fontes: string[] = []
+  if (row.fontes_json) {
+    try {
+      const parsed = JSON.parse(row.fontes_json)
+      if (Array.isArray(parsed)) fontes = parsed.filter((item): item is string => typeof item === 'string')
+    } catch {
+      fontes = []
+    }
+  }
+
   return {
     id: row.id,
     conversaId: row.conversa_id,
@@ -119,7 +135,9 @@ function mapMensagemRow(row: DbMensagemRow): AgenteMensagemRecord {
     texto: row.texto,
     status: row.status as any,
     confianca: row.confianca !== null ? Number(row.confianca) : null,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    externalId: row.external_id ?? null,
+    fontes
   }
 }
 
@@ -328,21 +346,31 @@ export class AgentesService {
     return rows.map(mapMensagemRow)
   }
 
+  static getMensagem(mensagemId: string): AgenteMensagemRecord | null {
+    const db = getDb()
+    const row = db.prepare(`SELECT * FROM agente_mensagens WHERE id = ?`).get(mensagemId) as DbMensagemRow | undefined
+    return row ? mapMensagemRow(row) : null
+  }
+
   static enviarMensagem(conversaId: string, texto: string): AgenteMensagemRecord {
     const db = getDb()
     const id = `msg-${randomUUID().substring(0, 8)}`
     const now = new Date().toISOString()
+    const trimmedText = texto.trim()
+
+    if (!trimmedText) throw new Error('A mensagem não pode ficar vazia.')
+    if (!this.getConversa(conversaId)) throw new Error('Conversa não encontrada.')
 
     db.prepare(
       `INSERT INTO agente_mensagens (id, conversa_id, remetente, texto, status, created_at)
        VALUES (?, ?, 'operador', ?, 'enviado', ?)`
-    ).run(id, conversaId, texto.trim(), now)
+    ).run(id, conversaId, trimmedText, now)
 
     db.prepare(
       `UPDATE agente_conversas
-       SET ultima_mensagem_texto = ?, ultima_mensagem_at = ?, status = 'respondido', updated_at = ?
+       SET ultima_mensagem_texto = ?, ultima_mensagem_at = ?, status = 'respondido', ultimo_erro = NULL, updated_at = ?
        WHERE id = ?`
-    ).run(texto.trim(), now, now, conversaId)
+    ).run(trimmedText, now, now, conversaId)
 
     const row = db.prepare(`SELECT * FROM agente_mensagens WHERE id = ?`).get(id) as DbMensagemRow
     return mapMensagemRow(row)
@@ -364,12 +392,33 @@ export class AgentesService {
 
     db.prepare(
       `UPDATE agente_conversas
-       SET ultima_mensagem_texto = ?, ultima_mensagem_at = ?, status = 'respondido', updated_at = ?
+       SET ultima_mensagem_texto = ?, ultima_mensagem_at = ?, status = 'respondido', ultimo_erro = NULL, updated_at = ?
        WHERE id = ?`
     ).run(finalTexto, now, now, msg.conversa_id)
 
     const updated = db.prepare(`SELECT * FROM agente_mensagens WHERE id = ?`).get(mensagemId) as DbMensagemRow
     return mapMensagemRow(updated)
+  }
+
+  static registrarFalhaEnvio(conversaId: string, texto: string, erro: string): AgenteMensagemRecord {
+    const db = getDb()
+    const id = `msg-${randomUUID().substring(0, 8)}`
+    const now = new Date().toISOString()
+    const trimmedText = texto.trim()
+
+    db.prepare(
+      `INSERT INTO agente_mensagens (id, conversa_id, remetente, texto, status, created_at)
+       VALUES (?, ?, 'operador', ?, 'falha', ?)`
+    ).run(id, conversaId, trimmedText || '[mensagem não enviada]', now)
+
+    db.prepare(
+      `UPDATE agente_conversas
+       SET ultimo_erro = ?, updated_at = ?
+       WHERE id = ?`
+    ).run(erro.slice(0, 500), now, conversaId)
+
+    const row = db.prepare(`SELECT * FROM agente_mensagens WHERE id = ?`).get(id) as DbMensagemRow
+    return mapMensagemRow(row)
   }
 
   static rejeitarSugestao(mensagemId: string): boolean {

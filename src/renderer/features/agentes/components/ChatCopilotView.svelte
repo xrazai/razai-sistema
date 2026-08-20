@@ -2,7 +2,6 @@
   import { onMount } from 'svelte'
   import Button from '../../../design-system/controls/Button.svelte'
   import Badge from '../../../design-system/data-display/Badge.svelte'
-  import Input from '../../../design-system/controls/Input.svelte'
   import EmptyState from '../../../design-system/compositions/EmptyState.svelte'
   import type {
     AgenteRecord,
@@ -212,7 +211,9 @@
                 {conv.ultimaMensagemTexto || 'Sem mensagens recentes'}
               </div>
               <div class="conv-status">
-                {#if conv.status === 'aguardando_aprovacao'}
+                {#if conv.ultimoErro}
+                  <Badge text="FALHA DE ENVIO" tone="danger" />
+                {:else if conv.status === 'aguardando_aprovacao'}
                   <Badge text="AGUARDANDO APROVAÇÃO" tone="warn" />
                 {:else if conv.status === 'respondido'}
                   <Badge text="RESPONDIDO" tone="ok" />
@@ -239,6 +240,12 @@
             <span class="client-canal mono font-xs">Canal: Shopee Web</span>
           </div>
         </div>
+        {#if selectedConversa.ultimoErro}
+          <div class="connection-error" role="alert">
+            <span>FALHA //</span>
+            <span>{selectedConversa.ultimoErro}</span>
+          </div>
+        {/if}
 
         <div class="messages-area">
           {#if isLoadingMensagens}
@@ -274,8 +281,19 @@
                   <div class="suggestion-status">
                     <Badge
                       text={msg.status === 'pendente' ? 'STATUS: AGUARDANDO SUA REVISÃO' : `STATUS: ${msg.status.toUpperCase()}`}
-                      tone={msg.status === 'pendente' ? 'warn' : 'ok'}
+                      tone={msg.status === 'pendente' ? 'warn' : msg.status === 'falha' ? 'danger' : 'ok'}
                     />
+                  </div>
+                  {#if msg.fontes?.length}
+                    <div class="suggestion-sources">
+                      <span>FONTES //</span>
+                      <span>{msg.fontes.join(' · ')}</span>
+                    </div>
+                  {/if}
+                {/if}
+                {#if msg.status === 'falha'}
+                  <div class="suggestion-status">
+                    <Badge text="ENVIO NÃO CONFIRMADO" tone="danger" />
                   </div>
                 {/if}
               </div>
@@ -525,6 +543,20 @@
     box-sizing: border-box;
   }
 
+  .connection-error {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-danger);
+    color: var(--color-danger);
+    background: var(--color-bg);
+    font-size: var(--text-xs);
+    line-height: 100%;
+    box-sizing: border-box;
+  }
+
   .client-meta {
     display: flex;
     align-items: center;
@@ -598,6 +630,14 @@
 
   .suggestion-status {
     margin-top: var(--space-1);
+  }
+
+  .suggestion-sources {
+    display: flex;
+    gap: var(--space-2);
+    color: var(--color-fg-muted);
+    font-size: 11px;
+    line-height: 100%;
   }
 
   .chat-composer {
