@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-20 — Lançamento da versão v0.3.1 com Atendimento Shopee e agentes
+
 ## 2026-08-20 — Ingestão idempotente, sugestões e envio Shopee no Atendimento (Task 38)
 
 ## 2026-08-20 — ESLint integrado à CI e README atualizado
