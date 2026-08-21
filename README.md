@@ -15,7 +15,7 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 │                        Processo Renderer (Svelte 5)                    │
 │   • AppShell & Topbar Unificada    • Tecidos, Cores e Vínculos         │
 │   • Router Reativo (Hash-based)    • Vendas, Pedidos e Relatórios      │
-│   • Design System Industrial Grid  • Agentes & Atendimento Shopee     │
+│   • Design System Industrial Grid  • Etiquetas Shopee                  │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ window.razai (Context Bridge)
 ┌───────────────────────────────────▼────────────────────────────────────┐
@@ -65,10 +65,7 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 - **Análises**: Vendas dos últimos 7 dias e relatório hierárquico por tecido e cor com filtros de período.
 - **Previsibilidade**: Estimativa de demanda e estoque por tecido usando Croston-SBA em horizontes configuráveis.
 
-### 🤖 Módulo de Agentes e Atendimento Shopee
-- **Agentes**: Cadastro de agentes, modo de operação, prompt de sistema e base de conhecimento com FAQs, políticas e manuais.
-- **Co-piloto**: Central de conversas com geração de respostas, aprovação ou rejeição de sugestões e histórico de mensagens.
-- **Shopee**: Sessão persistente de Seller Centre e mapeamento de conversas recentes do WebChat.
+### 🏷️ Módulo de Etiquetas Shopee
 - **Etiquetas Shopee**: Importação local de ZIP/ZPL, OCR posicional, revisão com origem visual, memória de correções, equivalências, impressão Zebra e PDF de cortes. Checklists sem linhas reconhecidas viram uma pendência editável antes da impressão.
 
 ### 🖨️ Integração de Impressora Térmica ESC/POS (80mm)
@@ -90,7 +87,7 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 ### 🧭 Navegação & Topbar Unificada
 - **Topbar Única**: Cabeçalho unificado sem duplicações de títulos em páginas.
 - **Ações de Topbar**: Botões de ação primária (`+ Cadastrar Tecido`, `+ Cadastrar Cor`, `+ Cadastrar Vínculo`, `+ Nova Venda`, `+ Novo Pedido`) integrados no canto superior direito ao lado do status de conexão do banco.
-- **Roteador Reativo**: Navegação por hash URL (`#tecidos`, `#cores`, `#vinculos`, `#vendas`, `#pedidos`, `#relatorios`, `#agentes`, `#settings`, etc.) sem dependências externas pesadas.
+- **Roteador Reativo**: Navegação por hash URL (`#tecidos`, `#cores`, `#vinculos`, `#vendas`, `#pedidos`, `#relatorios`, `#shopee`, `#settings`, etc.) sem dependências externas pesadas.
 
 ### 🗄️ Banco de Dados & Persistência Local
 - **SQLite Nativo (`better-sqlite3`)**: Persistência no caminho canônico `%APPDATA%\razai-sistema\data\razai.sqlite`.
@@ -106,8 +103,7 @@ src/
 ├── main/                 → Electron main process, banco SQLite, migrations, IPC e serviços
 │   ├── database/         → Conexão db.ts, runner migrator.ts e migrations versionadas
 │   ├── ipc/              → Handlers de comunicação IPC
-│   └── services/         → Lógica de negócio (Tecidos, Cores, Vínculos, Vendas, Pedidos, Relatórios, Agentes)
-│       ├── agent/        → ContextBuilder, LLM, sessão e mapeamento Shopee
+│   └── services/         → Lógica de negócio (Tecidos, Cores, Vínculos, Vendas, Pedidos, Relatórios e Shopee)
 │       ├── shopee-etiquetas/ → OCR, revisão, impressão Zebra e PDF de cortes
 │       ├── pdf/          → Geração de PDF e compartilhamento nativo
 │       └── printer/      → EscPosBuilder, Win32 RAW Spooler e serviço de impressão
@@ -115,7 +111,7 @@ src/
 ├── shared/               → Tipagens TypeScript compartilhadas (types.ts, sku.ts, textile-math.ts)
 └── renderer/             → Interface Svelte 5
     ├── design-system/    → Foundations, Primitives, Controls, Data Display, Layout, Compositions
-    ├── features/         → Telas e regras de produto (tecidos, cores, vinculos, vendas, pedidos, relatorios, agentes, settings)
+    ├── features/         → Telas e regras de produto (tecidos, cores, vinculos, vendas, pedidos, relatorios, shopee, settings)
     ├── shell/            → AppShell, AppSidebar, AppTopbar, Router reativo
     └── pages/            → Living Design System Page
 ```
@@ -196,4 +192,4 @@ npm run build
 - [Padrão de Layout de Recibo Térmico 80mm](docs/padrao-layout-recibo-80mm.md)
 - [Guia de Empacotamento, Distribuição e Smoke Test](docs/packaging.md)
 - [Workflow de Desenvolvimento e GitHub Stacks](docs/workflow-github.md)
-- [Diretrizes de Agentes e Regras do Repositório](AGENTS.md)
+- [Regras do Repositório](AGENTS.md)

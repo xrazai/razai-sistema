@@ -39,12 +39,6 @@
     onclick={() => onnavigate('relatorios')}
   />
   <NavItem
-    label="Agentes"
-    icon="agent"
-    active={route === 'agentes'}
-    onclick={() => onnavigate('agentes')}
-  />
-  <NavItem
     label="Shopee"
     icon="cart"
     active={route === 'shopee'}

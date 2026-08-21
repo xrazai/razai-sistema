@@ -12,29 +12,15 @@ Formato:
 
 ---
 
+## 2026-08-21 — Remoção do módulo de atendimento automatizado e integrações de conversas Shopee
+
 ## 2026-08-21 — Catálogo de tecidos responsivo, semântico e recuperável
 
 ## 2026-08-21 — Revisão recuperável e leitura posicional do pedido nas etiquetas Shopee (Task 45)
 
 ## 2026-08-20 — Etiquetas Shopee com OCR local, memória de correções, revisão visual, impressão Zebra e PDF de cortes (Task 44)
 
-## 2026-08-20 — Lançamento da versão v0.3.1 com Atendimento Shopee e agentes
-
-## 2026-08-20 — Ingestão idempotente, sugestões e envio Shopee no Atendimento (Task 38)
-
 ## 2026-08-20 — ESLint integrado à CI e README atualizado
-
-## 2026-08-19 — Mapeador do WebChat Shopee com filtro de conversas de hoje e ontem (Task 35)
-
-## 2026-08-19 — Central de Atendimento e Painel Co-piloto de Mensagens com aprovação em 1 clique (Task 34)
-
-## 2026-08-19 — Driver de sessão Electron para Shopee Seller Centre com persistência e login isolado (Task 33)
-
-## 2026-08-19 — Motor de IA com ContextBuilder de regras/FAQs e simulador de testes no renderer (Task 32)
-
-## 2026-08-19 — Telas de Gestão de Agentes e Base de Conhecimento com editor de FAQs e regras (Task 31)
-
-## 2026-08-19 — Schema SQLite, migração 007, tipos compartilhados e handlers IPC para Agentes e Conhecimento (Task 30)
 
 ## 2026-08-19 — Lançamento da versão v0.3.0 com Módulo Completo de Relatórios e Previsibilidade de Demanda Croston-SBA
 
