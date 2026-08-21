@@ -6,6 +6,7 @@ import { registerIpcHandlers } from './ipc/handlers'
 import { setupAppMenu } from './menu'
 import { initAutoUpdater } from './updater'
 import { logger } from './logger'
+import { ShopeeEtiquetasJobService } from './services/shopee-etiquetas/job.service'
 
 // Define identificador único e exclusivo no Windows para isolamento na barra de tarefas, notificações e processos
 if (process.platform === 'win32') {
@@ -13,7 +14,7 @@ if (process.platform === 'win32') {
 }
 
 // Garante caminho canônico permanente do banco e dados em %APPDATA%/razai-sistema
-app.setPath('userData', join(app.getPath('appData'), 'razai-sistema'))
+app.setPath('userData', process.env.RAZAI_USER_DATA_PATH || join(app.getPath('appData'), 'razai-sistema'))
 
 if (process.env.WSL_DISTRO_NAME) {
   app.disableHardwareAcceleration()
@@ -68,11 +69,12 @@ function createWindow(): void {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   logger.info('Iniciando aplicação Razai Sistema...')
   setupAppMenu()
   openDatabase()
   logger.info('Banco de dados SQLite inicializado.')
+  await ShopeeEtiquetasJobService.initialize()
   registerIpcHandlers()
   createWindow()
   logger.info('Janela principal criada.')

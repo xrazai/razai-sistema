@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import type {
   AppInfo,
   DbHealth,
@@ -149,6 +149,37 @@ const api: RazaiApi = {
       obterMapa: () => ipcRenderer.invoke('agentes:shopee:obterMapa'),
       atualizarMapa: () => ipcRenderer.invoke('agentes:shopee:atualizarMapa'),
       getStatus: () => ipcRenderer.invoke('agentes:shopee:getStatus')
+    }
+  },
+  shopee: {
+    etiquetas: {
+      importFiles: (files: File[]) => {
+        const paths = files.map((file) => webUtils.getPathForFile(file)).filter(Boolean)
+        return ipcRenderer.invoke('shopee:etiquetas:import', paths)
+      },
+      listBatches: () => ipcRenderer.invoke('shopee:etiquetas:list'),
+      getBatch: (id: string) => ipcRenderer.invoke('shopee:etiquetas:get', id),
+      getItemSourcePreview: (itemId: string) => ipcRenderer.invoke('shopee:etiquetas:itemSourcePreview', itemId),
+      deleteBatch: (id: string) => ipcRenderer.invoke('shopee:etiquetas:delete', id),
+      correctItem: (input) => ipcRenderer.invoke('shopee:etiquetas:correctItem', JSON.parse(JSON.stringify(input))),
+      resumeBatch: (id: string) => ipcRenderer.invoke('shopee:etiquetas:resume', id),
+      retryPrinting: (id: string) => ipcRenderer.invoke('shopee:etiquetas:retryPrinting', id),
+      confirmPrinted: (id: string) => ipcRenderer.invoke('shopee:etiquetas:confirmPrinted', id),
+      regeneratePdf: (id: string) => ipcRenderer.invoke('shopee:etiquetas:regeneratePdf', id),
+      openPdf: (id: string) => ipcRenderer.invoke('shopee:etiquetas:openPdf', id),
+      listEquivalences: () => ipcRenderer.invoke('shopee:etiquetas:equivalences:list'),
+      saveEquivalence: (input) => ipcRenderer.invoke('shopee:etiquetas:equivalences:save', JSON.parse(JSON.stringify(input))),
+      deleteEquivalence: (id: string) => ipcRenderer.invoke('shopee:etiquetas:equivalences:delete', id),
+      getLearningStats: () => ipcRenderer.invoke('shopee:etiquetas:learning:stats'),
+      listPrinters: () => ipcRenderer.invoke('shopee:etiquetas:printers:list'),
+      getZebraPrinter: () => ipcRenderer.invoke('shopee:etiquetas:zebra:get'),
+      setZebraPrinter: (name: string) => ipcRenderer.invoke('shopee:etiquetas:zebra:set', name),
+      testZebra: (name?: string) => ipcRenderer.invoke('shopee:etiquetas:zebra:test', name),
+      onProgress: (callback) => {
+        const listener = (_event: Electron.IpcRendererEvent, progress: Parameters<typeof callback>[0]) => callback(progress)
+        ipcRenderer.on('shopee:etiquetas:progress', listener)
+        return () => ipcRenderer.removeListener('shopee:etiquetas:progress', listener)
+      }
     }
   }
 }

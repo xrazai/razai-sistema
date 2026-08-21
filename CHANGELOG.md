@@ -12,6 +12,8 @@ Formato:
 
 ---
 
+## 2026-08-20 — Etiquetas Shopee com OCR local, memória de correções, revisão visual, impressão Zebra e PDF de cortes (Task 44)
+
 ## 2026-08-20 — Lançamento da versão v0.3.1 com Atendimento Shopee e agentes
 
 ## 2026-08-20 — Ingestão idempotente, sugestões e envio Shopee no Atendimento (Task 38)

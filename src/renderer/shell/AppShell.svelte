@@ -6,7 +6,7 @@
 
   type Props = {
     route: Route
-    onnavigate: (route: Route) => void
+    onnavigate: (route: string) => void
     children?: Snippet
   }
 

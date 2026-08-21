@@ -1,11 +1,12 @@
 <script lang="ts">
   import Sidebar from '../design-system/navigation/Sidebar.svelte'
   import NavItem from '../design-system/navigation/NavItem.svelte'
-  import type { Route } from './router.svelte'
+  import Icon from '../design-system/primitives/Icon.svelte'
+  import { router, type Route } from './router.svelte'
 
   type Props = {
     route: Route
-    onnavigate: (route: Route) => void
+    onnavigate: (route: string) => void
   }
 
   let { route, onnavigate }: Props = $props()
@@ -43,6 +44,23 @@
     active={route === 'agentes'}
     onclick={() => onnavigate('agentes')}
   />
+  <NavItem
+    label="Shopee"
+    icon="cart"
+    active={route === 'shopee'}
+    onclick={() => onnavigate('shopee')}
+  />
+  {#if route === 'shopee'}
+    <button
+      type="button"
+      class="subnav-item"
+      class:active={router.subRoute === 'etiquetas'}
+      onclick={() => onnavigate('shopee/etiquetas')}
+    >
+      <span class="subnav-icon"><Icon name="tag" size="sm" /></span>
+      <span>Etiquetas</span>
+    </button>
+  {/if}
   <NavItem
     label="Tecidos"
     icon="fabric"
@@ -88,5 +106,49 @@
     line-height: 100%;
     box-shadow: inset 0 -1px 0 0 var(--color-border);
     box-sizing: border-box;
+  }
+
+  .subnav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    height: 32px;
+    min-height: 32px;
+    padding: var(--space-2) var(--space-3) var(--space-2) var(--space-7);
+    border: none;
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
+    background: var(--color-bg-sunken);
+    color: var(--color-fg-muted);
+    font-size: var(--text-xs);
+    line-height: 100%;
+    letter-spacing: var(--tracking-tight);
+    text-align: left;
+    text-transform: uppercase;
+    box-sizing: border-box;
+  }
+
+  .subnav-item:hover {
+    color: var(--color-fg);
+    background: var(--color-bg);
+  }
+
+  .subnav-item.active {
+    color: var(--color-fg);
+    box-shadow: inset 2px 0 0 0 var(--color-accent), inset 0 -1px 0 0 var(--color-border);
+  }
+
+  .subnav-item:focus-visible {
+    outline: var(--border-width) solid var(--color-accent);
+    outline-offset: -1px;
+  }
+
+  .subnav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    line-height: 100%;
   }
 </style>

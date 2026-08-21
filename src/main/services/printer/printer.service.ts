@@ -62,16 +62,22 @@ export class PrinterService {
     }
 
     const tempFile = path.join(os.tmpdir(), `razai_print_${Date.now()}_${Math.random().toString(36).substring(7)}.bin`)
-    const scriptPath = path.join(__dirname, 'services/printer/raw-print.ps1')
-
-    // Se estiver em desenvolvimento ou empacotado, localiza o script .ps1
-    let resolvedScriptPath = path.resolve(__dirname, 'services/printer/raw-print.ps1')
-    try {
-      await fs.access(resolvedScriptPath)
-    } catch {
-      // Fallback para localização relativa ao código-fonte ou diretório atual
-      resolvedScriptPath = path.resolve(process.cwd(), 'src/main/services/printer/raw-print.ps1')
+    const candidates = [
+      process.resourcesPath ? path.join(process.resourcesPath, 'printer', 'raw-print.ps1') : '',
+      path.resolve(__dirname, 'services/printer/raw-print.ps1'),
+      path.resolve(process.cwd(), 'src/main/services/printer/raw-print.ps1')
+    ].filter(Boolean)
+    let resolvedScriptPath = ''
+    for (const candidate of candidates) {
+      try {
+        await fs.access(candidate)
+        resolvedScriptPath = candidate
+        break
+      } catch {
+        // Tenta a próxima localização conhecida.
+      }
     }
+    if (!resolvedScriptPath) return { ok: false, error: 'Script RAW de impressão não encontrado.' }
 
     try {
       await fs.writeFile(tempFile, buffer)

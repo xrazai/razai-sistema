@@ -24,6 +24,19 @@ extraResources:
     to: bin
     filter:
       - "**/*"
+  - from: src/main/services/printer/raw-print.ps1
+    to: printer/raw-print.ps1
+  - from: node_modules/@tesseract.js-data/por/4.0.0
+    to: ocr
+    filter:
+      - "por.traineddata.gz"
+  - from: node_modules/tesseract.js/dist/worker.min.js
+    to: ocr/worker.min.js
+  - from: node_modules/tesseract.js-core
+    to: ocr/core
+    filter:
+      - "*.js"
+      - "*.wasm"
 
 win:
   executableName: Razai Sistema

@@ -606,6 +606,9 @@ export type RazaiApi = {
   updater: UpdaterApi
   relatorios: RelatoriosApi
   agentes: AgentesApi
+  shopee: {
+    etiquetas: import('./shopee-etiquetas').ShopeeEtiquetasApi
+  }
 }
 
 declare global {
