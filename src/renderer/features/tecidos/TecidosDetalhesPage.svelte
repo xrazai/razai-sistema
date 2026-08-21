@@ -36,6 +36,8 @@
   let acabamento = $state('')
   let lastEditedMetric = $state<'rendimento' | 'gramaturaLinear' | 'gramaturaM2' | null>(null)
   let erroMsg = $state('')
+  let deleteErrorMsg = $state('')
+  let deleteErrorEl = $state<HTMLDivElement | null>(null)
   let isSaving = $state(false)
   let showDeleteConfirm = $state(false)
 
@@ -54,7 +56,14 @@
       acabamento = tecido.acabamento || ''
       lastEditedMetric = null
       erroMsg = ''
+      deleteErrorMsg = ''
       showDeleteConfirm = false
+    }
+  })
+
+  $effect(() => {
+    if (showDeleteConfirm && deleteErrorMsg) {
+      queueMicrotask(() => deleteErrorEl?.focus())
     }
   })
 
@@ -225,13 +234,21 @@
   }
 
   async function handleDelete() {
+    erroMsg = ''
+    deleteErrorMsg = ''
     isSaving = true
     try {
       await ondelete(tecido.id)
     } catch (err: any) {
-      erroMsg = err?.message || 'Erro ao excluir tecido.'
+      deleteErrorMsg = err?.message || 'Erro ao excluir tecido.'
+    } finally {
       isSaving = false
     }
+  }
+
+  function closeDeleteConfirm() {
+    showDeleteConfirm = false
+    deleteErrorMsg = ''
   }
 </script>
 
@@ -241,10 +258,10 @@
       <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div class="grid-form">
           <!-- Linha 1: 2 colunas (Nome e Composição) -->
-          <div class="section-row">
+          <section class="section-row" aria-labelledby="tecido-detalhes-section-identificacao">
             <header class="section-head">
               <div class="head-title-wrap">
-                <span>01. Identificação Básica</span>
+                <h2 id="tecido-detalhes-section-identificacao" class="section-title">01. Identificação Básica</h2>
                 <span class="code-badge">{codigoExibicao}</span>
               </div>
               {#if erroMsg}
@@ -271,12 +288,12 @@
                   />
                 </div>
               </Grid>
-            </div>
+            </section>
 
             <!-- Linha 2: 4 colunas (Dimensões e Rendimento com Auto-cálculo) -->
-            <div class="section-row">
+            <section class="section-row" aria-labelledby="tecido-detalhes-section-dimensoes">
               <header class="section-head">
-                <span>02. Dimensões e Rendimento (Padrão Brasileiro)</span>
+                <h2 id="tecido-detalhes-section-dimensoes" class="section-title">02. Dimensões e Rendimento (Padrão Brasileiro)</h2>
                 <span class="head-rule">Largura obrigatória + ao menos 1 parâmetro numérico (auto-cálculo ativo)</span>
               </header>
               <Grid cols={4} bare>
@@ -321,12 +338,12 @@
                   />
                 </div>
               </Grid>
-            </div>
+            </section>
 
             <!-- Linha 3: 4 colunas (Propriedades Físicas e Acabamento) -->
-            <div class="section-row">
+            <section class="section-row" aria-labelledby="tecido-detalhes-section-propriedades">
               <header class="section-head">
-                <span>03. Propriedades e Acabamento</span>
+                <h2 id="tecido-detalhes-section-propriedades" class="section-title">03. Propriedades e Acabamento</h2>
                 <span class="head-rule">Classificação técnica</span>
               </header>
               <Grid cols={4} bare>
@@ -363,7 +380,7 @@
                   />
                 </div>
               </Grid>
-            </div>
+            </section>
           </div>
         </form>
 
@@ -391,8 +408,8 @@
   <div
     class="modal-backdrop"
     role="presentation"
-    onclick={() => (showDeleteConfirm = false)}
-    onkeydown={(e) => { if (e.key === 'Escape') showDeleteConfirm = false }}
+    onclick={closeDeleteConfirm}
+    onkeydown={(e) => { if (e.key === 'Escape') closeDeleteConfirm() }}
   >
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div
@@ -401,16 +418,16 @@
       tabindex="-1"
       aria-modal="true"
       aria-labelledby="modal-title"
-      aria-describedby="modal-desc"
+      aria-describedby={deleteErrorMsg ? 'modal-desc modal-delete-error' : 'modal-desc'}
       onclick={(e) => e.stopPropagation()}
-      onkeydown={(e) => { if (e.key === 'Escape') showDeleteConfirm = false }}
+      onkeydown={(e) => { if (e.key === 'Escape') closeDeleteConfirm() }}
     >
       <header class="modal-header">
         <span id="modal-title" class="modal-title">Confirmar Exclusão Definitiva</span>
         <button
           type="button"
           class="modal-close"
-          onclick={() => (showDeleteConfirm = false)}
+          onclick={closeDeleteConfirm}
           aria-label="Fechar"
         >
           ✕
@@ -418,6 +435,21 @@
       </header>
 
       <div class="modal-body">
+        {#if deleteErrorMsg}
+          <div
+            bind:this={deleteErrorEl}
+            id="modal-delete-error"
+            class="modal-error"
+            role="alert"
+            aria-live="assertive"
+            tabindex="-1"
+          >
+            <strong>Não foi possível excluir o tecido.</strong>
+            <span>{deleteErrorMsg}</span>
+            <span>Corrija a causa e tente novamente.</span>
+          </div>
+        {/if}
+
         <div class="danger-banner">
           <p id="modal-desc" class="warning-text">
             Esta operação é irreversível. O tecido e todos os seus dados técnicos serão removidos permanentemente.
@@ -441,11 +473,11 @@
       </div>
 
       <footer class="modal-footer">
-        <Button variant="ghost" onclick={() => (showDeleteConfirm = false)} disabled={isSaving}>
+        <Button variant="ghost" onclick={closeDeleteConfirm} disabled={isSaving}>
           <span>Cancelar Exclusão</span>
         </Button>
         <Button variant="danger" onclick={handleDelete} disabled={isSaving}>
-          <span>Confirmar Exclusão</span>
+          <span>{deleteErrorMsg ? 'Tentar Excluir Novamente' : 'Confirmar Exclusão'}</span>
         </Button>
       </footer>
     </div>
@@ -496,12 +528,31 @@
     font-family: var(--font-mono);
     box-sizing: border-box;
     line-height: 100%;
+    gap: var(--space-3);
+  }
+
+  .section-title {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font: inherit;
+    font-weight: inherit;
+    line-height: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .section-head > :global(.badge) {
+    min-width: 0;
+    max-width: 45%;
+    flex: 0 1 auto;
   }
 
   .head-title-wrap {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    min-width: 0;
   }
 
   .code-badge {
@@ -514,10 +565,14 @@
   }
 
   .head-rule {
+    min-width: 0;
+    overflow: hidden;
     font-size: var(--text-xs);
     color: var(--color-fg-dim);
     letter-spacing: var(--tracking-tight);
     text-transform: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .field-cell {
@@ -611,6 +666,27 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+  }
+
+  .modal-error {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-danger);
+    background: var(--color-bg-sunken);
+    color: var(--color-danger);
+    font-size: var(--text-xs);
+    line-height: 100%;
+  }
+
+  .modal-error:focus-visible {
+    outline: var(--border-width) solid var(--color-accent);
+    outline-offset: -1px;
+  }
+
+  .modal-error span {
+    color: var(--color-fg-muted);
   }
 
   .danger-banner {

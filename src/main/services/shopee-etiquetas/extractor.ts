@@ -82,6 +82,39 @@ function extractOrderId(text: string): string | null {
   )?.replace(/[^0-9A-Z-]/gi, '') ?? null
 }
 
+function extractOrderIdFromOcr(result: OcrResult, imageHeight: number): string | null {
+  const headerWords = parseTsv(result.tsv).filter((word) => word.y0 < imageHeight * 0.45)
+  const lines: Array<{ y: number; words: OcrWord[] }> = []
+  for (const word of headerWords.sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0)) {
+    const centerY = (word.y0 + word.y1) / 2
+    const line = lines.find((candidate) => Math.abs(candidate.y - centerY) <= 14)
+    if (line) {
+      line.words.push(word)
+      line.y = line.words.reduce((sum, item) => sum + (item.y0 + item.y1) / 2, 0) / line.words.length
+    } else {
+      lines.push({ y: centerY, words: [word] })
+    }
+  }
+
+  for (const line of lines) {
+    const text = joinWords(line.words)
+    const compact = text.replace(/[|]/g, 'I').toUpperCase().replace(/[^0-9A-Z-]/g, '')
+    const labelled = compact.match(/(?:ID(?:DO)?PEDID[O0]|PEDID[O0])([0-9][0-9A-Z-]{7,}?)(?:PACKAGE|PACOTE|$)/)?.[1]
+    if (labelled) return labelled
+    const beforePackage = compact.match(/([0-9][0-9A-Z-]{9,}?)(?:PACKAGE|PACOTE)d*$/)?.[1]
+    if (beforePackage) return beforePackage
+    const direct = extractOrderId(text)
+    if (direct) return direct
+  }
+
+  const direct = extractOrderId(result.text)
+  if (direct) return direct
+  const isolated = headerWords
+    .map((word) => word.text.replace(/[|]/g, 'I').toUpperCase().replace(/[^0-9A-Z-]/g, ''))
+    .find((word) => /^[0-9][0-9A-Z-]{9,}$/.test(word))
+  return isolated ?? null
+}
+
 function extractPackage(text: string): number | null {
   const match = text.match(/PACKAGE\s*[:#-]?\s*(\d+)/i)
   return match ? Number.parseInt(match[1], 10) : null
@@ -236,7 +269,7 @@ export async function extractPage(page: ParsedZplPage, lookup: EquivalenceLookup
   if (type === 'checklist' && items.length === 0) warnings.push('Nenhuma linha de produto foi reconhecida.')
   return {
     type,
-    orderId: extractOrderId(oriented.result.text),
+    orderId: extractOrderIdFromOcr(oriented.result, metadata.height ?? page.graphic.height),
     packageNumber: extractPackage(oriented.result.text),
     confidence: oriented.result.confidence,
     warnings,
@@ -249,4 +282,4 @@ export async function extractPage(page: ParsedZplPage, lookup: EquivalenceLookup
   }
 }
 
-export const extractorInternals = { parseTsv, extractRows, classify, extractOrderId }
+export const extractorInternals = { parseTsv, extractRows, classify, extractOrderId, extractOrderIdFromOcr }

@@ -83,6 +83,11 @@ test.describe('QA E2E - Origem OCR das Etiquetas', () => {
          raster_hash, rotation_degrees, image_width, image_height, warnings_json)
         VALUES (?, ?, 0, 'checklist', 'ORDER-PREVIEW', 1, 'z64', 72, ?, 0, ?, ?, '[]')`)
         .run('page-preview', 'document-preview', fixture.rasterHash, fixture.width, fixture.height)
+      db.prepare(`INSERT INTO shopee_etiqueta_paginas
+        (id, documento_id, page_order, page_type, order_id, package_number, extraction_method, confidence,
+         raster_hash, rotation_degrees, image_width, image_height, warnings_json)
+        VALUES ('page-preview-shipping', 'document-preview', -1, 'envio', 'ORDER-PREVIEW', NULL,
+          'fd', 100, NULL, NULL, NULL, NULL, '[]')`).run()
       const insertItem = db.prepare(`INSERT INTO shopee_etiqueta_itens
         (id, pagina_id, row_order, order_id, product_raw, variation_raw, fabric_raw, color_raw,
          quantity, sku, fabric_name, color_name, cut_mm, width_mm, confidence, review_required,

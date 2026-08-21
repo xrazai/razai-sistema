@@ -12,6 +12,10 @@ Formato:
 
 ---
 
+## 2026-08-21 — Catálogo de tecidos responsivo, semântico e recuperável
+
+## 2026-08-21 — Revisão recuperável e leitura posicional do pedido nas etiquetas Shopee (Task 45)
+
 ## 2026-08-20 — Etiquetas Shopee com OCR local, memória de correções, revisão visual, impressão Zebra e PDF de cortes (Task 44)
 
 ## 2026-08-20 — Lançamento da versão v0.3.1 com Atendimento Shopee e agentes

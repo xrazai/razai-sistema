@@ -106,6 +106,20 @@ export class ShopeeEtiquetasJobService {
     }
   }
 
+  static listBatches() {
+    const batches = ShopeeEtiquetasRepository.listBatches()
+    for (const batch of batches.filter((candidate) => candidate.status === 'revisao')) {
+      this.reconcileReviewState(batch.id)
+    }
+    return ShopeeEtiquetasRepository.listBatches()
+  }
+
+  static getBatch(batchId: string) {
+    const batch = ShopeeEtiquetasRepository.getBatch(batchId)
+    if (batch?.status === 'revisao') this.reconcileReviewState(batchId)
+    return ShopeeEtiquetasRepository.getBatch(batchId)
+  }
+
   static async importFiles(filePaths: string[]): Promise<ShopeeEtiquetaActionResult> {
     if (!Array.isArray(filePaths) || filePaths.length < 1) return { ok: false, error: 'Selecione ao menos um arquivo.' }
     if (filePaths.length > 50) return { ok: false, error: 'O lote aceita no máximo 50 arquivos.' }
@@ -227,7 +241,7 @@ export class ShopeeEtiquetasJobService {
     const structuralIssues = this.validateAndGroup(batchId)
     const reviewCount = ShopeeEtiquetasRepository.countReviewIssues(batchId)
     if (structuralIssues > 0 || reviewCount > 0) {
-      const message = `${structuralIssues + reviewCount} pendência(s) precisam de revisão antes da impressão.`
+      const message = `${reviewCount || structuralIssues} pendência(s) precisam de revisão antes da impressão.`
       ShopeeEtiquetasRepository.updateBatch(batchId, 'revisao', 80, 'REVIEW_REQUIRED', message)
       this.emit({ loteId: batchId, status: 'revisao', progress: 80, message })
       return
@@ -237,7 +251,12 @@ export class ShopeeEtiquetasJobService {
   }
 
   private static validateAndGroup(batchId: string): number {
-    const pages = ShopeeEtiquetasRepository.getBatchPages(batchId)
+    let pages = ShopeeEtiquetasRepository.getBatchPages(batchId)
+    let materialized = false
+    for (const page of pages.filter((candidate) => candidate.type === 'checklist' && candidate.itemCount === 0)) {
+      materialized = ShopeeEtiquetasRepository.ensureEmptyChecklistReviewItem(page.id) || materialized
+    }
+    if (materialized) pages = ShopeeEtiquetasRepository.getBatchPages(batchId)
     let issues = 0
     let segmentStart = -1
     const closeSegment = (start: number, end: number) => {
@@ -303,6 +322,26 @@ export class ShopeeEtiquetasJobService {
     return issues
   }
 
+  private static reconcileReviewState(batchId: string): { structuralIssues: number; reviewIssues: number } {
+    const structuralIssues = this.validateAndGroup(batchId)
+    const reviewIssues = ShopeeEtiquetasRepository.countReviewIssues(batchId)
+    const batch = ShopeeEtiquetasRepository.getBatch(batchId)
+    if (batch?.status === 'revisao') {
+      const pending = reviewIssues || structuralIssues
+      const message = pending > 0
+        ? `${pending} pendência(s) precisam de revisão antes da impressão.`
+        : 'Revisões concluídas. Clique em Retomar lote.'
+      ShopeeEtiquetasRepository.updateBatch(
+        batchId,
+        'revisao',
+        batch.progress,
+        pending > 0 ? 'REVIEW_REQUIRED' : null,
+        message
+      )
+    }
+    return { structuralIssues, reviewIssues }
+  }
+
   private static async printAndGenerate(batchId: string): Promise<void> {
     const documents = ShopeeEtiquetasRepository.getBatchDocuments(batchId)
     if (!ZebraPrinterService.getPrinter()) {
@@ -358,9 +397,10 @@ export class ShopeeEtiquetasJobService {
   static resumeBatch(batchId: string): ShopeeEtiquetaActionResult {
     const batch = ShopeeEtiquetasRepository.getBatch(batchId)
     if (!batch) return { ok: false, error: 'Lote não encontrado.' }
-    if (ShopeeEtiquetasRepository.countReviewIssues(batchId) > 0) return { ok: false, error: 'Ainda existem itens que precisam de revisão.' }
-    const structuralIssues = this.validateAndGroup(batchId)
+    const { structuralIssues, reviewIssues } = this.reconcileReviewState(batchId)
+    if (reviewIssues > 0) return { ok: false, error: `Ainda existem ${reviewIssues} revisão(ões) pendente(s).` }
     if (structuralIssues > 0) return { ok: false, error: 'A estrutura de páginas do lote ainda é inválida.' }
+    this.update(batchId, 'pronto', 82, 'Revisão concluída; preparando impressão')
     this.enqueue(batchId, () => this.printAndGenerate(batchId))
     return { ok: true, loteId: batchId }
   }
@@ -368,11 +408,12 @@ export class ShopeeEtiquetasJobService {
   static retryPrinting(batchId: string): ShopeeEtiquetaActionResult {
     const batch = ShopeeEtiquetasRepository.getBatch(batchId)
     if (!batch) return { ok: false, error: 'Lote não encontrado.' }
+    const structuralIssues = this.validateAndGroup(batchId)
     const reviewIssues = ShopeeEtiquetasRepository.countReviewIssues(batchId)
     if (!canRetryShopeePrinting(batch.status, reviewIssues)) {
       return { ok: false, error: 'Somente lotes com impressão pendente ou incerta podem ser reenviados.' }
     }
-    if (this.validateAndGroup(batchId) > 0) {
+    if (structuralIssues > 0) {
       return { ok: false, error: 'O lote possui revisões pendentes e não pode ser impresso.' }
     }
     this.enqueue(batchId, () => this.printAndGenerate(batchId))

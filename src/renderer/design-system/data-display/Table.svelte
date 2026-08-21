@@ -62,6 +62,13 @@
     }
   }
 
+  function handleHeaderKeydown(event: KeyboardEvent, col: Column) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleHeaderClick(col)
+    }
+  }
+
   let sortedRows = $derived.by(() => {
     if (!sortable || !sortKey) return rows
 
@@ -97,12 +104,15 @@
             style:width={col.width ?? undefined}
             class:is-sortable={sortable && col.sortable !== false}
             class:is-sorted={sortKey === col.key}
+            aria-sort={sortable && col.sortable !== false ? (sortKey === col.key ? sortDir === 'asc' ? 'ascending' : 'descending' : 'none') : undefined}
+            tabindex={sortable && col.sortable !== false ? 0 : undefined}
             onclick={() => handleHeaderClick(col)}
+            onkeydown={(event) => handleHeaderKeydown(event, col)}
           >
             <div class="th-content" style:justify-content={col.align === 'center' ? 'center' : col.align === 'right' ? 'flex-end' : 'flex-start'}>
               <span class="th-label">{col.label}</span>
               {#if sortable && col.sortable !== false}
-                <span class="sort-indicator" class:active={sortKey === col.key}>
+                <span class="sort-indicator" class:active={sortKey === col.key} aria-hidden="true">
                   {#if sortKey === col.key}
                     {sortDir === 'asc' ? '▲' : '▼'}
                   {:else}
@@ -220,6 +230,11 @@
   th.is-sorted {
     color: var(--color-accent);
     background: var(--color-bg-sunken);
+  }
+
+  th:focus-visible {
+    outline: var(--border-width) solid var(--color-accent);
+    outline-offset: -1px;
   }
 
   .th-content {

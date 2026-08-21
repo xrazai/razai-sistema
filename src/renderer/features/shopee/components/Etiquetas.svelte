@@ -20,6 +20,7 @@
   let importing = $state(false)
   let testingPrinter = $state(false)
   let message = $state('')
+  let batchMessage = $state('')
   let progressMessage = $state('')
   let equivalences = $state<ShopeeEtiquetaEquivalencia[]>([])
   let equivalenceKind = $state<'tecido' | 'cor' | 'sku'>('tecido')
@@ -52,7 +53,7 @@
   }
 
   async function importFiles(files: File[]) {
-    importing = true; message = ''
+    importing = true; message = ''; batchMessage = ''
     try {
       const result = await window.razai.shopee.etiquetas.importFiles(files)
       if (!result.ok) throw new Error(result.error)
@@ -71,6 +72,7 @@
   }
   async function correctItem(input: Parameters<typeof window.razai.shopee.etiquetas.correctItem>[0]) {
     selected = await window.razai.shopee.etiquetas.correctItem(input)
+    batchMessage = selected?.errorMessage ?? ''
     await Promise.all([loadSettings(), loadBatches(selected?.id)])
   }
   async function batchAction(action: 'resume' | 'retry' | 'confirm' | 'pdf' | 'open') {
@@ -80,7 +82,9 @@
       : action === 'retry' ? await api.retryPrinting(selected.id)
         : action === 'confirm' ? await api.confirmPrinted(selected.id)
         : action === 'pdf' ? await api.regeneratePdf(selected.id) : await api.openPdf(selected.id)
-    if (!result.ok) message = result.error ?? 'Ação não concluída.'
+    batchMessage = result.ok
+      ? action === 'resume' ? 'Lote retomado; preparando impressão.' : 'Ação concluída.'
+      : result.error ?? 'Ação não concluída.'
     await loadBatches(selected.id)
   }
   async function saveEquivalence() {
@@ -109,6 +113,7 @@
       showDeleteBatch = false
       selected = null
       progressMessage = ''
+      batchMessage = ''
       message = `Lote ${deletedId.slice(0, 8).toUpperCase()} excluído.`
       await Promise.all([loadBatches(), loadSettings()])
     } finally {
@@ -155,6 +160,7 @@
           {#if selected.pdfAvailable}<Button variant="secondary" size="sm" onclick={() => batchAction('open')}>Abrir PDF</Button>{/if}
           {#if ['recebido', 'revisao', 'falhou'].includes(selected.status)}<span class="delete-batch-action"><Button variant="danger" size="sm" onclick={requestBatchDeletion}>Excluir lote</Button></span>{/if}
         </div>
+        {#if batchMessage}<div class="batch-action-message">{batchMessage}</div>{/if}
       </Panel>
       {#if selected.items.some((item) => item.reviewRequired)}
         <Panel title="Revisão obrigatória"><div class="review-list">{#each selected.items.filter((item) => item.reviewRequired) as item (item.id)}<EtiquetaReviewItem {item} onsave={correctItem} />{/each}</div></Panel>
@@ -163,7 +169,7 @@
 
     <div class="secondary-grid">
       <Panel title="Histórico de lotes"><div class="history-list">
-        {#each batches as batch (batch.id)}<button class:active={selected?.id === batch.id} onclick={async () => { selected = await window.razai.shopee.etiquetas.getBatch(batch.id) }}><span class="history-id">{batch.id.slice(0, 8).toUpperCase()}</span><span>{new Date(batch.createdAt).toLocaleString('pt-BR')}</span><span>{batch.fileCount} arq. · {batch.itemCount} cortes</span><Badge text={batch.status} tone={toneFor(batch.status)} /></button>{:else}<div class="empty-row">Nenhum lote processado.</div>{/each}
+        {#each batches as batch (batch.id)}<button class:active={selected?.id === batch.id} onclick={async () => { progressMessage = ''; batchMessage = ''; selected = await window.razai.shopee.etiquetas.getBatch(batch.id) }}><span class="history-id">{batch.id.slice(0, 8).toUpperCase()}</span><span>{new Date(batch.createdAt).toLocaleString('pt-BR')}</span><span>{batch.fileCount} arq. · {batch.itemCount} cortes</span><Badge text={batch.status} tone={toneFor(batch.status)} /></button>{:else}<div class="empty-row">Nenhum lote processado.</div>{/each}
       </div></Panel>
       <Panel title="Equivalências Shopee">
         <div class="equivalence-form"><Select options={[{ value: 'tecido', label: 'Tecido' }, { value: 'cor', label: 'Cor' }, { value: 'sku', label: 'SKU' }]} bind:value={equivalenceKind} /><Input bind:value={equivalenceSource} placeholder="Texto recebido" /><Input bind:value={equivalenceCanonical} placeholder="Valor normalizado" /><Button variant="primary" size="sm" onclick={saveEquivalence}>Adicionar</Button></div>
@@ -200,6 +206,7 @@
   .printer-controls, .equivalence-form { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-2); align-items: center; }
   .equivalence-form { grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1fr) auto; }
   .technical-note, .inline-message { margin-top: var(--space-3); color: var(--color-fg-muted); font-size: var(--text-xs); line-height: 100%; }
+  .batch-action-message { min-height: 24px; padding-top: var(--space-2); color: var(--color-fg-muted); font-size: var(--text-xs); line-height: 100%; box-sizing: border-box; }
   .batch-metrics { display: grid; grid-template-columns: repeat(5, 1fr); border: var(--border-width) solid var(--color-border); }
   .batch-metrics > div { display: flex; flex-direction: column; justify-content: center; gap: var(--space-1); height: 56px; padding: 0 var(--space-3); box-shadow: inset -1px 0 0 0 var(--color-border); box-sizing: border-box; }
   .batch-metrics span { color: var(--color-fg-muted); font-size: 10px; letter-spacing: var(--tracking-label); line-height: 100%; }

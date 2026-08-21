@@ -207,9 +207,9 @@
       <form class="form-body" onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div class="grid-form">
           <!-- Linha 1: 2 colunas (Nome e Composição) -->
-          <div class="section-row">
+          <section class="section-row" aria-labelledby="tecido-cadastro-section-identificacao">
             <header class="section-head">
-              <span>01. Identificação Básica</span>
+              <h2 id="tecido-cadastro-section-identificacao" class="section-title">01. Identificação Básica</h2>
               {#if erroMsg}
                 <Badge text={erroMsg} tone="danger" />
               {:else}
@@ -234,12 +234,12 @@
                   />
                 </div>
               </Grid>
-            </div>
+            </section>
 
             <!-- Linha 2: 4 colunas (Dimensões e Rendimento com Auto-cálculo) -->
-            <div class="section-row">
+            <section class="section-row" aria-labelledby="tecido-cadastro-section-dimensoes">
               <header class="section-head">
-                <span>02. Dimensões e Rendimento (Padrão Brasileiro)</span>
+                <h2 id="tecido-cadastro-section-dimensoes" class="section-title">02. Dimensões e Rendimento (Padrão Brasileiro)</h2>
                 <span class="head-rule">Largura obrigatória + ao menos 1 parâmetro numérico (auto-cálculo ativo)</span>
               </header>
               <Grid cols={4} bare>
@@ -284,12 +284,12 @@
                   />
                 </div>
               </Grid>
-            </div>
+            </section>
 
             <!-- Linha 3: 4 colunas (Propriedades Físicas e Acabamento) -->
-            <div class="section-row">
+            <section class="section-row" aria-labelledby="tecido-cadastro-section-propriedades">
               <header class="section-head">
-                <span>03. Propriedades e Acabamento</span>
+                <h2 id="tecido-cadastro-section-propriedades" class="section-title">03. Propriedades e Acabamento</h2>
                 <span class="head-rule">Classificação técnica</span>
               </header>
               <Grid cols={4} bare>
@@ -326,7 +326,7 @@
                   />
                 </div>
               </Grid>
-            </div>
+            </section>
           </div>
         </form>
 
@@ -387,13 +387,35 @@
     font-family: var(--font-mono);
     box-sizing: border-box;
     line-height: 100%;
+    gap: var(--space-3);
+  }
+
+  .section-title {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font: inherit;
+    font-weight: inherit;
+    line-height: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .section-head > :global(.badge) {
+    min-width: 0;
+    max-width: 45%;
+    flex: 0 1 auto;
   }
 
   .head-rule {
+    min-width: 0;
+    overflow: hidden;
     font-size: var(--text-xs);
     color: var(--color-fg-dim);
     letter-spacing: var(--tracking-tight);
     text-transform: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .field-cell {

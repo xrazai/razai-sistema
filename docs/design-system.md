@@ -98,10 +98,10 @@ A interface é estruturada como um maquinário de precisão: compartimentos ríg
 - `Toggle.svelte`: Chave comutadora retangular de alta visibilidade.
 
 ### 3.3 Data Display (`design-system/data-display/`)
-- `Table.svelte`: Tabela técnica com ordenação automática e interativa por colunas (ASC/DESC), colunas com alinhamento e largura customizável, clique na linha e fallback de dados vazios.
-- `TableToolbar.svelte`: Barra técnica de busca, contadores e filtros para tabelas densas, com botão de limpar (✕), badges de estado e slots de filtros/ações no grid rígido de 40px.
+- `Table.svelte`: Tabela técnica com ordenação automática e interativa por colunas (ASC/DESC), `aria-sort` no cabeçalho ativo, operação por Enter/Espaço, foco visível, colunas com alinhamento e largura customizável, clique na linha e fallback de dados vazios.
+- `TableToolbar.svelte`: Barra técnica de busca, contadores e filtros para tabelas densas, com botão de limpar (✕), badges de estado e slots de filtros/ações no grid rígido de 40px. Quando a lista filtrada coincide com o total, o contador não repete o formato `n de n`.
 - `Status.svelte`: Indicador de estado do sistema com pontos luminosos (`ok`, `warn`, `danger`, `neutral`).
-- `Badge.svelte`: Tag compacta em monoespaçado para status, mensagens e contadores.
+- `Badge.svelte`: Tag compacta em monoespaçado para status, mensagens e contadores; mensagens extensas recebem ellipsis dentro da célula, mantendo o valor completo em `title` e `aria-label`.
 - `Metric.svelte`: Exibição destacada de valores numéricos com rótulo e unidade.
 - `Progress.svelte`: Barra de progresso retangular de 1px com preenchimento sólido.
 
@@ -133,6 +133,14 @@ Para eliminar cabeçalhos duplicados nas telas e maximizar a área útil:
 1. **Topbar Única**: Existe apenas uma barra de topo (`AppTopbar`), que gerencia o título da seção atual (`TECIDOS`, `CORES`, `INÍCIO`, etc.).
 2. **Ações Primárias no Topo**: Botões de cadastro ou ações globais da tela atual (`+ Cadastrar Tecido`, `+ Cadastrar Cor`) ficam posicionados na extremidade direita da Topbar, ao lado do indicador de conexão do banco (`SQLite Online`).
 3. **Páginas Livres de Repetição**: As páginas de listagem começam diretamente na barra de ferramentas e busca (`.toolbar`), fluindo imediatamente para a tabela de dados (`Table`).
+
+### 4.1. Semântica e acessibilidade operacional
+
+- Cabeçalhos de tabela ordenáveis devem comunicar o estado por `aria-sort`, além do indicador visual. Enter e Espaço precisam executar a mesma ação do clique.
+- Instruções necessárias para operar uma tabela devem ficar próximas da tabela, e não apenas no rodapé distante do painel.
+- Seções de formulário devem usar `section` com `aria-labelledby` apontando para um `h2` identificável. O heading não deve ser substituído por um `span` visualmente equivalente.
+- Mensagens de estado e erro devem permanecer no fluxo da operação. Quando forem compactadas em badges, o truncamento visual não pode apagar o texto acessível.
+- A densidade deve preservar dados: campos de alta frequência ficam na listagem e métricas secundárias ficam no detalhe, com uma ação explícita para alcançá-las.
 
 ---
 

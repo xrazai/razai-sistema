@@ -7,12 +7,16 @@
   let { text, tone = 'neutral' }: Props = $props()
 </script>
 
-<span class="badge" data-tone={tone}>{text}</span>
+<span class="badge" data-tone={tone} title={text} aria-label={text}>
+  <span class="badge-text">{text}</span>
+</span>
 
 <style>
   .badge {
     display: inline-flex;
     align-items: center;
+    min-width: 0;
+    max-width: 100%;
     height: 20px;
     padding: var(--space-1) var(--space-2);
     border: var(--border-width) solid var(--color-border-strong);
@@ -23,6 +27,13 @@
     color: var(--color-fg-muted);
     background: var(--color-bg-elevated);
     box-sizing: border-box;
+  }
+
+  .badge-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .badge[data-tone='ok'] {

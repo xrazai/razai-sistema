@@ -62,6 +62,20 @@ function mapSummary(row: LoteRow): ShopeeEtiquetaLoteResumo {
   }
 }
 
+export function fullPageReviewBounds(
+  width: number | null,
+  height: number | null
+): { x: number; y: number; width: number; height: number } | null {
+  if (!width || !height || width <= 0 || height <= 0) return null
+  const inset = Math.min(4, Math.max(0, Math.floor((Math.min(width, height) - 1) / 2)))
+  return {
+    x: inset,
+    y: inset,
+    width: Math.max(1, width - inset * 2),
+    height: Math.max(1, height - inset * 2)
+  }
+}
+
 const summarySql = `
   SELECT l.*,
     (SELECT COUNT(*) FROM shopee_etiqueta_arquivos a WHERE a.lote_id = l.id) AS file_count,
@@ -248,6 +262,58 @@ export class ShopeeEtiquetasRepository {
     getDb().prepare(`
       UPDATE shopee_etiqueta_itens SET review_required = 1, review_reason = ? WHERE pagina_id = ?
     `).run(warning, pageId)
+  }
+
+  static ensureEmptyChecklistReviewItem(pageId: string): boolean {
+    const db = getDb()
+    return db.transaction(() => {
+      const page = db.prepare(`
+        SELECT p.id, p.order_id, p.page_order, p.extraction_method, p.confidence,
+               p.image_width, p.image_height, d.document_hash
+        FROM shopee_etiqueta_paginas p
+        JOIN shopee_etiqueta_documentos d ON d.id = p.documento_id
+        WHERE p.id = ? AND p.page_type = 'checklist'
+      `).get(pageId) as Record<string, any> | undefined
+      if (!page) return false
+      const current = db.prepare(`SELECT COUNT(*) AS total FROM shopee_etiqueta_itens WHERE pagina_id = ?`)
+        .get(pageId) as { total: number }
+      if (current.total > 0) return false
+
+      const memory = this.findExactCorrection(page.document_hash, page.page_order, 0)
+      const reviewReason = 'Checklist sem linhas reconhecidas. Abra a origem e preencha os dados da linha manualmente.'
+      this.addItem({
+        id: randomUUID(),
+        paginaId: page.id,
+        rowOrder: 0,
+        orderId: memory?.orderId ?? page.order_id,
+        productRaw: memory?.productRaw ?? '',
+        variationRaw: memory?.variationRaw ?? '',
+        fabricRaw: memory?.productRaw ?? '',
+        colorRaw: memory?.colorName ?? '',
+        quantity: memory?.quantity ?? 1,
+        quantityRaw: '',
+        sku: memory?.sku ?? '',
+        skuRaw: '',
+        fabricName: memory?.fabricName ?? '',
+        colorName: memory?.colorName ?? '',
+        cutMm: memory?.cutMm ?? null,
+        widthMm: memory?.widthMm ?? null,
+        confidence: page.confidence ?? 0,
+        validationSource: memory ? 'exact_memory' : 'ocr',
+        reviewReason: memory ? null : reviewReason,
+        reviewRequired: !memory,
+        sourceBounds: page.extraction_method === 'z64'
+          ? fullPageReviewBounds(page.image_width, page.image_height)
+          : null
+      })
+      if (memory) {
+        this.setPageOrderId(page.id, memory.orderId)
+        this.markExactCorrectionUsed(memory.id)
+      } else {
+        this.requirePageReview(page.id, reviewReason)
+      }
+      return true
+    })()
   }
 
   static countReviewIssues(batchId: string): number {
