@@ -4,7 +4,6 @@
   import VendasPage from './features/vendas/VendasPage.svelte'
   import PedidosPage from './features/pedidos/PedidosPage.svelte'
   import RelatoriosPage from './features/relatorios/RelatoriosPage.svelte'
-  import AgentesPage from './features/agentes/AgentesPage.svelte'
   import ShopeePage from './features/shopee/ShopeePage.svelte'
   import TecidosPage from './features/tecidos/TecidosPage.svelte'
   import CoresPage from './features/cores/CoresPage.svelte'
@@ -23,8 +22,6 @@
     <PedidosPage />
   {:else if router.route === 'relatorios'}
     <RelatoriosPage />
-  {:else if router.route === 'agentes'}
-    <AgentesPage />
   {:else if router.route === 'shopee'}
     <ShopeePage />
   {:else if router.route === 'tecidos'}

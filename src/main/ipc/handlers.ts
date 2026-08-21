@@ -11,8 +11,6 @@ import { PrinterService } from '../services/printer/printer.service'
 import { exportTecidosCsv, exportCoresCsv, exportDatabase } from '../services/backup.service'
 import { DiagnosticsService } from '../services/diagnostics.service'
 import { RelatoriosService } from '../services/relatorios.service'
-import { AgentesService } from '../services/agent/agentes.service'
-import { ShopeeSessionManager } from '../services/agent/ShopeeSessionManager'
 import { checkForUpdates, quitAndInstall, getUpdateStatus } from '../updater'
 import { logger } from '../logger'
 import { ShopeeEtiquetasRepository } from '../services/shopee-etiquetas/repository'
@@ -32,12 +30,7 @@ import type {
   CreatePedidoInput,
   UpdatePedidoInput,
   RelatorioFiltroInput,
-  PrevisibilidadeFiltroInput,
-  CreateAgenteInput,
-  UpdateAgenteInput,
-  CreateAgenteConhecimentoInput,
-  UpdateAgenteConhecimentoInput,
-  AgenteConversaStatus
+  PrevisibilidadeFiltroInput
 } from '../../shared/types'
 import type { ShopeeEtiquetaCorrecaoInput, ShopeeEtiquetaEquivalenciaInput } from '../../shared/shopee-etiquetas'
 
@@ -318,104 +311,4 @@ export function registerIpcHandlers(): void {
     return getUpdateStatus()
   })
 
-  // Handlers para Módulo de Agentes e Atendimento
-  ipcMain.handle('agentes:list', async () => {
-    return AgentesService.list()
-  })
-
-  ipcMain.handle('agentes:getById', async (_event, id: string) => {
-    return AgentesService.getById(id)
-  })
-
-  ipcMain.handle('agentes:create', async (_event, input: CreateAgenteInput) => {
-    return AgentesService.create(input)
-  })
-
-  ipcMain.handle('agentes:update', async (_event, id: string, input: UpdateAgenteInput) => {
-    return AgentesService.update(id, input)
-  })
-
-  ipcMain.handle('agentes:delete', async (_event, id: string) => {
-    return AgentesService.delete(id)
-  })
-
-  ipcMain.handle('agentes:conhecimento:list', async (_event, agenteId: string) => {
-    return AgentesService.listConhecimentos(agenteId)
-  })
-
-  ipcMain.handle('agentes:conhecimento:create', async (_event, input: CreateAgenteConhecimentoInput) => {
-    return AgentesService.createConhecimento(input)
-  })
-
-  ipcMain.handle('agentes:conhecimento:update', async (_event, id: string, input: UpdateAgenteConhecimentoInput) => {
-    return AgentesService.updateConhecimento(id, input)
-  })
-
-  ipcMain.handle('agentes:conhecimento:delete', async (_event, id: string) => {
-    return AgentesService.deleteConhecimento(id)
-  })
-
-  ipcMain.handle('agentes:conversas:list', async (_event, agenteId: string, status?: AgenteConversaStatus) => {
-    return AgentesService.listConversas(agenteId, status)
-  })
-
-  ipcMain.handle('agentes:conversas:get', async (_event, conversaId: string) => {
-    return AgentesService.getConversa(conversaId)
-  })
-
-  ipcMain.handle('agentes:mensagens:list', async (_event, conversaId: string) => {
-    return AgentesService.listMensagens(conversaId)
-  })
-
-  ipcMain.handle('agentes:mensagens:enviar', async (_event, conversaId: string, texto: string) => {
-    return ShopeeSessionManager.enviarMensagem(conversaId, texto)
-  })
-
-  ipcMain.handle('agentes:mensagens:aprovar', async (_event, mensagemId: string, textoEditado?: string) => {
-    return ShopeeSessionManager.aprovarSugestao(mensagemId, textoEditado)
-  })
-
-  ipcMain.handle('agentes:mensagens:rejeitar', async (_event, mensagemId: string) => {
-    return AgentesService.rejeitarSugestao(mensagemId)
-  })
-
-  ipcMain.handle('agentes:gerarRespostaIa', async (_event, agenteId: string, pergunta: string, conversaId?: string) => {
-    return AgentesService.gerarRespostaIa(agenteId, pergunta, conversaId)
-  })
-
-  // Handlers para Shopee Web Session (Electron)
-  ipcMain.handle('agentes:shopee:abrirLogin', async () => {
-    return ShopeeSessionManager.abrirJanelaLogin()
-  })
-
-  ipcMain.handle('agentes:shopee:verificarStatus', async () => {
-    return ShopeeSessionManager.verificarStatus()
-  })
-
-  ipcMain.handle('agentes:shopee:limparSessao', async () => {
-    return ShopeeSessionManager.limparSessao()
-  })
-
-  ipcMain.handle(
-    'agentes:shopee:simularMensagem',
-    async (_event, agenteId: string, clienteNome: string, textoPergunta: string) => {
-      return ShopeeSessionManager.simularMensagemRecebida(agenteId, clienteNome, textoPergunta)
-    }
-  )
-
-  ipcMain.handle('agentes:shopee:iniciarMapeamento', async () => {
-    return ShopeeSessionManager.iniciarMapeamento()
-  })
-
-  ipcMain.handle('agentes:shopee:obterMapa', async () => {
-    return ShopeeSessionManager.obterMapa()
-  })
-
-  ipcMain.handle('agentes:shopee:atualizarMapa', async () => {
-    return ShopeeSessionManager.atualizarMapa()
-  })
-
-  ipcMain.handle('agentes:shopee:getStatus', async () => {
-    return ShopeeSessionManager.verificarStatus()
-  })
 }

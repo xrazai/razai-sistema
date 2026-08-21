@@ -18,14 +18,14 @@ Sucesso significa permitir que o dono encontre, registre, acompanhe e execute as
 
 ## Positioning
 
-O mecanismo central do produto é consolidar, em uma aplicação local, o catálogo técnico de tecidos e cores, os produtos vendáveis, vendas, pedidos, relatórios, atendimento Shopee e impressão operacional.
+O mecanismo central do produto é consolidar, em uma aplicação local, o catálogo técnico de tecidos e cores, os produtos vendáveis, vendas, pedidos, relatórios, etiquetas Shopee e impressão operacional.
 
 Uma posição competitiva ou promessa adicional não foi definida. Não inventar claims, métricas, clientes ou provas externas.
 
 ## Operating Context
 
 - O produto é operado pelo dono da loja em Windows 10/11.
-- As rotinas abrangem cadastro e engenharia de tecidos, cadastro de cores, vínculos entre tecido e cor, vendas, pedidos, relatórios, atendimento Shopee, geração de documentos e impressão térmica.
+- As rotinas abrangem cadastro e engenharia de tecidos, cadastro de cores, vínculos entre tecido e cor, vendas, pedidos, relatórios, etiquetas Shopee, geração de documentos e impressão térmica.
 - Os dados do negócio são persistidos localmente em SQLite e as integrações operacionais incluem impressoras térmicas.
 - A interface e os conteúdos devem ser mantidos em português.
 
@@ -35,7 +35,7 @@ Uma posição competitiva ou promessa adicional não foi definida. Não inventar
 - O catálogo de tecidos preserva dados técnicos e cálculos de engenharia têxtil; cores preservam dados visuais e valores LAB/HEX.
 - Vínculos geram produtos vendáveis e SKUs compostos; vendas e pedidos suportam acompanhamento, impressão e documentos.
 - Relatórios cobrem indicadores, análises de vendas e previsibilidade de demanda e estoque.
-- Agentes e atendimento Shopee cobrem base de conhecimento, sugestões de resposta, conversas e sessão do Seller Centre.
+- Etiquetas Shopee cobrem importação, OCR, revisão, impressão Zebra e geração de PDF de cortes.
 - A integração de impressão térmica ESC/POS é parte do fluxo operacional; a Gertec G250W é uma impressora homologada no projeto.
 - Reduzir carga cognitiva significa melhorar organização, hierarquia e clareza. Não significa esconder ou remover informações relevantes.
 - A listagem de tecidos mantém um núcleo curto de identificação e oferece as métricas completas no detalhe, com ação explícita para acessá-las.

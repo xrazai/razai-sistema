@@ -3,7 +3,6 @@ export type Route =
   | 'vendas'
   | 'pedidos'
   | 'relatorios'
-  | 'agentes'
   | 'shopee'
   | 'tecidos'
   | 'cores'
@@ -23,7 +22,6 @@ const VALID_ROUTES: Route[] = [
   'vendas',
   'pedidos',
   'relatorios',
-  'agentes',
   'shopee',
   'tecidos',
   'cores',

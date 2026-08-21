@@ -104,14 +104,6 @@
       <circle cx="5.5" cy="5.5" r="3.5" />
       <path d="M8.5 8.5 L12.5 12.5" />
     </svg>
-  {:else if name === 'agent' || name === 'robot' || name === 'bot'}
-    <svg viewBox="0 0 14 14">
-      <rect x="2.5" y="3.5" width="9" height="8" />
-      <path d="M7 0.5 V3.5 M0.5 7.5 H2.5 M11.5 7.5 H13.5" />
-      <rect class="fill" x="4.5" y="5.5" width="1.5" height="1.5" />
-      <rect class="fill" x="8" y="5.5" width="1.5" height="1.5" />
-      <path d="M4.5 9.5 H9.5" />
-    </svg>
   {:else}
     <svg viewBox="0 0 14 14">
       <rect class="fill" x="6" y="6" width="2" height="2" />
