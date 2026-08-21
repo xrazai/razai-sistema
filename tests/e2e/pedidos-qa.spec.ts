@@ -18,7 +18,8 @@ test.describe('QA E2E — Módulo de Pedidos', () => {
       env: {
         ...process.env,
         NODE_ENV: 'test',
-        RAZAI_DB_PATH: tempDbPath
+        RAZAI_DB_PATH: tempDbPath,
+        RAZAI_USER_DATA_PATH: join(tempDir, 'user-data')
       }
     })
 
@@ -79,18 +80,18 @@ test.describe('QA E2E — Módulo de Pedidos', () => {
     // Retorna para a tabela de pedidos
     await expect(page.locator('.main > header.topbar .title')).toHaveText('Pedidos')
     await expect(page.getByText('Confecção Primavera')).toBeVisible()
-    await expect(page.getByText('PENDENTE')).toBeVisible()
+    await expect(page.getByText('PENDENTE', { exact: true })).toBeVisible()
 
     // Abre os detalhes do pedido
-    await page.getByText('Confecção Primavera').click()
+    await page.getByTitle('Editar / Ver Detalhes').click()
     await expect(page.locator('.main > header.topbar .title')).toHaveText(/Pedidos \/ Detalhes/i)
 
     // Aprova o pedido para converter em venda
     page.once('dialog', (dialog) => dialog.accept())
     await page.getByRole('button', { name: /Aprovar & Gerar Venda/i }).click()
 
-    await expect(page.getByText(/Pedido aprovado com sucesso/i)).toBeVisible()
-    await expect(page.getByText('APROVADO')).toBeVisible()
+    await expect(page.locator('.main > header.topbar .title')).toHaveText('Pedidos')
+    await expect(page.getByText('APROVADO', { exact: true })).toBeVisible()
   })
 
   test('Flow 3: Geração física de PDF A4 em disco via Electron e validação de cabeçalho binário', async () => {

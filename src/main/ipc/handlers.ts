@@ -15,6 +15,11 @@ import { AgentesService } from '../services/agent/agentes.service'
 import { ShopeeSessionManager } from '../services/agent/ShopeeSessionManager'
 import { checkForUpdates, quitAndInstall, getUpdateStatus } from '../updater'
 import { logger } from '../logger'
+import { ShopeeEtiquetasRepository } from '../services/shopee-etiquetas/repository'
+import { ShopeeEtiquetasJobService } from '../services/shopee-etiquetas/job.service'
+import { ZebraPrinterService } from '../services/shopee-etiquetas/zebra-printer.service'
+import { ShopeeEtiquetaSourcePreviewService } from '../services/shopee-etiquetas/source-preview.service'
+import { ShopeeEtiquetaTrainingSampleService } from '../services/shopee-etiquetas/training-sample.service'
 import type {
   AppInfo,
   DbHealth,
@@ -34,6 +39,7 @@ import type {
   UpdateAgenteConhecimentoInput,
   AgenteConversaStatus
 } from '../../shared/types'
+import type { ShopeeEtiquetaCorrecaoInput, ShopeeEtiquetaEquivalenciaInput } from '../../shared/shopee-etiquetas'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle('app:getInfo', (): AppInfo => ({
@@ -224,6 +230,37 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('printer:printTest', async (_event, printerName?: string) => {
     return PrinterService.printTestReceipt(printerName)
   })
+
+  // Shopee / Etiquetas
+  ipcMain.handle('shopee:etiquetas:import', async (_event, filePaths: string[]) => {
+    return ShopeeEtiquetasJobService.importFiles(filePaths)
+  })
+  ipcMain.handle('shopee:etiquetas:list', () => ShopeeEtiquetasRepository.listBatches())
+  ipcMain.handle('shopee:etiquetas:get', (_event, id: string) => ShopeeEtiquetasRepository.getBatch(id))
+  ipcMain.handle('shopee:etiquetas:itemSourcePreview', (_event, itemId: string) =>
+    ShopeeEtiquetaSourcePreviewService.getItemSourcePreview(itemId)
+  )
+  ipcMain.handle('shopee:etiquetas:delete', (_event, id: string) => ShopeeEtiquetasJobService.deleteBatch(id))
+  ipcMain.handle('shopee:etiquetas:correctItem', async (_event, input: ShopeeEtiquetaCorrecaoInput) => {
+    const batchId = ShopeeEtiquetasRepository.correctItem(input)
+    if (batchId) await ShopeeEtiquetaTrainingSampleService.captureCorrectedItem(input.itemId).catch(() => false)
+    return batchId ? ShopeeEtiquetasRepository.getBatch(batchId) : null
+  })
+  ipcMain.handle('shopee:etiquetas:resume', (_event, id: string) => ShopeeEtiquetasJobService.resumeBatch(id))
+  ipcMain.handle('shopee:etiquetas:retryPrinting', (_event, id: string) => ShopeeEtiquetasJobService.retryPrinting(id))
+  ipcMain.handle('shopee:etiquetas:confirmPrinted', (_event, id: string) => ShopeeEtiquetasJobService.confirmPrinted(id))
+  ipcMain.handle('shopee:etiquetas:regeneratePdf', (_event, id: string) => ShopeeEtiquetasJobService.regeneratePdf(id))
+  ipcMain.handle('shopee:etiquetas:openPdf', (_event, id: string) => ShopeeEtiquetasJobService.openPdf(id))
+  ipcMain.handle('shopee:etiquetas:equivalences:list', () => ShopeeEtiquetasRepository.listEquivalences())
+  ipcMain.handle('shopee:etiquetas:equivalences:save', (_event, input: ShopeeEtiquetaEquivalenciaInput) =>
+    ShopeeEtiquetasRepository.saveEquivalence(input)
+  )
+  ipcMain.handle('shopee:etiquetas:equivalences:delete', (_event, id: string) => ShopeeEtiquetasRepository.deleteEquivalence(id))
+  ipcMain.handle('shopee:etiquetas:learning:stats', () => ShopeeEtiquetasRepository.getLearningStats())
+  ipcMain.handle('shopee:etiquetas:printers:list', () => PrinterService.listPrinters())
+  ipcMain.handle('shopee:etiquetas:zebra:get', () => ZebraPrinterService.getPrinter())
+  ipcMain.handle('shopee:etiquetas:zebra:set', (_event, name: string) => ZebraPrinterService.setPrinter(name))
+  ipcMain.handle('shopee:etiquetas:zebra:test', (_event, name?: string) => ZebraPrinterService.test(name))
 
   // Handlers para Exportação CSV e Backup do Banco
   ipcMain.handle('backup:exportTecidosCsv', async (_event, filePath?: string) => {

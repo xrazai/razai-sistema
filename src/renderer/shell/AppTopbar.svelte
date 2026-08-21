@@ -19,6 +19,7 @@
     pedidos: 'Pedidos',
     relatorios: 'Relatórios',
     agentes: 'Agentes & Atendimento',
+    shopee: 'Shopee',
     tecidos: 'Tecidos',
     cores: 'Cores',
     vinculos: 'Vínculos',
@@ -32,6 +33,10 @@
       if (router.subRoute.startsWith('chat')) return 'Agentes / Central de Atendimento'
       if (router.subRoute.startsWith('conhecimento')) return 'Agentes / Base de Conhecimento'
       return 'Agentes & Atendimento'
+    }
+    if (router.route === 'shopee') {
+      if (router.subRoute === 'etiquetas') return 'Shopee / Etiquetas'
+      return 'Shopee'
     }
     if (router.route === 'vendas') {
       if (router.subRoute === 'novo') return 'Vendas / Novo Lançamento'

@@ -18,7 +18,8 @@ test.describe('QA E2E — Módulo de Vínculos', () => {
       env: {
         ...process.env,
         NODE_ENV: 'test',
-        RAZAI_DB_PATH: tempDbPath
+        RAZAI_DB_PATH: tempDbPath,
+        RAZAI_USER_DATA_PATH: join(tempDir, 'user-data')
       }
     })
 

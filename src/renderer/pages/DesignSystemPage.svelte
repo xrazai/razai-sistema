@@ -14,6 +14,7 @@
   import Select from '../design-system/controls/Select.svelte'
   import Checkbox from '../design-system/controls/Checkbox.svelte'
   import Toggle from '../design-system/controls/Toggle.svelte'
+  import FileDropZone from '../design-system/controls/FileDropZone.svelte'
   import Status from '../design-system/data-display/Status.svelte'
   import Metric from '../design-system/data-display/Metric.svelte'
   import Badge from '../design-system/data-display/Badge.svelte'
@@ -118,6 +119,7 @@
     'arrow-left',
     'check',
     'copy',
+    'tag',
     'empty'
   ]
 </script>
@@ -177,6 +179,9 @@
               <div class="caption">Bordas sólidas 1px · border-radius: 0 · Grid modular rígido</div>
             </Cell>
           </Grid>
+          <Panel title="File Drop Zone">
+            <FileDropZone description="Seleção múltipla de arquivos operacionais" />
+          </Panel>
         </section>
 
         <!-- 02. Primitives -->

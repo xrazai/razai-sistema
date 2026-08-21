@@ -71,6 +71,8 @@ describe('PdfService — Geração de PDF e Design Brutalista A4', () => {
 
     expect(html).toContain("font-family: 'Courier New', Courier, monospace")
     expect(html).toContain('RAZAI / SISTEMA')
+    expect(html).toContain('min-height: 32px;')
+    expect(html).not.toContain('Engenharia e Gestão Têxtil Industrial')
     expect(html).toContain('PEDIDO #PED-0042')
     expect(html).toContain('Ateliê Alta Costura')
   })

@@ -58,6 +58,38 @@ function getWindowsShareBinaryPath(): string | null {
 }
 
 export class PdfService {
+  static async renderHtmlToPdf(htmlContent: string, finalPdfPath: string): Promise<Buffer> {
+    let win: BrowserWindow | null = null
+    const htmlPath = finalPdfPath.replace(/\.pdf$/i, '.html')
+    try {
+      await fs.mkdir(path.dirname(finalPdfPath), { recursive: true })
+      win = new BrowserWindow({
+        show: false,
+        width: 800,
+        height: 1100,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true
+        }
+      })
+      await fs.writeFile(htmlPath, htmlContent, 'utf8')
+      await win.loadFile(htmlPath)
+      const pdfBuffer = await win.webContents.printToPDF({
+        pageSize: 'A4',
+        printBackground: true,
+        margins: { marginType: 'none' }
+      })
+      if (pdfBuffer.subarray(0, 4).toString('utf8') !== '%PDF') {
+        throw new Error('Falha ao renderizar o documento PDF.')
+      }
+      await fs.writeFile(finalPdfPath, pdfBuffer)
+      return pdfBuffer
+    } finally {
+      await fs.unlink(htmlPath).catch(() => undefined)
+      win?.destroy()
+    }
+  }
+
   static generatePedidoHtml(pedido: PedidoRecord): string {
     const formatCurrency = (val: number) =>
       `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -119,12 +151,8 @@ export class PdfService {
             letter-spacing: 1px;
             text-transform: uppercase;
           }
-          .brand-sub {
-            font-size: 9px;
-            color: #444444;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
+          .brand-block {
+            min-height: 32px;
           }
           .doc-title {
             text-align: right;
@@ -250,9 +278,8 @@ export class PdfService {
       </head>
       <body>
         <div class="header">
-          <div>
+          <div class="brand-block">
             <div class="brand">RAZAI / SISTEMA</div>
-            <div class="brand-sub">Engenharia e Gestão Têxtil Industrial</div>
           </div>
           <div class="doc-title">
             <div class="doc-number">PEDIDO ${numeroFormatado}</div>
@@ -333,7 +360,6 @@ export class PdfService {
   }
 
   static async generatePedidoPdf(pedido: PedidoRecord): Promise<PedidoPdfResult> {
-    let win: BrowserWindow | null = null
     try {
       const htmlContent = this.generatePedidoHtml(pedido)
       const numeroPad = String(pedido.numero).padStart(4, '0')
@@ -342,35 +368,7 @@ export class PdfService {
       const outputDir = path.join(os.tmpdir(), 'razai-pedidos')
       await fs.mkdir(outputDir, { recursive: true })
       const finalPdfPath = path.join(outputDir, fileName)
-      const htmlPath = path.join(outputDir, fileName.replace(/\.pdf$/i, '.html'))
-
-      win = new BrowserWindow({
-        show: false,
-        width: 800,
-        height: 1100,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true
-        }
-      })
-
-      await fs.writeFile(htmlPath, htmlContent, 'utf8')
-      await win.loadFile(htmlPath)
-      await fs.unlink(htmlPath).catch(() => undefined)
-
-      const pdfBuffer = await win.webContents.printToPDF({
-        pageSize: 'A4',
-        printBackground: true,
-        margins: {
-          marginType: 'none'
-        }
-      })
-
-      if (pdfBuffer.subarray(0, 4).toString('utf8') !== '%PDF') {
-        return { ok: false, error: 'Falha ao renderizar o PDF do pedido.' }
-      }
-
-      await fs.writeFile(finalPdfPath, pdfBuffer)
+      const pdfBuffer = await this.renderHtmlToPdf(htmlContent, finalPdfPath)
       return {
         ok: true,
         filePath: finalPdfPath,
@@ -381,10 +379,6 @@ export class PdfService {
     } catch (err: any) {
       console.error('[PdfService] Erro ao gerar PDF:', err)
       return { ok: false, error: err?.message || 'Falha na geração do PDF' }
-    } finally {
-      if (win) {
-        win.destroy()
-      }
     }
   }
 

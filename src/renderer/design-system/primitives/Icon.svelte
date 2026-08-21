@@ -77,6 +77,11 @@
       <rect x="4.5" y="4.5" width="8" height="8" />
       <path d="M9.5 4.5 V1.5 H1.5 V9.5 H4.5" />
     </svg>
+  {:else if name === 'tag'}
+    <svg viewBox="0 0 14 14">
+      <path d="M1.5 5 V1.5 H5 L12.5 9 L9 12.5 Z" />
+      <circle class="fill" cx="4" cy="4" r="1" />
+    </svg>
   {:else if name === 'cart' || name === 'vendas'}
     <svg viewBox="0 0 14 14">
       <path d="M1.5 1.5 H3.5 L5.5 8.5 H11.5 L12.5 3.5 H4.5" />
