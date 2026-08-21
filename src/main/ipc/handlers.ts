@@ -235,8 +235,8 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('shopee:etiquetas:import', async (_event, filePaths: string[]) => {
     return ShopeeEtiquetasJobService.importFiles(filePaths)
   })
-  ipcMain.handle('shopee:etiquetas:list', () => ShopeeEtiquetasRepository.listBatches())
-  ipcMain.handle('shopee:etiquetas:get', (_event, id: string) => ShopeeEtiquetasRepository.getBatch(id))
+  ipcMain.handle('shopee:etiquetas:list', () => ShopeeEtiquetasJobService.listBatches())
+  ipcMain.handle('shopee:etiquetas:get', (_event, id: string) => ShopeeEtiquetasJobService.getBatch(id))
   ipcMain.handle('shopee:etiquetas:itemSourcePreview', (_event, itemId: string) =>
     ShopeeEtiquetaSourcePreviewService.getItemSourcePreview(itemId)
   )
@@ -244,7 +244,7 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('shopee:etiquetas:correctItem', async (_event, input: ShopeeEtiquetaCorrecaoInput) => {
     const batchId = ShopeeEtiquetasRepository.correctItem(input)
     if (batchId) await ShopeeEtiquetaTrainingSampleService.captureCorrectedItem(input.itemId).catch(() => false)
-    return batchId ? ShopeeEtiquetasRepository.getBatch(batchId) : null
+    return batchId ? ShopeeEtiquetasJobService.getBatch(batchId) : null
   })
   ipcMain.handle('shopee:etiquetas:resume', (_event, id: string) => ShopeeEtiquetasJobService.resumeBatch(id))
   ipcMain.handle('shopee:etiquetas:retryPrinting', (_event, id: string) => ShopeeEtiquetasJobService.retryPrinting(id))

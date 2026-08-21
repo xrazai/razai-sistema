@@ -66,10 +66,30 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     await expect(page.getByRole('columnheader', { name: /SKU/i })).toBeVisible()
     await expect(page.getByRole('columnheader', { name: /Nome/i })).toBeVisible()
     await expect(page.getByRole('columnheader', { name: /Composição/i })).toBeVisible()
-    await expect(page.getByRole('columnheader', { name: /Largura/i })).toBeVisible()
-    await expect(page.getByRole('columnheader', { name: /Rendimento/i })).toBeVisible()
-    await expect(page.getByRole('columnheader', { name: /Gramatura Linear/i })).toBeVisible()
-    await expect(page.getByRole('columnheader', { name: /Gramatura \(g\/m²\)/i })).toBeVisible()
+    await expect(page.getByRole('columnheader', { name: /Mais campos/i })).toBeVisible()
+    await expect(page.getByRole('columnheader', { name: /Nome/i })).toHaveAttribute('aria-sort', 'ascending')
+  })
+
+  test('Flow 1b: Listagem preserva o núcleo sem overflow horizontal em janela estreita', async () => {
+    await app.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setSize(960, 640)
+    })
+    await page.waitForTimeout(150)
+
+    const dimensions = await page.locator('.table-container').evaluate((container) => {
+      const table = container.querySelector('table')
+      return {
+        containerWidth: container.clientWidth,
+        tableWidth: table?.scrollWidth ?? 0
+      }
+    })
+
+    expect(dimensions.tableWidth).toBeLessThanOrEqual(dimensions.containerWidth)
+
+    await app.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setSize(1280, 800)
+    })
+    await page.waitForTimeout(150)
   })
 
   test('Flow 2: Busca em tempo real e insensível a acentos (Unaccented)', async () => {
@@ -157,6 +177,9 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
 
     // Confirma retorno para a listagem
     await expect(page.locator('.topbar .title')).toHaveText('Tecidos')
+    await expect(page.locator('.feedback-banner')).toContainText('Tecido cadastrado com sucesso.')
+    await expect(page.getByRole('button', { name: /Dispensar/i })).toBeVisible()
+    await expect(page.locator('.table-hint')).toContainText('Mais campos')
 
     // Verifica que o novo tecido está listado na tabela com o nome único
     const tableArea = page.locator('.table-container')
@@ -171,6 +194,12 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
     // Verifica tela de detalhes
     await expect(page.locator('.topbar .title')).toHaveText(/Tecidos \/ Detalhes/i)
     await expect(page.locator('#nome')).toHaveValue(fabricName)
+    await expect(page.locator('#tecido-detalhes-section-identificacao')).toBeVisible()
+    await expect(page.locator('#tecido-detalhes-section-dimensoes')).toBeVisible()
+    await expect(page.locator('#tecido-detalhes-section-propriedades')).toBeVisible()
+    await expect(page.getByText('Largura (m) *')).toBeVisible()
+    await expect(page.getByText('Rendimento (m/kg)')).toBeVisible()
+    await expect(page.getByText('Gramatura (g/m²)')).toBeVisible()
 
     // Edita o nome
     await page.locator('#nome').fill(fabricNameEdited)
@@ -183,7 +212,16 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
 
     // Retorna para a tabela e verifica atualização
     await expect(page.locator('.topbar .title')).toHaveText('Tecidos')
+    await expect(page.locator('.feedback-banner')).toContainText('Alterações do tecido salvas com sucesso.')
     await expect(tableArea.getByText(fabricNameEdited)).toBeVisible()
+
+    const searchInput = page.locator('input.search-input')
+    await searchInput.fill(fabricNameEdited)
+    await page.waitForTimeout(300)
+    await expect(page.locator('.toolbar-meta')).toHaveText(/1 de \d+ itens/)
+    await expect(page.locator('.toolbar-meta')).not.toContainText('1 de 1')
+    await searchInput.fill('')
+    await page.waitForTimeout(300)
 
     // Entra novamente nos detalhes para excluir
     await tableArea.getByText(fabricNameEdited).click()
@@ -199,6 +237,7 @@ test.describe('QA E2E — Módulo de Tecidos', () => {
 
     // Retorna para a lista e valida que o item foi excluído
     await expect(page.locator('.topbar .title')).toHaveText('Tecidos')
+    await expect(page.locator('.feedback-banner')).toContainText('Tecido excluído com sucesso.')
     await expect(tableArea.getByText(fabricNameEdited)).not.toBeVisible()
   })
 })

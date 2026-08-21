@@ -1,8 +1,8 @@
 <script lang="ts">
   import Table, { type Column } from '../../design-system/data-display/Table.svelte'
   import TableToolbar from '../../design-system/data-display/TableToolbar.svelte'
-  import Badge from '../../design-system/data-display/Badge.svelte'
   import EmptyState from '../../design-system/compositions/EmptyState.svelte'
+  import Button from '../../design-system/controls/Button.svelte'
   import TecidosCadastroPage from './TecidosCadastroPage.svelte'
   import TecidosDetalhesPage from './TecidosDetalhesPage.svelte'
   import { generateTecidoSku } from './utils'
@@ -10,15 +10,10 @@
   import type { TecidoRecord, CreateTecidoInput, UpdateTecidoInput } from '../../../shared/types'
 
   const columns: Column[] = [
-    { key: 'codigo', label: 'SKU', width: '90px' },
+    { key: 'codigo', label: 'SKU', width: '96px' },
     { key: 'nome', label: 'Nome' },
     { key: 'composicao', label: 'Composição' },
-    { key: 'largura', label: 'Largura (m)', width: '120px' },
-    { key: 'rendimento', label: 'Rendimento (m/kg)', width: '150px' },
-    { key: 'gramaturaLinear', label: 'Gramatura Linear (g/m)', width: '170px' },
-    { key: 'gramaturaM2', label: 'Gramatura (g/m²)', width: '150px' },
-    { key: 'tipo', label: 'Tipo', width: '110px' },
-    { key: 'acabamento', label: 'Acabamento', width: '120px' }
+    { key: 'detalhes', label: 'Mais campos', width: '132px', align: 'right', sortable: false }
   ]
 
   let viewMode = $derived.by<'list' | 'create' | 'details'>(() => {
@@ -33,8 +28,10 @@
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
   let selectedTecido = $state<TecidoRecord | null>(null)
   let tecidos = $state<TecidoRecord[]>([])
+  let totalTecidos = $state(0)
   let isLoading = $state(true)
   let errorMsg = $state<string | null>(null)
+  let successMsg = $state('')
 
   $effect(() => {
     const term = searchTerm
@@ -78,8 +75,13 @@
     errorMsg = null
     try {
       if (typeof window !== 'undefined' && window.razai?.tecidos) {
-        const data = await window.razai.tecidos.list(query)
+        const hasQuery = query.trim().length > 0
+        const [data, allData] = await Promise.all([
+          window.razai.tecidos.list(query),
+          hasQuery ? window.razai.tecidos.list() : Promise.resolve(null)
+        ])
         tecidos = data
+        totalTecidos = allData ? allData.length : data.length
       }
     } catch (err: any) {
       console.error('Erro ao carregar tecidos:', err)
@@ -94,6 +96,7 @@
   })
 
   async function handleNovoTecido(novo: CreateTecidoInput) {
+    successMsg = ''
     try {
       if (typeof window !== 'undefined' && window.razai?.tecidos) {
         const created = await window.razai.tecidos.create(novo)
@@ -118,17 +121,19 @@
           updatedAt: new Date().toISOString()
         }
         tecidos = [localItem, ...tecidos]
+        totalTecidos = tecidos.length
         selectedTecido = localItem
       }
+      successMsg = 'Tecido cadastrado com sucesso.'
       router.navigate('tecidos')
     } catch (err: any) {
       console.error('Erro ao cadastrar tecido:', err)
-      errorMsg = err?.message || 'Erro ao cadastrar tecido no banco de dados.'
       throw err
     }
   }
 
   async function handleSalvarEdicao(id: string, input: UpdateTecidoInput) {
+    successMsg = ''
     try {
       if (typeof window !== 'undefined' && window.razai?.tecidos) {
         const updated = await window.razai.tecidos.update(id, input)
@@ -146,28 +151,31 @@
           }
           return item
         })
+        totalTecidos = tecidos.length
       }
+      successMsg = 'Alterações do tecido salvas com sucesso.'
       router.navigate('tecidos')
     } catch (err: any) {
       console.error('Erro ao atualizar tecido:', err)
-      errorMsg = err?.message || 'Erro ao atualizar tecido.'
       throw err
     }
   }
 
   async function handleExcluirTecido(id: string) {
+    successMsg = ''
     try {
       if (typeof window !== 'undefined' && window.razai?.tecidos) {
         await window.razai.tecidos.delete(id)
       } else {
         tecidos = tecidos.filter((item) => item.id !== id)
+        totalTecidos = tecidos.length
       }
       selectedTecido = null
       await loadTecidos(debouncedSearch)
+      successMsg = 'Tecido excluído com sucesso.'
       router.navigate('tecidos')
     } catch (err: any) {
       console.error('Erro ao excluir tecido:', err)
-      errorMsg = err?.message || 'Erro ao excluir tecido.'
       throw err
     }
   }
@@ -177,20 +185,9 @@
     router.navigate(`tecidos/${selectedTecido.id}`)
   }
 
-  function formatDisplayLabel(val: string | null | undefined): string {
-    if (!val) return '—'
-    const map: Record<string, string> = {
-      liso: 'Liso',
-      estampado: 'Estampado',
-      nenhuma: 'Nenhuma',
-      baixa: 'Baixa',
-      media: 'Média',
-      alta: 'Alta',
-      fosco: 'Fosco',
-      semi_brilho: 'Semi-brilho',
-      brilhante: 'Brilhante'
-    }
-    return map[val] || val
+  function handleDetailsClick(event: MouseEvent, row: TecidoRecord) {
+    event.stopPropagation()
+    handleRowClick(row)
   }
 </script>
 
@@ -213,59 +210,71 @@
       <TableToolbar
         bind:search={searchTerm}
         placeholder="Buscar por SKU, nome, composição, tipo..."
-        totalCount={tecidos.length}
+        totalCount={totalTecidos}
         filteredCount={isFiltered ? tecidos.length : undefined}
         {isLoading}
         {errorMsg}
       />
 
-        <!-- Tabela padrão de itens ou estado de erro -->
-        <div class="table-container">
-          {#if errorMsg && tecidos.length === 0}
-            <div class="error-container">
-              <EmptyState
-                title="Falha na Comunicação com o Banco de Dados"
-                description={errorMsg}
-                tone="danger"
-                actionLabel="Tentar Novamente"
-                actionIcon="search"
-                onaction={() => loadTecidos(searchTerm)}
-              />
-            </div>
-          {:else}
-            <Table
-              {columns}
-              rows={tecidos}
-              bordered={false}
-              emptyMessage={emptyMessage}
-              onrowclick={handleRowClick}
-            >
-              {#snippet cell({ row, column, value })}
-                {#if column.key === 'codigo'}
-                  <span class="code">{value}</span>
-                {:else if column.key === 'largura'}
-                  <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m` : '—'}</span>
-                {:else if column.key === 'rendimento'}
-                  <span>{value !== null && value !== undefined ? `${Number(value).toFixed(2).replace('.', ',')} m/kg` : '—'}</span>
-                {:else if column.key === 'gramaturaLinear'}
-                  <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m` : '—'}</span>
-                {:else if column.key === 'gramaturaM2'}
-                  <span>{value !== null && value !== undefined ? `${Math.round(Number(value))} g/m²` : '—'}</span>
-                {:else if column.key === 'tipo' || column.key === 'acabamento'}
-                  <span class="muted-tag">{formatDisplayLabel(value)}</span>
-                {:else if column.key === 'nome'}
-                  <span class="fabric-name">{value}</span>
-                {:else}
-                  <span>{value || '—'}</span>
-                {/if}
-              {/snippet}
-            </Table>
-          {/if}
+      {#if successMsg}
+        <div class="feedback-banner" role="status" aria-live="polite" aria-atomic="true">
+          <span class="feedback-indicator" aria-hidden="true"></span>
+          <span class="feedback-text">{successMsg}</span>
+          <Button variant="ghost" size="sm" onclick={() => (successMsg = '')}>
+            Dispensar
+          </Button>
         </div>
+      {/if}
 
-        <!-- Barra de rodapé informativa -->
+      {#if tecidos.length > 0 && !errorMsg}
+        <div class="table-hint" role="note">
+          <span class="hint-indicator" aria-hidden="true"></span>
+          <span>Selecione uma linha ou use Mais campos para consultar métricas técnicas e editar.</span>
+        </div>
+      {/if}
+
+      <!-- Tabela de identificação; métricas técnicas ficam em Detalhes -->
+      <div class="table-container">
+        {#if errorMsg && tecidos.length === 0}
+          <div class="error-container">
+            <EmptyState
+              title="Falha na Comunicação com o Banco de Dados"
+              description={errorMsg}
+              tone="danger"
+              actionLabel="Tentar Novamente"
+              actionIcon="search"
+              onaction={() => loadTecidos(searchTerm)}
+            />
+          </div>
+        {:else}
+          <Table
+            {columns}
+            rows={tecidos}
+            bordered={false}
+            emptyMessage={emptyMessage}
+            onrowclick={handleRowClick}
+          >
+            {#snippet cell({ row, column, value })}
+              {#if column.key === 'detalhes'}
+                <Button variant="ghost" size="sm" onclick={(event) => handleDetailsClick(event, row as TecidoRecord)}>
+                  Mais campos
+                </Button>
+              {:else if column.key === 'codigo'}
+                <span class="code" title={String(value ?? '')}>{value}</span>
+              {:else if column.key === 'nome'}
+                <span class="fabric-name" title={String(value ?? '')}>{value}</span>
+              {:else if column.key === 'composicao'}
+                <span class="composition" title={String(value ?? '')}>{value || '—'}</span>
+              {:else}
+                <span>{value || '—'}</span>
+              {/if}
+            {/snippet}
+          </Table>
+        {/if}
+      </div>
+
+      <!-- Barra de rodapé informativa -->
       <footer class="footer">
-        <span class="footer-note">Clique em uma linha para abrir a tela de detalhes e editar o cadastro</span>
         {#if selectedTecido}
           <span class="footer-selected">
             Último selecionado: <strong>{selectedTecido.codigo} — {selectedTecido.nome}</strong>
@@ -306,6 +315,105 @@
     width: 100%;
   }
 
+  .table-container :global(.table) {
+    width: 100%;
+    min-width: 100%;
+    table-layout: fixed;
+  }
+
+  .table-container :global(th),
+  .table-container :global(td) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .table-container :global(th:first-child),
+  .table-container :global(td:first-child) {
+    position: sticky;
+    left: 0;
+    box-shadow: inset -1px 0 0 0 var(--color-border-strong), inset 0 -1px 0 0 var(--color-border);
+  }
+
+  .table-container :global(th:first-child) {
+    z-index: 3;
+    background: var(--color-bg-elevated);
+  }
+
+  .table-container :global(td:first-child) {
+    z-index: 2;
+    background: var(--color-bg);
+  }
+
+  .table-container :global(tbody tr:hover td:first-child) {
+    background: var(--color-bg-elevated);
+  }
+
+  .feedback-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 40px;
+    min-height: 40px;
+    padding: 0 var(--space-4);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
+    background: var(--color-bg-elevated);
+    color: var(--color-ok);
+    box-sizing: border-box;
+  }
+
+  .feedback-indicator {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border: var(--border-width) solid var(--color-ok);
+    background: var(--color-ok);
+  }
+
+  .feedback-text {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-xs);
+    line-height: 100%;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .table-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 40px;
+    min-height: 40px;
+    padding: 0 var(--space-4);
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-fg-dim);
+    font-size: var(--text-xs);
+    line-height: 100%;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    box-sizing: border-box;
+  }
+
+  .table-hint > span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hint-indicator {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border: var(--border-width) solid var(--color-accent);
+    background: var(--color-accent);
+  }
+
   .error-container {
     padding: var(--space-6) var(--space-4);
     display: flex;
@@ -324,11 +432,6 @@
 
   .fabric-name {
     color: var(--color-fg);
-  }
-
-  .muted-tag {
-    color: var(--color-fg-muted);
-    font-size: var(--text-xs);
   }
 
   .footer {

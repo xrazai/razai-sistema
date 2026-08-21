@@ -35,7 +35,9 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 ## 2. Módulos e Recursos Implementados
 
 ### 🧶 Módulo de Tecidos
-- **Catálogo Técnico**: Listagem com colunas técnicas (SKU, Nome, Composição, Largura, Rendimento, Gramatura Linear, Gramatura Superficial, Tipo, Acabamento).
+- **Catálogo Técnico**: Listagem principal com SKU, Nome e Composição; as métricas técnicas permanecem preservadas no detalhe do tecido e na ação **Mais campos**, sem remoção de informação.
+- **Listagem Operável**: Busca em tempo real, contagem filtrada baseada no total real, primeira coluna fixa em larguras menores e instrução de uso posicionada junto à tabela.
+- **Semântica de Dados**: Ordenação comunicada por `aria-sort`, cabeçalhos operáveis por teclado e seções de cadastro/detalhes organizadas com headings hierárquicos.
 - **Geração de SKU**: Regra têxtil de 4 caracteres maiúsculos a partir do nome com remoção de acentuação (*unaccented*) e resolução alfabética de colisões sem números.
 - **Engenharia Têxtil**: Auto-cálculo e interconversão em tempo real entre Largura ($L$), Rendimento ($R$), Gramatura Linear ($GL$) e Gramatura ($GM$).
 - **CRUD Completo**: Cadastro em grid modular, detalhes, edição, busca e exclusão semântica com confirmação.
@@ -67,6 +69,7 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 - **Agentes**: Cadastro de agentes, modo de operação, prompt de sistema e base de conhecimento com FAQs, políticas e manuais.
 - **Co-piloto**: Central de conversas com geração de respostas, aprovação ou rejeição de sugestões e histórico de mensagens.
 - **Shopee**: Sessão persistente de Seller Centre e mapeamento de conversas recentes do WebChat.
+- **Etiquetas Shopee**: Importação local de ZIP/ZPL, OCR posicional, revisão com origem visual, memória de correções, equivalências, impressão Zebra e PDF de cortes. Checklists sem linhas reconhecidas viram uma pendência editável antes da impressão.
 
 ### 🖨️ Integração de Impressora Térmica ESC/POS (80mm)
 - **Comunicação Binária RAW Direta**: Builder fluente `EscPosBuilder` com suporte a 48 colunas (80mm), corte automático de guilhotina (`auto-cut`), negrito, tamanhos escalados e charset PT-BR (`CP850`).
@@ -82,6 +85,7 @@ O **Razai Sistema** foi projetado para alta densidade informacional, baixa latê
 - **Ritmo Modular Rígido de 40px**: Linhas horizontais alinhadas de ponta a ponta na tela (Brand, Topbar, NavItem, Toolbar, Table th/td/footer, Painéis).
 - **Alturas Múltiplas de 4 ou 8px**: Todo componente e bloco de layout possui altura somada estritamente múltipla de 4 ou 8px (20px, 24px, 32px, 40px, 48px, 56px, 76px/80px).
 - **Divisores Virtuais Inset**: Linhas desenhadas via `box-shadow: inset` para zero colisão de bordas e zero subtração física no modelo de caixa.
+- **Semântica Operacional**: Tabelas expõem estado de ordenação, contadores distinguem total e filtro sem repetir valores iguais, e badges longos truncam visualmente sem perder seu texto acessível.
 
 ### 🧭 Navegação & Topbar Unificada
 - **Topbar Única**: Cabeçalho unificado sem duplicações de títulos em páginas.
@@ -104,6 +108,7 @@ src/
 │   ├── ipc/              → Handlers de comunicação IPC
 │   └── services/         → Lógica de negócio (Tecidos, Cores, Vínculos, Vendas, Pedidos, Relatórios, Agentes)
 │       ├── agent/        → ContextBuilder, LLM, sessão e mapeamento Shopee
+│       ├── shopee-etiquetas/ → OCR, revisão, impressão Zebra e PDF de cortes
 │       ├── pdf/          → Geração de PDF e compartilhamento nativo
 │       └── printer/      → EscPosBuilder, Win32 RAW Spooler e serviço de impressão
 ├── preload/              → Bridge seguro (contextIsolation) expondo window.razai
@@ -180,8 +185,11 @@ npm run build
 
 ## 6. Documentação Detalhada
 
+- [Direção do Produto](PRODUCT.md)
+- [Direção Visual e Design System](DESIGN.md)
 - [Design System — Regras, Baseline e Componentes](docs/design-system.md)
 - [Módulo de Tecidos — Especificação e Fórmulas](docs/modulos/tecidos.md)
+- [Módulo Shopee / Etiquetas — OCR, Revisão e Impressão](docs/modulos/etiquetas-shopee.md)
 - [Módulo de Cores — Especificação e Conversão de Cores](docs/modulos/cores.md)
 - [Módulo de Vínculos — Matriz Tecido-Cor e SKU Composto](docs/modulos/vinculos.md)
 - [Impressão Térmica ESC/POS — Especificação Técnica (80mm)](docs/impressora-termal-escpos.md)

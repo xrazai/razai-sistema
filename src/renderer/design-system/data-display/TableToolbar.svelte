@@ -44,10 +44,10 @@
   let isFiltered = $derived(search.trim().length > 0)
   let countText = $derived.by(() => {
     if (filteredCount !== undefined && totalCount !== undefined) {
-      if (isFiltered) {
+      if (isFiltered && filteredCount !== totalCount) {
         return `${filteredCount} de ${totalCount} ${totalCount === 1 ? 'item' : 'itens'}`
       }
-      return `${totalCount} ${totalCount === 1 ? 'item' : 'itens'}`
+      return `${filteredCount} ${filteredCount === 1 ? 'item' : 'itens'}`
     }
     if (totalCount !== undefined) {
       return `${totalCount} ${totalCount === 1 ? 'item' : 'itens'}`
@@ -186,8 +186,13 @@
     gap: var(--space-2);
     padding: 0 var(--space-3);
     margin-left: auto;
+    min-width: 0;
     height: 40px;
     box-sizing: border-box;
+  }
+
+  .toolbar-meta :global(.badge) {
+    max-width: 100%;
   }
 
   .toolbar-actions {

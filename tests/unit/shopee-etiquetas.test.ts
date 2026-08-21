@@ -11,7 +11,7 @@ import { loadExactZplDocument, loadZplDocuments } from '../../src/main/services/
 import { CutPdfService } from '../../src/main/services/shopee-etiquetas/cut-pdf.service'
 import { clipSourceBounds, extractorInternals } from '../../src/main/services/shopee-etiquetas/extractor'
 import { sourcePreviewInternals, ShopeeEtiquetaSourcePreviewService } from '../../src/main/services/shopee-etiquetas/source-preview.service'
-import { ShopeeEtiquetasRepository } from '../../src/main/services/shopee-etiquetas/repository'
+import { fullPageReviewBounds, ShopeeEtiquetasRepository } from '../../src/main/services/shopee-etiquetas/repository'
 import { applyExactCorrection, canDeleteShopeeBatch, canRetryShopeePrinting, resolveShopeeBatchDirectory } from '../../src/main/services/shopee-etiquetas/job.service'
 import { resolveTrainingSamplePath } from '../../src/main/services/shopee-etiquetas/training-sample.service'
 import type { ShopeeEtiquetaItem } from '../../src/shared/shopee-etiquetas'
@@ -118,6 +118,12 @@ describe('Shopee Etiquetas - parser e normalização', () => {
 })
 
 describe('Shopee Etiquetas - origem da leitura OCR', () => {
+  it('destaca a checklist inteira para uma linha de revisão criada manualmente', () => {
+    expect(fullPageReviewBounds(128, 160)).toEqual({ x: 4, y: 4, width: 120, height: 152 })
+    expect(fullPageReviewBounds(4, 3)).toEqual({ x: 1, y: 1, width: 2, height: 1 })
+    expect(fullPageReviewBounds(null, 160)).toBeNull()
+  })
+
   it('aplica margem e limita o retângulo às dimensões da imagem', () => {
     expect(clipSourceBounds({ x0: 3, y0: 4, x1: 98, y1: 49 }, 100, 50, 8)).toEqual({
       x: 0, y: 0, width: 100, height: 50
@@ -138,6 +144,30 @@ describe('Shopee Etiquetas - origem da leitura OCR', () => {
     const [item] = extractorInternals.extractRows({ text: '', tsv, confidence: 90 }, 900, 300, () => null)
     expect(item.sourceBounds).toEqual({ x: 2, y: 12, width: 816, height: 226 })
     expect(item).toMatchObject({ productRaw: 'Tecido Malha Helanca', variationRaw: 'Branco, 4m x 1,80m', sku: 'HELA-BRAN-01' })
+  })
+
+  it('extrai o pedido do cabeçalho por posição mesmo quando o OCR separa o identificador', () => {
+    const word = (left: number, top: number, width: number, text: string) =>
+      `5\t1\t1\t1\t1\t1\t${left}\t${top}\t${width}\t20\t90\t${text}`
+    const tsv = [
+      'level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext',
+      word(100, 150, 30, 'ID'), word(135, 150, 70, 'Pedido'),
+      word(220, 150, 110, '2608210'), word(334, 150, 110, 'GX79K8Q'),
+      word(450, 150, 90, 'package'), word(545, 150, 15, '1')
+    ].join('\n')
+    expect(extractorInternals.extractOrderIdFromOcr({ text: 'Checklist de carregamento', tsv, confidence: 90 }, 700))
+      .toBe('2608210GX79K8Q')
+  })
+
+  it('usa o identificador anterior a package quando o rótulo Pedido não é reconhecido', () => {
+    const tsv = [
+      'level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext',
+      '5\t1\t1\t1\t1\t1\t220\t150\t220\t20\t82\t2608210GX79K8Q',
+      '5\t1\t1\t1\t1\t2\t450\t150\t90\t20\t88\tpackage',
+      '5\t1\t1\t1\t1\t3\t545\t150\t15\t20\t91\t1'
+    ].join('\n')
+    expect(extractorInternals.extractOrderIdFromOcr({ text: '', tsv, confidence: 82 }, 700))
+      .toBe('2608210GX79K8Q')
   })
 
   it('mantém revisão para regra heurística quando a leitura bruta está abaixo do limite', () => {
